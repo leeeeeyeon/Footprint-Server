@@ -31,6 +31,7 @@ dependencies {
 
 	// DB
 	runtimeOnly 'mysql:mysql-connector-java'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 
 	// Web
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -38,6 +39,9 @@ dependencies {
 	// Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.security:spring-security-test'
+
+	// 이메일 인증
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 test {
