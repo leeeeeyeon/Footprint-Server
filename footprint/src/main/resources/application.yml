@@ -1,14 +1,19 @@
 server:
-  port: 3000  # 3000? ??? ??
+  port: 3000  # 3000 ? ?? ??
 
 spring:
-  application:
-    name: demo
-
   datasource:
-    platform: mysql
+    # DB URL
     url: jdbc:mysql://footprint.cyk6hh5fzxrl.us-east-2.rds.amazonaws.com/footprintdb
-  # url ??? jdbc:mysql://RDS? EndPoint/?? DB ???? ???.
+
+    # DB Username
     username: admin # ?? ?? ???? ????? ???? admin ???
+
+    # DB Password
     password: umcfootprint # ????? ??????!
+
+    # DB Driver
     driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      platform: mysql

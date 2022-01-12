@@ -8,6 +8,9 @@ group = 'com.umc'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
+// 인코딩 방식
+compileJava.options.encoding = 'UTF-8'
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -19,12 +22,21 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'mysql:mysql-connector-java'
-	annotationProcessor 'org.projectlombok:lombok'
+	// Spring Boot Starter
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// DB
+	runtimeOnly 'mysql:mysql-connector-java'
+
+	// Web
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.security:spring-security-test'
 }
 
