@@ -1,4 +1,4 @@
-package com.umc.footprint.src.walks.model;
+package com.umc.footprint.src.walks;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
