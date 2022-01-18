@@ -10,8 +10,7 @@ import javax.sql.DataSource;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 @Repository
 public class UserDao {
@@ -44,26 +43,56 @@ public class UserDao {
                 ),getUserIdxParam);
     }
 
-    public List<GetUserDateRes> getUserDate(int userIdx, String date){
-    String getUserDateQuery = "SELECT W.walkIdx, DATE_FORMAT(W.startAt,'%H:%i') as startTime, DATE_FORMAT(W.endAt,'%H:%i') as endTime, WH.hashtag " +
-            "FROM Walk W " +
-            "    INNER JOIN (SELECT F.walkIdx ,T.footprintIdx ,H.hashtag " +
-            "                FROM Hashtag H " +
-            "                INNER JOIN Tag T ON H.hashtagIdx = T.hashtagIdx " +
-            "                INNER JOIN Footprint F on T.footprintIdx = F.footprintIdx) as WH " +
-            "        ON W.walkIdx = WH.walkIdx " +
-            "WHERE W.userIdx = ? and DATE(W.startAt) = DATE(?) ";
+    public List<GetUserDateRes> getUserDate(int userIdx, String date) {
 
-    return this.jdbcTemplate.query(getUserDateQuery,
-            (rs, rowNum) -> new GetUserDateRes(
-                    rs.getInt("walkIdx"),
-                    rs.getString("startTime"),
-                    rs.getString("endTime"),
-                    rs.getString("hashtag")
-            ),userIdx,date);
+        // 1. Walk 정보 가져오기
+        String getUserDateWalkQuery = "SELECT walkIdx, DATE_FORMAT(startAt,'%H:%i') as startTime, DATE_FORMAT(endAt,'%H:%i') as endTime " +
+                "FROM Walk " +
+                "WHERE userIdx = ? and DATE(startAt) = DATE(?) ";
+
+        List<UserDateWalk> userDateWalkInfo = this.jdbcTemplate.query(getUserDateWalkQuery, (rs, rowNum) -> new UserDateWalk(
+                rs.getInt("walkIdx"),
+                rs.getString("startTime"),
+                rs.getString("endTime")
+        ),userIdx,date);
+
+        // 2-1. Hashtag 정보 가져오기
+        String getHashtagQuery = "SELECT F.walkIdx ,H.hashtag " +
+                "FROM Hashtag H " +
+                "    INNER JOIN Tag T ON H.hashtagIdx = T.hashtagIdx " +
+                "    INNER JOIN Footprint F on T.footprintIdx = F.footprintIdx ";
+
+        List<Hashtag> entireHashtag = this.jdbcTemplate.query(getHashtagQuery, (rs, rowNum) -> new Hashtag(
+                rs.getInt("walkIdx"),
+                rs.getString("hashtag")
+                ));
+
+
+        // 2-2. entireHashtag 를 WalkIdx 단위로 묶어주기(entireHashtag -> hashtagList)
+        List<ArrayList<String>> hashtagList = new ArrayList<ArrayList<String>>(); // 2차원 Arraylist 생성
+        int count = 0;  // 1차원단 count 값
+        for (int i=0 ; i<entireHashtag.size() ; i++){
+            if(i == 0)  // 초기 i=0 일때 1차원단에 ArrayList 하나 생성
+                hashtagList.add(new ArrayList<String>());
+
+            hashtagList.get(count).add(entireHashtag.get(i).getHashtag());  // entireHashtag의 hashtag값을 순서대로 2차원단 ArrayList에 추가
+
+            // i 가 마지막 loop일때 && 다음 나올 entireHashTag의 값이 다른 값일 때, 1차원단 ArrayList 하나 추가 AND count++
+            if(i != (entireHashtag.size()-1) && entireHashtag.get(i).getWalkIdx() != entireHashtag.get(i+1).getWalkIdx()) {
+                hashtagList.add(new ArrayList<String>());
+                count++;
+            }
+        }
+
+        // 3. Walk 와 HashTag 정보 묶어 처리하기
+        List<GetUserDateRes> getUserDateRes = new ArrayList<GetUserDateRes>();
+        for(int i=0; i<userDateWalkInfo.size(); i++){   // userDateWalkInfo.size() == hashtagList.size() 이므로 userDateWalkInfo.size() 만큼 loop
+            getUserDateRes.add(new GetUserDateRes(userDateWalkInfo.get(i),hashtagList.get(i)));
+        }
+
+        return getUserDateRes;
 
     }
-
 
 
     // 해당 userIdx를 갖는 유저조회
