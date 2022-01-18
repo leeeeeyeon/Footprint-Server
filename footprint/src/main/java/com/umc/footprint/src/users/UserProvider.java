@@ -34,6 +34,13 @@ public class UserProvider {
         return userTodayRes;
     }
 
+    public List<GetUserDateRes> getUserDate(int userIdx, String date) throws BaseException {
+
+        List<GetUserDateRes> userDateRes = userDao.getUserDate(userIdx, date);
+
+        return userDateRes;
+    }
+
 
     // 해당 userIdx를 갖는 User의 정보 조회
     public GetUserRes getUser(int userIdx) throws BaseException {

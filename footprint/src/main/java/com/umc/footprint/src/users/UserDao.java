@@ -7,7 +7,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @Repository
 public class UserDao {
@@ -38,6 +42,26 @@ public class UserDao {
                         rs.getDouble("distance"),
                         rs.getInt("calorie")
                 ),getUserIdxParam);
+    }
+
+    public List<GetUserDateRes> getUserDate(int userIdx, String date){
+    String getUserDateQuery = "SELECT W.walkIdx, DATE_FORMAT(W.startAt,'%H:%i') as startTime, DATE_FORMAT(W.endAt,'%H:%i') as endTime, WH.hashtag " +
+            "FROM Walk W " +
+            "    INNER JOIN (SELECT F.walkIdx ,T.footprintIdx ,H.hashtag " +
+            "                FROM Hashtag H " +
+            "                INNER JOIN Tag T ON H.hashtagIdx = T.hashtagIdx " +
+            "                INNER JOIN Footprint F on T.footprintIdx = F.footprintIdx) as WH " +
+            "        ON W.walkIdx = WH.walkIdx " +
+            "WHERE W.userIdx = ? and DATE(W.startAt) = DATE(?) ";
+
+    return this.jdbcTemplate.query(getUserDateQuery,
+            (rs, rowNum) -> new GetUserDateRes(
+                    rs.getInt("walkIdx"),
+                    rs.getString("startTime"),
+                    rs.getString("endTime"),
+                    rs.getString("hashtag")
+            ),userIdx,date);
+
     }
 
 

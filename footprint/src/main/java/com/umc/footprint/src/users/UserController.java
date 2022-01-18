@@ -32,13 +32,35 @@ public class UserController {
         this.userService = userService;
     }
 
-
+    /**
+     * 유저 오늘 산책관련 정보 조회 API
+     * [GET] /users/:userIdx/today
+     */
+    // Path-variable
+    @ResponseBody
     @GetMapping("/{useridx}/today")
     public BaseResponse<List<GetUserTodayRes>> getToday(@PathVariable("useridx") int userIdx){
         try{
             List<GetUserTodayRes> userTodayRes = userProvider.getUserToday(userIdx);
 
             return new BaseResponse<>(userTodayRes);
+        } catch (BaseException exception){
+            return new BaseResponse<>(exception.getStatus());
+        }
+    }
+
+    /**
+     * 유저 날짜별 산책관련 정보 조회 API
+     * [GET] /users/:userIdx/:date
+     */
+    // Path-variable
+    @ResponseBody
+    @GetMapping("/{useridx}/{date}")
+    public BaseResponse<List<GetUserDateRes>> getDateWalk(@PathVariable("useridx") int userIdx,@PathVariable("date") String date){
+        try{
+            List<GetUserDateRes> userDateRes = userProvider.getUserDate(userIdx,date);
+
+            return new BaseResponse<>(userDateRes);
         } catch (BaseException exception){
             return new BaseResponse<>(exception.getStatus());
         }
