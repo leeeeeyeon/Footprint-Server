@@ -4,6 +4,10 @@ import lombok.*;
 
 import java.util.ArrayList;
 
+/*
+ * userIdx, date에 해당하는 산책 정보 DTO
+ * */
+
 @Getter
 @Setter
 @AllArgsConstructor

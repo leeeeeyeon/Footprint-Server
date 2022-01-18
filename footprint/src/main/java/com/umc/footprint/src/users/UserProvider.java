@@ -26,7 +26,7 @@ public class UserProvider {
         this.userDao = userDao;
     }
 
-
+    // 해당 userIdx를 갖는 오늘 산책 관련 정보 조회
     public List<GetUserTodayRes> getUserToday(int userIdx) throws BaseException {
 
         List<GetUserTodayRes> userTodayRes = userDao.getUserToday(userIdx);
@@ -34,6 +34,7 @@ public class UserProvider {
         return userTodayRes;
     }
 
+    // 해당 userIdx를 갖는 date의 산책 관련 정보 조회
     public List<GetUserDateRes> getUserDate(int userIdx, String date) throws BaseException {
 
         List<GetUserDateRes> userDateRes = userDao.getUserDate(userIdx, date);

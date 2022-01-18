@@ -21,7 +21,8 @@ public class UserDao {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-
+    // [ GET ]
+    // 해당 userIdx를 갖는 오늘 산책 관련 정보 조회
     public List<GetUserTodayRes> getUserToday(int userIdx){
         String getUserTodayQuery = "SELECT SUM(W.goalRate) as goalRate, G.walkGoalTime, " +
                 "SUM(TIMESTAMPDIFF(minute,W.startAt,W.endAt)) as walkTime, " +
@@ -43,17 +44,19 @@ public class UserDao {
                 ),getUserIdxParam);
     }
 
+    // 해당 userIdx를 갖는 date의 산책 관련 정보 조회
     public List<GetUserDateRes> getUserDate(int userIdx, String date) {
 
         // 1. Walk 정보 가져오기
-        String getUserDateWalkQuery = "SELECT walkIdx, DATE_FORMAT(startAt,'%H:%i') as startTime, DATE_FORMAT(endAt,'%H:%i') as endTime " +
+        String getUserDateWalkQuery = "SELECT walkIdx, DATE_FORMAT(startAt,'%H:%i') as startTime, DATE_FORMAT(endAt,'%H:%i') as endTime, pathImageUrl " +
                 "FROM Walk " +
                 "WHERE userIdx = ? and DATE(startAt) = DATE(?) ";
 
         List<UserDateWalk> userDateWalkInfo = this.jdbcTemplate.query(getUserDateWalkQuery, (rs, rowNum) -> new UserDateWalk(
                 rs.getInt("walkIdx"),
                 rs.getString("startTime"),
-                rs.getString("endTime")
+                rs.getString("endTime"),
+                rs.getString("pathImageUrl")
         ),userIdx,date);
 
         // 2-1. Hashtag 정보 가져오기
