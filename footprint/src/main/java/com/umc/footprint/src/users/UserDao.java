@@ -10,8 +10,6 @@ import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.util.List;
 
-import static com.umc.footprint.config.BaseResponseStatus.EXIST_USER_ERROR;
-
 @Repository
 public class UserDao {
     private JdbcTemplate jdbcTemplate;
@@ -62,34 +60,28 @@ public class UserDao {
                 userIdx);
     }
 
+    // Goal Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot MODIFY
     public int modifyUserGoalTime(int userIdx, PatchUserGoalReq patchUserGoalReq){
 
-        // Goal Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot MODIFY
         String modifyUserGoalTimeQuery = "UPDATE Goal SET walkGoalTime = ?, walkTimeSlot = ? WHERE userIdx = ?";
-        Object[] modifyUserGoalTimeParams = new Object[]{
-                patchUserGoalReq.getWalkGoalTime(), patchUserGoalReq.getWalkTimeSlot(), userIdx
-        };
+        Object[] modifyUserGoalTimeParams = new Object[]{ patchUserGoalReq.getWalkGoalTime(), patchUserGoalReq.getWalkTimeSlot(), userIdx };
         return this.jdbcTemplate.update(modifyUserGoalTimeQuery,modifyUserGoalTimeParams);
 
     }
 
-    // ******* 수정 로직 미정 *******
+    // Goal Table에 userIdx에 맞는 요일(dayIdx) MODIFY
     public int modifyUserGoalDay(int userIdx, PatchUserGoalReq patchUserGoalReq){
-        // Goal Table에 userIdx에 맞는 요일(dayIdx) MODIFY
-        // *** 어떤 방식으로 수정을 저장할 것인가??
 
-        String modifyUserGoalDayQuery = "UPDATE GoalDay SET dayIdx = ? WHERE userIdx = ?";
-        int resultSum = 0;
+        Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
 
-        for (Integer dayIdx : patchUserGoalReq.getDayIdx()) // GoalDay Table에 요일 하나하나당 튜플 생성
-        {
-            Object[] modifyUserGoalDayParams = new Object[]{ dayIdx, userIdx };
-            resultSum += this.jdbcTemplate.update(modifyUserGoalDayQuery,modifyUserGoalDayParams);
+        for (int dayIdx : patchUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
+            days[dayIdx-1] = true;
         }
-        if (resultSum < patchUserGoalReq.getDayIdx().size())
-            return 0;
 
-        return 1;
+        String modifyUserGoalDayQuery = "UPDATE GoalDay SET sun = ?, mon = ?, tue = ?, wed = ?, thu = ?, fri = ?, sat = ? WHERE userIdx = ?";
+        Object[] modifyUserGoalDayParams = new Object[]{ days[0], days[1], days[2], days[3], days[4], days[5], days[6], userIdx };
+        return this.jdbcTemplate.update(modifyUserGoalDayQuery,modifyUserGoalDayParams);
+
     }
 
 }
