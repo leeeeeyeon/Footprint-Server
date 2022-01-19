@@ -85,9 +85,9 @@ public class UserDao {
         this.jdbcTemplate.update(createUserGoalTimeQuery,createUserGoalTimeParams);
 
         // 2. GoalDay Table에 sun~fri Create
-        Boolean[] days = {false,false,false,false,false,false,false};
+        Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
 
-        for (int dayIdx : postUserGoalReq.getDayIdx()){
+        for (int dayIdx : postUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
             days[dayIdx-1] = true;
         }
 
