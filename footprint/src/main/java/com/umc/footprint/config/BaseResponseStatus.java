@@ -32,6 +32,7 @@ public enum BaseResponseStatus {
     /**
      * 2000 : Request 오류
      */
+    EXIST_USER_ERROR(false, 2140,"이미 존재하는 유저입니다."),
 
 
     /**
