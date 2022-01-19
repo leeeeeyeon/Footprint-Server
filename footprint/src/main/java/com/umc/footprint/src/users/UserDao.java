@@ -59,5 +59,10 @@ public class UserDao {
                 userIdx);
     }
 
+    public int modifyUserGoal(int userIdx, PatchUserGoalReq patchUserGoalReq){
+        
+
+        return 0;
+    }
 
 }

@@ -61,6 +61,22 @@ public class UserController {
 
     }
 
+    /**
+     * 목표 수정 API
+     * [PATCH] /users/:useridx/goals
+     */
+    // Path-variable
+    @ResponseBody
+    @PatchMapping("/{useridx}/goals") // [PATCH] /users/:useridx/goals
+    public BaseResponse<String> modifyGoal(@PathVariable("useridx") int userIdx, @RequestBody PatchUserGoalReq patchUserGoalReq){
+        try {
+            userService.modifyGoal(userIdx, patchUserGoalReq);
 
+            String result ="목표가 수정되었습니다.";
+            return new BaseResponse<>(result);
+        } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
 
 }
