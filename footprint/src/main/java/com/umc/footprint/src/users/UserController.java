@@ -61,6 +61,20 @@ public class UserController {
 
     }
 
-
+    /**
+     * 목표 수정 API
+     * [POST] /users/:useridx/goals
+     */
+    // Path-variable
+    @ResponseBody
+    @PostMapping("/{useridx}/goals") // [POST] /users/:useridx/goals
+    public BaseResponse<PostUserGoalRes> postGoal(@PathVariable("useridx") int userIdx, @RequestBody PostUserGoalReq postUserGoalReq){
+        try {
+            PostUserGoalRes postUserGoalRes = userService.postGoal(userIdx, postUserGoalReq);
+            return new BaseResponse<>(postUserGoalRes);
+        } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
 
 }
