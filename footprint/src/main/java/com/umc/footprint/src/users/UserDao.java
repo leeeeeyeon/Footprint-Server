@@ -1,5 +1,6 @@
 package com.umc.footprint.src.users;
 
+import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.users.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.util.List;
+
+import static com.umc.footprint.config.BaseResponseStatus.EXIST_USER_ERROR;
 
 @Repository
 public class UserDao {
@@ -59,10 +62,34 @@ public class UserDao {
                 userIdx);
     }
 
-    public int modifyUserGoal(int userIdx, PatchUserGoalReq patchUserGoalReq){
-        
+    public int modifyUserGoalTime(int userIdx, PatchUserGoalReq patchUserGoalReq){
 
-        return 0;
+        // Goal Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot MODIFY
+        String modifyUserGoalTimeQuery = "UPDATE Goal SET walkGoalTime = ?, walkTimeSlot = ? WHERE userIdx = ?";
+        Object[] modifyUserGoalTimeParams = new Object[]{
+                patchUserGoalReq.getWalkGoalTime(), patchUserGoalReq.getWalkTimeSlot(), userIdx
+        };
+        return this.jdbcTemplate.update(modifyUserGoalTimeQuery,modifyUserGoalTimeParams);
+
+    }
+
+    // ******* 수정 로직 미정 *******
+    public int modifyUserGoalDay(int userIdx, PatchUserGoalReq patchUserGoalReq){
+        // Goal Table에 userIdx에 맞는 요일(dayIdx) MODIFY
+        // *** 어떤 방식으로 수정을 저장할 것인가??
+
+        String modifyUserGoalDayQuery = "UPDATE GoalDay SET dayIdx = ? WHERE userIdx = ?";
+        int resultSum = 0;
+
+        for (Integer dayIdx : patchUserGoalReq.getDayIdx()) // GoalDay Table에 요일 하나하나당 튜플 생성
+        {
+            Object[] modifyUserGoalDayParams = new Object[]{ dayIdx, userIdx };
+            resultSum += this.jdbcTemplate.update(modifyUserGoalDayQuery,modifyUserGoalDayParams);
+        }
+        if (resultSum < patchUserGoalReq.getDayIdx().size())
+            return 0;
+
+        return 1;
     }
 
 }

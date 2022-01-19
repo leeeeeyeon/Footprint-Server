@@ -19,9 +19,14 @@ public class UserService {
 
     public void modifyGoal(int userIdx, PatchUserGoalReq patchUserGoalReq) throws BaseException{
         try{
-            int result = userDao.modifyUserGoal(userIdx, patchUserGoalReq);
-            if(result == 0)
+            int resultTime = userDao.modifyUserGoalTime(userIdx, patchUserGoalReq);
+            if(resultTime == 0)
                 throw new BaseException(BaseResponseStatus.MODIFY_USER_GOAL_FAIL);
+
+            int resultDay = userDao.modifyUserGoalDay(userIdx, patchUserGoalReq);
+            if(resultDay == 0)
+                throw new BaseException(BaseResponseStatus.MODIFY_USER_GOAL_FAIL);
+
         } catch(Exception exception){
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
