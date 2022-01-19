@@ -26,7 +26,7 @@ public class UserService {
     @Transactional(rollbackOn = Exception.class)
     public PostUserGoalRes postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException{
         try {
-            PostUserGoalRes postUserGoalRes = userDao.postGoalTime(userIdx, postUserGoalReq);
+            PostUserGoalRes postUserGoalRes = userDao.postGoal(userIdx, postUserGoalReq);
             return postUserGoalRes;
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);

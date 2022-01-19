@@ -65,8 +65,8 @@ public class UserDao {
                 userIdx);
     }
 
-    // 해당 userIdx를 갖는 Goal의 Time정보 저장 (Goal Table)
-    public PostUserGoalRes postGoalTime(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
+    // 해당 userIdx를 갖는 Goal의 Time 정보 & GoalDay의 요일 정보 CREATE
+    public PostUserGoalRes postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
 
         // Goal Table에 이미 존재하는 userIdx인지 확인 >> GoalDay도 해줘야할까?
         List<ExistUser> existUserIdx = this.jdbcTemplate.query("SELECT userIdx FROM Goal  ",
