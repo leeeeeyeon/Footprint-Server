@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
@@ -83,14 +84,16 @@ public class UserDao {
         };
         this.jdbcTemplate.update(createUserGoalTimeQuery,createUserGoalTimeParams);
 
-        // 2. Goal Table에 userIdx에 맞는 요일(dayIdx) Create
-        String createUserGoalDayQuery = "INSERT INTO GoalDay (userIdx,dayIdx) VALUES (?,?)";
+        // 2. GoalDay Table에 sun~fri Create
+        Boolean[] days = {false,false,false,false,false,false,false};
 
-        for (Integer dayIdx : postUserGoalReq.getDayIdx()) // GoalDay Table에 요일 하나하나당 튜플 생성
-        {
-            Object[] createUserGoalDayParams = new Object[]{ userIdx, dayIdx };
-            this.jdbcTemplate.update(createUserGoalDayQuery,createUserGoalDayParams);
+        for (int dayIdx : postUserGoalReq.getDayIdx()){
+            days[dayIdx-1] = true;
         }
+
+        String createUserGoalDayQuery = "INSERT INTO GoalDay (userIdx,sun,mon,tue,wed,thu,fri,sat) VALUES (?,?,?,?,?,?,?,?)";
+        Object[] createUserGoalDayParams = new Object[]{ userIdx, days[0], days[1], days[2], days[3], days[4], days[5], days[6]};
+        this.jdbcTemplate.update(createUserGoalDayQuery,createUserGoalDayParams);
 
         // response 일단 안줌 <- PostUserGoalRes 형식으로 줄까 고민중!
         return null;
