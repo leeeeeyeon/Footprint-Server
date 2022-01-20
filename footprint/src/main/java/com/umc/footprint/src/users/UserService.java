@@ -24,10 +24,10 @@ public class UserService {
 
     // 해당 userIdx를 갖는 Goal 정보 저장
     @Transactional(rollbackOn = Exception.class)
-    public PostUserGoalRes postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException{
+    public int postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException{
         try {
-            PostUserGoalRes postUserGoalRes = userDao.postGoal(userIdx, postUserGoalReq);
-            return postUserGoalRes;
+            int result = userDao.postGoal(userIdx, postUserGoalReq);
+            return result;
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }

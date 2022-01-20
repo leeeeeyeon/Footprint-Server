@@ -32,6 +32,7 @@ public enum BaseResponseStatus {
     /**
      * 2000 : Request 오류
      */
+    INVALID_USERIDX(false,2100,"잘못된 유저 인덱스입니다."),
     EXIST_USER_ERROR(false, 2140,"이미 존재하는 유저입니다."),
 
 

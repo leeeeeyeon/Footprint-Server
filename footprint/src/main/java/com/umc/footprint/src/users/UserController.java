@@ -1,8 +1,6 @@
 package com.umc.footprint.src.users;
 
-
-
-
+import com.umc.footprint.config.BaseResponseStatus;
 import com.umc.footprint.src.users.model.GetUserTodayRes;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
+import com.umc.footprint.config.BaseResponseStatus.*;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -68,10 +67,19 @@ public class UserController {
     // Path-variable
     @ResponseBody
     @PostMapping("/{useridx}/goals") // [POST] /users/:useridx/goals
-    public BaseResponse<PostUserGoalRes> postGoal(@PathVariable("useridx") int userIdx, @RequestBody PostUserGoalReq postUserGoalReq){
+    public BaseResponse<String> postGoal(@PathVariable("useridx") int userIdx, @RequestBody PostUserGoalReq postUserGoalReq){
+
+        // Validaion 1. userIdx 가 0 이하일 경우 exception
+        if(userIdx <= 0)
+            return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_USERIDX).getStatus());
+
         try {
-            PostUserGoalRes postUserGoalRes = userService.postGoal(userIdx, postUserGoalReq);
-            return new BaseResponse<>(postUserGoalRes);
+            int result = userService.postGoal(userIdx, postUserGoalReq);
+            String resultMsg = "목표 저장에 성공하였습니다.";
+            if(result == 0)
+                resultMsg = "목표 저장에 실패하였습니다.";
+
+            return new BaseResponse<>(resultMsg);
         } catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));
         }
