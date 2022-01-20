@@ -45,4 +45,14 @@ public class UserProvider {
         }
     }
 
+    // 해당 userIdx를 갖는 Goal 정보 조회
+    public GetUserGoalRes getUserGoal(int userIdx) throws BaseException{
+        try{
+            GetUserGoalRes getUserGoalRes = userDao.getUserGoal(userIdx);
+            return getUserGoalRes;
+        } catch (Exception exception){
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
 }

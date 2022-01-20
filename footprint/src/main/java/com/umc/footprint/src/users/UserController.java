@@ -61,6 +61,23 @@ public class UserController {
 
     }
 
+    /**
+     * 유저 목회 조회 API
+     * [GET] /users/:userIdx/goals
+     */
+    // Path-variable
+    @ResponseBody
+    @GetMapping("/{userIdx}/goals") // (GET) 127.0.0.1:3000/users/:userIdx/goals
+    public BaseResponse<GetUserGoalRes> getUserGoal(@PathVariable("userIdx") int userIdx) {
+        try {
+            GetUserGoalRes getUserGoalRes = userProvider.getUserGoal(userIdx);
+            return new BaseResponse<>(getUserGoalRes);
+        } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+
+    }
+
 
 
 }
