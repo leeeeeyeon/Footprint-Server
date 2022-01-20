@@ -68,7 +68,7 @@ public class UserDao {
     // 해당 userIdx를 갖는 Goal의 Time 정보 & GoalDay의 요일 정보 CREATE
     public int postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
 
-        // Validation 2. Goal Table에 이미 존재하는 userIdx인지 확인
+        // Validation 7. Goal Table에 이미 존재하는 userIdx인지 확인
         List<ExistUser> existUserIdx = this.jdbcTemplate.query("SELECT userIdx FROM Goal WHERE userIdx = ? ",
                 (rs, rowNum) -> new ExistUser(rs.getInt("userIdx")),userIdx);
             if(existUserIdx.size() != 0){
