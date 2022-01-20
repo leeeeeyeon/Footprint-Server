@@ -95,11 +95,11 @@ public class UserController {
         // Validaion 5. walkGoalTime 범위 확인
         if(postUserGoalReq.getWalkGoalTime() < 10) // 최소 산책 목표 시간 미만
             return new BaseResponse<>(new BaseException(BaseResponseStatus.MIN_WALK_GOAL_TIME).getStatus());
-        if(postUserGoalReq.getWalkGoalTime() > 720) // 최대 산책 목표 시간 초과
+        if(postUserGoalReq.getWalkGoalTime() > 240) // 최대 산책 목표 시간 초과
             return new BaseResponse<>(new BaseException(BaseResponseStatus.MAX_WALK_GOAL_TIME).getStatus());
 
         // Validaion 6. walkTimeSlot 범위 확인
-        if(postUserGoalReq.getWalkTimeSlot() > 8 || postUserGoalReq.getWalkTimeSlot() < 1)
+        if(postUserGoalReq.getWalkTimeSlot() > 7 || postUserGoalReq.getWalkTimeSlot() < 1)
             return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_WALK_TIME_SLOT).getStatus());
 
 
