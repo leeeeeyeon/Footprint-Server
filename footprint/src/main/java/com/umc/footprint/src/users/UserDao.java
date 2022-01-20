@@ -60,6 +60,8 @@ public class UserDao {
                 userIdx);
     }
 
+
+    // 해당 userIdx를 갖는 유저의 목표 조회
     public GetUserGoalRes getUserGoal(int userIdx){
 
         // 1-1. get UserGoalDay
