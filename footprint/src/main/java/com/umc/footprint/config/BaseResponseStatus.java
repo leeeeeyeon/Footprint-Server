@@ -32,11 +32,15 @@ public enum BaseResponseStatus {
     /**
      * 2000 : Request 오류
      */
+    INVALID_DATE(false,2000, "잘못된 날짜 형식입니다."),
 
+    NOT_EXIST_USER_IN_WALK(false,2120, "등록되지 않은 사용자입니다."),
+    NO_EXIST_WALK(false,2121, "해당 날짜에는 산책을 하지 않았습니다."),
 
     /**
      * 3000 : Response 오류
      */
+
 
     /**
      * 4000 : Database, Server 오류

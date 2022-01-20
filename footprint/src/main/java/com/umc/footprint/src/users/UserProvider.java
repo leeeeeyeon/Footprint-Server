@@ -37,9 +37,24 @@ public class UserProvider {
     // 해당 userIdx를 갖는 date의 산책 관련 정보 조회
     public List<GetUserDateRes> getUserDate(int userIdx, String date) throws BaseException {
 
-        List<GetUserDateRes> userDateRes = userDao.getUserDate(userIdx, date);
 
-        return userDateRes;
+        try {
+            // Validation 2. Walk Table 안 존재하는 User인지 확인
+            int existUserResult = userDao.checkUserInWalk(userIdx);
+            if (existUserResult == 0)
+                throw new BaseException(NOT_EXIST_USER_IN_WALK);
+
+            // Validation 3. 해당 날짜에 User가 기록한 Walk가 있는지 확인
+            int existUserDateResult = userDao.checkUserDateWalk(userIdx, date);
+            if (existUserDateResult == 0)
+                throw new BaseException(NO_EXIST_WALK);
+
+            List<GetUserDateRes> userDateRes = userDao.getUserDate(userIdx, date);
+
+            return userDateRes;
+        } catch(Exception exception){
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
 
 

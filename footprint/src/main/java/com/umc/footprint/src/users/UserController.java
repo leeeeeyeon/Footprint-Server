@@ -1,21 +1,19 @@
 package com.umc.footprint.src.users;
 
 
-
-
+import com.umc.footprint.config.BaseException;
+import com.umc.footprint.config.BaseResponse;
+import com.umc.footprint.config.Constant;
+import com.umc.footprint.src.users.model.GetUserDateRes;
+import com.umc.footprint.src.users.model.GetUserRes;
 import com.umc.footprint.src.users.model.GetUserTodayRes;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import com.umc.footprint.src.users.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;;
-import com.umc.footprint.config.BaseException;
-import com.umc.footprint.config.BaseResponse;
-import org.springframework.web.bind.annotation.*;
-
+import static com.umc.footprint.config.BaseResponseStatus.INVALID_DATE;
+import static com.umc.footprint.config.BaseResponseStatus.NO_EXIST_WALK;
 
 
 @RestController
@@ -57,6 +55,13 @@ public class UserController {
     @ResponseBody
     @GetMapping("/{useridx}/{date}")
     public BaseResponse<List<GetUserDateRes>> getDateWalk(@PathVariable("useridx") int userIdx,@PathVariable("date") String date){
+
+        // Validation 1. 날짜 형식 검사
+        if(!date.matches("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$")){
+            return new BaseResponse<>(new BaseException(INVALID_DATE).getStatus());
+        }
+
+        // Provider 연결
         try{
             List<GetUserDateRes> userDateRes = userProvider.getUserDate(userIdx,date);
 

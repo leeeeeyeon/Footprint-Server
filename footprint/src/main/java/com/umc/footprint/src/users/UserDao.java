@@ -44,6 +44,28 @@ public class UserDao {
                 ),getUserIdxParam);
     }
 
+    public int checkUserInWalk(int userIdx){
+
+        String checkUserWalkQuery = "SELECT userIdx FROM Walk WHERE userIdx = ? GROUP BY userIdx";
+        List<Integer> existUser =  this.jdbcTemplate.queryForList(checkUserWalkQuery,int.class,userIdx);
+
+        if(existUser.size() != 0)
+            return 1;
+
+        return 0;
+    }
+
+    public int checkUserDateWalk(int userIdx, String date){
+
+        String checkUserWalkQuery = "SELECT userIdx FROM Walk WHERE DATE(startAt) = DATE(?) and userIdx = ? GROUP BY userIdx";
+        List<Integer> existWalk =  this.jdbcTemplate.queryForList(checkUserWalkQuery,int.class,date,userIdx);
+
+        if (existWalk.size() != 0)
+            return 1;
+
+        return 0;
+    }
+
     // 해당 userIdx를 갖는 date의 산책 관련 정보 조회
     public List<GetUserDateRes> getUserDate(int userIdx, String date) {
 
