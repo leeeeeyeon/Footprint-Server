@@ -1,5 +1,6 @@
 package com.umc.footprint.src.users;
 
+import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.users.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.umc.footprint.config.BaseResponseStatus.*;
 
 @Repository
 public class UserDao {
@@ -62,7 +65,14 @@ public class UserDao {
 
 
     // 해당 userIdx를 갖는 유저의 목표 조회
-    public GetUserGoalRes getUserGoal(int userIdx){
+    public GetUserGoalRes getUserGoal(int userIdx) throws BaseException {
+
+        // Validation 1. Goal Table에 없는 userIdx인지 확인
+        List<ExistUser> existUserIdx = this.jdbcTemplate.query("SELECT userIdx FROM Goal WHERE userIdx = ? ",
+                (rs, rowNum) -> new ExistUser(rs.getInt("userIdx")),userIdx);
+        if(existUserIdx.size() == 0)
+            throw new BaseException(INVALID_USERIDX);
+
 
         // 1-1. get UserGoalDay
         String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ?";
