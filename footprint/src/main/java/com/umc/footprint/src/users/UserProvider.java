@@ -48,7 +48,15 @@ public class UserProvider {
     // 해당 userIdx를 갖는 User의 세부 정보 조회
     public GetUserInfoRes getUserInfo(int userIdx) throws BaseException {
         try {
-            GetUserInfoRes getUserInfoRes = userDao.getUserInfoGoal(userIdx);
+
+            UserInfoAchieve userInfoAchieve = userDao.getUserInfoAchieve(userIdx);
+
+            System.out.println(userInfoAchieve.getTodayGoalRate());
+            System.out.println(userInfoAchieve.getMonthGoalRate());
+            System.out.println(userInfoAchieve.getUserWalkCount());
+
+            GetUserInfoRes getUserInfoRes = new GetUserInfoRes();
+
             return getUserInfoRes;
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);

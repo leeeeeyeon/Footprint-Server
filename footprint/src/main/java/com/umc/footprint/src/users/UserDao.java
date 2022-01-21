@@ -65,15 +65,22 @@ public class UserDao {
     }
 
 
-    // 해당 userIdx를 갖는 유저의 세부정보 조회
-    public GetUserInfoRes getUserInfoGoal(int userIdx){
+    // 해당 userIdx를 갖는 유저의 달성정보 조회
+    public UserInfoAchieve getUserInfoAchieve(int userIdx){
 
         /*
-        *   [ 2. 이번달 목표 달성률 계산 ]
+         *   [ 1. 오늘 목표 달성률 계산 ] = todayGoalRate
+         * */
+        String getUserTodayGoalRateQuery = "SELECT SUM(goalRate) FROM Walk WHERE userIdx = ? and DATE(startAt) = DATE(NOW())";
+        int todayGoalRate = this.jdbcTemplate.queryForObject(getUserTodayGoalRateQuery,int.class,userIdx);
+
+
+        /*
+        *   [ 2. 이번달 목표 달성률 계산 ] = monthGoalRate
         * */
 
-        // 1. 사용자의 이번달 전체 산책 시간 확인
-        String getUserMonthWalkTimeQuery = "SELECT SUM(TIMESTAMPDIFF(minute ,startAt,endAt)) as monthWalkTime FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(CURRENT_DATE)";
+        // 1. 사용자의 이번달 전체 산책 시간 확인 (초 단위)
+        String getUserMonthWalkTimeQuery = "SELECT SUM(TIMESTAMPDIFF(second ,startAt,endAt)) as monthWalkTime FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(CURRENT_DATE)";
         int userMonthWalkTime = this.jdbcTemplate.queryForObject(getUserMonthWalkTimeQuery,int.class,userIdx);
 
         // 2. 이번달 목표 시간 계산
@@ -94,6 +101,7 @@ public class UserDao {
         // 2-2. 이번 달 요일별 횟수 정보 확인
         // 2-2-1. 해당 월 최대 일수 알아오기
         LocalDate now = LocalDate.now();
+        int todayWeekIdx = now.getDayOfWeek().getValue();
         int monthLength = now.lengthOfMonth();
 
         // 2-2-2. 해당 월 첫 요일 알아오기
@@ -159,9 +167,18 @@ public class UserDao {
         int userMonthGoalTime = countDay * userWalkGoalTime;
 
         // 3. 이번달 목표 달성률 계산
-        int monthGoalRate = (int)(userMonthWalkTime/(double)userMonthGoalTime * 100);
+        int monthGoalRate = (int)((userMonthWalkTime/ (double)( userMonthGoalTime*60 )) * 100);
 
-        return null;
+        /*
+         *   [ 3. 산책 횟수 계산 ] = userWalkCount
+         * */
+
+        String getUserWalkCountQuery = "SELECT COUNT(*) as walkCount FROM Walk WHERE userIdx = ?";
+        int userWalkCount = this.jdbcTemplate.queryForObject(getUserWalkCountQuery,int.class,userIdx);
+
+        UserInfoAchieve userInfoAchieve = new UserInfoAchieve(todayGoalRate,monthGoalRate,userWalkCount);
+
+        return userInfoAchieve;
     }
 
 }
