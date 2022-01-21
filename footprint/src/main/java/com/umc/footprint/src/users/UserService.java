@@ -36,4 +36,10 @@ public class UserService {
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
+
+    // 월이 변하면 Goal(Day)Next 데이터를 Goal(Day) 로 옯겨줌 
+    public void monthlyChangeGoal(){
+
+    }
+
 }
