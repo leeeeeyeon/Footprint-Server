@@ -27,7 +27,11 @@ public class UserService {
     public int postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException{
         try {
             int result = userDao.postGoal(userIdx, postUserGoalReq);
-            return result;
+            int resultNext = userDao.postGoalNext(userIdx, postUserGoalReq);
+
+            if(result == 0 || resultNext ==0)
+                return 0;
+            return 1;
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
