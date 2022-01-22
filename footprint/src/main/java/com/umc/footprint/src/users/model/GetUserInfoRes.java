@@ -8,5 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class GetUserInfoRes {
-
+    private UserInfoAchieve userInfoAchieve;
+    private GetUserGoalRes getUserGoalRes;
+    private UserInfoStat userInfoStat;
 }

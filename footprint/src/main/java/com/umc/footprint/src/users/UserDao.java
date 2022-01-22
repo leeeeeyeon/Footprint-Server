@@ -68,14 +68,14 @@ public class UserDao {
     public GetUserGoalRes getUserGoal(int userIdx) throws BaseException {
 
         // Validation 1. Goal Table에 없는 userIdx인지 확인
-        List<ExistUser> existUserIdx = this.jdbcTemplate.query("SELECT userIdx FROM Goal WHERE userIdx = ? ",
+        List<ExistUser> existUserIdx = this.jdbcTemplate.query("SELECT userIdx FROM Goal WHERE userIdx = ? GROUP BY userIdx",
                 (rs, rowNum) -> new ExistUser(rs.getInt("userIdx")),userIdx);
         if(existUserIdx.size() == 0)
             throw new BaseException(INVALID_USERIDX);
 
 
         // 1-1. get UserGoalDay
-        String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ?";
+        String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and DATE(createAt) = DATE(NOW())";
         UserGoalDay userGoalDay = this.jdbcTemplate.queryForObject(getUserGoalDayQuery,
                 (rs,rowNum) -> new UserGoalDay(
                         rs.getBoolean("sun"),
@@ -105,7 +105,7 @@ public class UserDao {
             dayIdx.add(7);
 
         // 2. get UserGoalTime
-        String getUserGoalTimeQuery = "SELECT walkGoalTime, walkTimeSlot FROM Goal WHERE userIdx = ?";
+        String getUserGoalTimeQuery = "SELECT walkGoalTime, walkTimeSlot FROM Goal WHERE userIdx = ? and DATE(createAt) = DATE(NOW())";
         UserGoalTime userGoalTime = this.jdbcTemplate.queryForObject(getUserGoalTimeQuery,
                 (rs,rowNum) -> new UserGoalTime(
                         rs.getInt("walkGoalTime"),
@@ -147,8 +147,10 @@ public class UserDao {
         return new UserInfoAchieve(todayGoalRate,monthGoalRate,userWalkCount);
     }
 
+
+
     // 유저 통계치 정보 제공
-    public void getUserInfoStat(int userIdx){
+    public UserInfoStat getUserInfoStat(int userIdx){
 
         // [ 1. 이전 3달 기준 요일별 산책 비율 ] = List<String> mostWalkDay & List<Double> userWeekDayRate
 
@@ -248,30 +250,47 @@ public class UserDao {
             System.out.println(m);
 
 
-        // [ 3. 이전 5달 범위 월별 달성률 & 평균 달성률 ] = monthlyGoalRate + avgGoalRate
+        // [ 3. 이전 5달 범위 월별 달성률 & 평균 달성률 ] = List<Integer>monthlyGoalRate + avgGoalRate
+        // List 순서 : -5달 , ... , 전달 , 이번달 (총 6개 element)
 
         List<Integer> monthlyGoalRate = new ArrayList<>();
         int sumGoalRate = 0;
-        for(int i=0; i<6; i++) {
-            monthlyGoalRate.add(getMonthGoalRate(userIdx, i));
-            sumGoalRate += monthlyGoalRate.get(i);
+
+        // 현재 달 + 이전 5달 범위의 월별 달성률 계산 by getMonthGoalRate()
+        for(int i=5; i>=0 ; i--) {
+            int goalRate = getMonthGoalRate(userIdx, i); // Method getMonthGoalRate
+            if (goalRate > 100) // 100 초과시 100으로 저장
+                goalRate = 100;
+            monthlyGoalRate.add(goalRate);
+            sumGoalRate += monthlyGoalRate.get(5-i);
         }
 
         int avgGoalRate = (int)((double)sumGoalRate / 6);
 
+        System.out.println("[ monthlyGoalRate ] ");
+        for(Integer m : monthlyGoalRate)
+            System.out.println(m);
+
+        System.out.println("[ avgGoalRate ]");
+        System.out.println(avgGoalRate);
+
+
+        return new UserInfoStat(mostWalkDay,userWeekDayRate,thisMonthWalkCount,monthlyWalkCount,monthlyGoalRate,avgGoalRate);
 
     }
+
+
 
     // 월 단위 달성률 계산 method
     public int getMonthGoalRate(int userIdx, int beforeMonth){
 
         // 1. 사용자의 원하는 달 전체 산책 시간 확인 (초 단위)
-        String getUserMonthWalkTimeQuery = "SELECT SUM(TIMESTAMPDIFF(second ,startAt,endAt)) as monthWalkTime FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH)";
+        String getUserMonthWalkTimeQuery = "SELECT IFNULL(SUM(TIMESTAMPDIFF(second ,startAt,endAt)),0) as monthWalkTime FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
         int userMonthWalkTime = this.jdbcTemplate.queryForObject(getUserMonthWalkTimeQuery,int.class,userIdx,beforeMonth);
 
         // 2. 이번달 목표 시간 계산
         // 2-1. 사용자 목표 요일 정보 확인
-        String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH)";
+        String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
         UserGoalDay userGoalDay = this.jdbcTemplate.queryForObject(getUserGoalDayQuery,
                 (rs,rowNum) -> new UserGoalDay(
                         rs.getBoolean("sun"),
@@ -344,7 +363,7 @@ public class UserDao {
         }
 
         // 2-3-2. 하루 산책 목표 시간 확인
-        String getUserWalkGoalTimeQuery = "SELECT walkGoalTime FROM Goal WHERE userIdx = ? and MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH)";
+        String getUserWalkGoalTimeQuery = "SELECT walkGoalTime FROM Goal WHERE userIdx = ? and MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
         int userWalkGoalTime = this.jdbcTemplate.queryForObject(getUserWalkGoalTimeQuery,int.class,userIdx,beforeMonth);
 
         // 2-3-3. 목표 시간 계산
