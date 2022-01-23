@@ -13,6 +13,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import javax.transaction.Transactional;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ public class WalkDao {
     }
 
     //Walk 테이블에 insert
+    @Transactional
     public int addWalk(Walk walk, String pathImgUrl) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -55,6 +57,7 @@ public class WalkDao {
         return keyHolder.getKey().intValue();
     }
 
+    @Transactional
     public void addFootprint(List<Footprint> footprintList, int walkIdx) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -78,29 +81,30 @@ public class WalkDao {
     }
 
         //Photo 테이블에 insert
-        public void addPhoto(int userIdx, List<Footprint> footprintList) {
-            String photoInsertQuery = "insert into `Photo`(`imageUrl`, `userIdx`, `footprintIdx`) values (?,?,?)";
+    @Transactional
+    public void addPhoto(int userIdx, List<Footprint> footprintList) {
+        String photoInsertQuery = "insert into `Photo`(`imageUrl`, `userIdx`, `footprintIdx`) values (?,?,?)";
 
-            for (Footprint footprint : footprintList) {
-                this.jdbcTemplate.batchUpdate(photoInsertQuery,
-                        new BatchPreparedStatementSetter() {
-                            @Override
-                            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                                ps.setString(1, footprint.getImgUrlList().get(i));
-                                ps.setInt(2, userIdx);
-                                ps.setInt(3, footprint.getFootprintIdx());
-                            }
+        for (Footprint footprint : footprintList) {
+            this.jdbcTemplate.batchUpdate(photoInsertQuery,
+                    new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setString(1, footprint.getImgUrlList().get(i));
+                        ps.setInt(2, userIdx);
+                        ps.setInt(3, footprint.getFootprintIdx());
+                    }
 
-                            @Override
-                            public int getBatchSize() {
-                                return footprint.getImgUrlList().size();
-                            }
-                        });
-            }
-
+                    @Override
+                    public int getBatchSize() {
+                        return footprint.getImgUrlList().size();
+                    }
+            });
         }
 
+    }
 
+    @Transactional
     public List<Pair<Integer, Integer>> addHashtag(List<Footprint> footprintList) {
         String hashtagInsertQuery = "insert into Hashtag(hashtag) values (?)";
 
@@ -128,6 +132,7 @@ public class WalkDao {
         return tagIdxList;
     }
 
+    @Transactional
     public void addTag(List<Pair<Integer, Integer>> tagIdxList, int userIdx) {
         String tagInsertQuery = "insert into Tag(hashtagIdx, footprintIdx, userIdx) values (?,?,?)";
 
@@ -149,6 +154,7 @@ public class WalkDao {
     }
 
     // 획득한 뱃지 매핑 테이블에 삽입
+    @Transactional
     public void addUserBadge(List<Integer> acquiredBadgeIdxList, int userIdx) {
         String userBadgeInsertQuery = "insert into UserBadge(userIdx, badgeIdx) values (?,?)";
 

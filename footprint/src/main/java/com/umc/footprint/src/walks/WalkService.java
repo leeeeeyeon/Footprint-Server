@@ -32,7 +32,6 @@ public class WalkService {
         this.awsS3Service = awsS3Service;
     }
 
-    @Transactional
     public PostWalkRes saveRecord(PostWalkReq request) throws BaseException {
         try {
             // 경로 이미지 URL 생성 및 S3 업로드
@@ -44,12 +43,6 @@ public class WalkService {
             int walkIdx = walkDao.addWalk(walkProvider.getGoalRate(request.getWalk()), pathImgUrl);
 
             System.out.println("walkIdx = " + walkIdx);
-
-            for (Footprint footprint : request.getFootprintList()) {
-                System.out.println("footprint.getCoordinate() = " + footprint.getCoordinate());
-                System.out.println("footprint.getWrite() = " + footprint.getWrite());
-                System.out.println("footprint.getRecordAt() = " + footprint.getRecordAt());
-            }
 
             // Footprint Table에 삽입 후 생성된 footprintIdx Footprint에 초기화
             walkDao.addFootprint(request.getFootprintList(), walkIdx);

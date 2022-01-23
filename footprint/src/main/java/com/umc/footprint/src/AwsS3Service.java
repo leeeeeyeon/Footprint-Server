@@ -5,6 +5,8 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.umc.footprint.config.BaseException;
+import com.umc.footprint.config.BaseResponseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -52,7 +54,7 @@ public class AwsS3Service {
     }
 
     // 파일 하나 넣을 때
-    public String uploadFile(MultipartFile oneMultipartFile) {
+    public String uploadFile(MultipartFile oneMultipartFile) throws BaseException {
         String photoUrl;
 
         String OnefileName = createFileName(oneMultipartFile.getOriginalFilename());
@@ -64,7 +66,7 @@ public class AwsS3Service {
             amazonS3.putObject(new PutObjectRequest(bucket, OnefileName, inputStream, objectMetadata)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
         } catch (IOException exception) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
+            throw new BaseException(BaseResponseStatus.S3UPLOAD_ERROR);
         }
 
         photoUrl = amazonS3.getUrl(bucket, OnefileName).toString();
