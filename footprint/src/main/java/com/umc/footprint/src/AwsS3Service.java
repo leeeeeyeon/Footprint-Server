@@ -27,8 +27,9 @@ public class AwsS3Service {
 
     private final AmazonS3 amazonS3;
 
-    public List<String> uploadFile(List<MultipartFile> multipartFile) {
-        List<String> photosUrl = new ArrayList<>();
+    // 파일 여러 개 넣을 때
+    public ArrayList<String> uploadFile(List<MultipartFile> multipartFile) {
+        ArrayList<String> photoUrlList = new ArrayList<>();
 
         // forEach 구문을 통해 multipartFile로 넘어온 파일들 하나씩 fileNameList에 추가
         multipartFile.forEach(file -> {
@@ -44,10 +45,31 @@ public class AwsS3Service {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
             }
 
-            photosUrl.add(amazonS3.getUrl(bucket, fileName).toString());
+            photoUrlList.add(amazonS3.getUrl(bucket, fileName).toString());
         });
 
-        return photosUrl;
+        return photoUrlList;
+    }
+
+    // 파일 하나 넣을 때
+    public String uploadFile(MultipartFile oneMultipartFile) {
+        String photoUrl;
+
+        String OnefileName = createFileName(oneMultipartFile.getOriginalFilename());
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(oneMultipartFile.getSize());
+        objectMetadata.setContentType(oneMultipartFile.getContentType());
+
+        try (InputStream inputStream = oneMultipartFile.getInputStream()) {
+            amazonS3.putObject(new PutObjectRequest(bucket, OnefileName, inputStream, objectMetadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+        } catch (IOException exception) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
+        }
+
+        photoUrl = amazonS3.getUrl(bucket, OnefileName).toString();
+
+        return photoUrl;
     }
 
     public void deleteFile(String fileName) {
