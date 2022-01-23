@@ -178,6 +178,7 @@ public class UserDao {
         // 1. GoalNext updateAt 변경하기
         String modifyUpdateAtQuery = "UPDATE GoalNext SET updateAt = CURRENT_TIMESTAMP WHERE MONTH(updateAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL  1 MONTH ))";
         int modifyAffectedRow = this.jdbcTemplate.update(modifyUpdateAtQuery);
+        System.out.println("SCHEDULE!");
 
         // 2. GoalNext 튜플 -> Goal
         String updateGoalQuery = "INSERT INTO Goal (userIdx, walkGoalTime, walkTimeSlot)  SELECT userIdx, walkGoalTime, walkTimeSlot FROM GoalNext";
@@ -192,9 +193,10 @@ public class UserDao {
         // 1. GoalDayNext updateAt 변경하기
         String modifyUpdateAtQuery = "UPDATE GoalDayNext SET updateAt = CURRENT_TIMESTAMP WHERE MONTH(updateAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL  1 MONTH ))";
         int modifyAffectedRow = this.jdbcTemplate.update(modifyUpdateAtQuery);
+        System.out.println("SCHEDULE!");
 
         // 2. GoalDayNext 튜플 -> Goal
-        String updateGoalQuery = "INSERT INTO GoalDay (userIdx, walkGoalTime, walkTimeSlot)  SELECT userIdx, walkGoalTime, walkTimeSlot FROM GoalNext";
+        String updateGoalQuery = "INSERT INTO GoalDay (userIdx, sun, mon, tue, wed, thu, fri, sat)  SELECT userIdx, sun, mon, tue, wed, thu, fri, sat FROM GoalDayNext";
         int updateAffectedRow = this.jdbcTemplate.update(updateGoalQuery);
 
 

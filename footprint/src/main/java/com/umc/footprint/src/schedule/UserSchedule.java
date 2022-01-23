@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import javax.transaction.Transactional;
+
 @EnableScheduling
 @Configuration
 public class UserSchedule {
@@ -18,7 +20,11 @@ public class UserSchedule {
         this.userDao = userDao;
     }
 
-    @Scheduled(cron = "0 0 12 1 1/1 ? *")
+
+
+    @Transactional
+    @Scheduled(cron = "0 0/5 * * * ?")
+//    @Scheduled(cron = "0 0 0 1 * ?")
     public void changeMonthGoal(){
         userDao.updateGoal();
         userDao.updateGoalDay();
