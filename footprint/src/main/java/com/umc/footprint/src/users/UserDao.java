@@ -171,4 +171,34 @@ public class UserDao {
     }
 
 
+    // 유저 목표 최신화
+    // GoalNext -> Goal
+    public void updateGoal(){
+
+        // 1. GoalNext updateAt 변경하기
+        String modifyUpdateAtQuery = "UPDATE GoalNext SET updateAt = CURRENT_TIMESTAMP WHERE MONTH(updateAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL  1 MONTH ))";
+        int modifyAffectedRow = this.jdbcTemplate.update(modifyUpdateAtQuery);
+
+        // 2. GoalNext 튜플 -> Goal
+        String updateGoalQuery = "INSERT INTO Goal (userIdx, walkGoalTime, walkTimeSlot)  SELECT userIdx, walkGoalTime, walkTimeSlot FROM GoalNext";
+        int updateAffectedRow = this.jdbcTemplate.update(updateGoalQuery);
+
+    }
+
+    // 유저 목표 요일 최신화
+    // GoalDayNext -> GoalDay
+    public void updateGoalDay(){
+
+        // 1. GoalDayNext updateAt 변경하기
+        String modifyUpdateAtQuery = "UPDATE GoalDayNext SET updateAt = CURRENT_TIMESTAMP WHERE MONTH(updateAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL  1 MONTH ))";
+        int modifyAffectedRow = this.jdbcTemplate.update(modifyUpdateAtQuery);
+
+        // 2. GoalDayNext 튜플 -> Goal
+        String updateGoalQuery = "INSERT INTO GoalDay (userIdx, walkGoalTime, walkTimeSlot)  SELECT userIdx, walkGoalTime, walkTimeSlot FROM GoalNext";
+        int updateAffectedRow = this.jdbcTemplate.update(updateGoalQuery);
+
+
+    }
+
+
 }
