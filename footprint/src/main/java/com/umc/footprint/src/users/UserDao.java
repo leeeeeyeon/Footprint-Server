@@ -40,8 +40,6 @@ public class UserDao {
                 ),getUserIdxParam);
     }
 
-
-
     // 해당 userIdx를 갖는 유저조회
     public GetUserRes getUser(int userIdx) {
         String getUserQuery = "select * from footprint.User where userIdx = ?"; // 해당 userIdx를 만족하는 유저를 조회하는 쿼리문
@@ -59,5 +57,20 @@ public class UserDao {
                 userIdx);
     }
 
+    // 회원정보 변경
+    public int modifyNickname(PatchNicknameReq patchNicknameReq) {
+        String modifyNicknameQuery = "update User set nickname = ? where userIdx = ?";
+        Object[] modifyNicknameParams = new Object[]{patchNicknameReq.getNickname(), patchNicknameReq.getUserIdx()};
+
+        return this.jdbcTemplate.update(modifyNicknameQuery, modifyNicknameParams); // 대응시켜 매핑시켜 쿼리 요청(생성했으면 1, 실패했으면 0)
+    }
+
+    // 중복 닉네임 검사
+    public int nicknameExist(PatchNicknameReq patchNicknameReq) {
+        String nickname = patchNicknameReq.getNickname();
+        String nicknameExistQuery = "select count(*) from User where nickname =?";
+
+        return jdbcTemplate.queryForObject(nicknameExistQuery, int.class, nickname);
+    }
 
 }

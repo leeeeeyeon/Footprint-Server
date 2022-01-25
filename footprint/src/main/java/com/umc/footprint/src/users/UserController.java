@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
-import org.springframework.web.bind.annotation.*;
 
+import static com.umc.footprint.config.BaseResponseStatus.MAX_NICKNAME_LENGTH;
+import static com.umc.footprint.config.BaseResponseStatus.MODIFY_NICKNAME_FAIL;
 
 
 @RestController
@@ -61,6 +62,24 @@ public class UserController {
 
     }
 
+    /**
+     * 유저 닉네임 변경 API
+     * [PATCH] /users/:userIdx/nickname
+     */
+    @ResponseBody
+    @PatchMapping("/{userIdx}/nickname")
+    public BaseResponse<String> modifyNickname(@PathVariable("userIdx") int userIdx, @RequestBody User user) {
+        try {
+            PatchNicknameReq patchNicknameReq = new PatchNicknameReq(userIdx, user.getNickname());
+            if (user.getNickname().length() > 15) { // 닉네임 15자 초과
+                throw new BaseException(MAX_NICKNAME_LENGTH);
+            }
+            userService.modifyNickname(patchNicknameReq);
 
-
+            String result = "닉네임이 수정되었습니다.";
+            return new BaseResponse<>(result);
+        } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
 }
