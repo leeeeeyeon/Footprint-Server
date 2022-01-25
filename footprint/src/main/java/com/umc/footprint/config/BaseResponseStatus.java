@@ -32,7 +32,14 @@ public enum BaseResponseStatus {
     /**
      * 2000 : Request 오류
      */
+    INVALID_USERIDX(false, 2100, "잘못된 유저 인덱스입니다."),
+    INACTIVE_USER(false, 2122, "비활성화된 유저입니다."),
+    BLACK_USER(false, 2123, "블랙 유저입니다."),
 
+    MAX_NICKNAME_LENGTH(false, 2160, "닉네임은 15자를 초과할 수 없습니다."),
+
+    INVALID_WALKIDX(false, 2200, "잘못된 산책 인덱스입니다."),
+    NO_EXIST_FOOTPRINT(false, 2221, "해당 산책 기록에는 발자국이 존재하지 않습니다."),
 
     /**
      * 3000 : Response 오류
@@ -42,7 +49,10 @@ public enum BaseResponseStatus {
      * 4000 : Database, Server 오류
      */
     DATABASE_ERROR(false, 4000, "데이터베이스 연결에 실패하였습니다."),
-    SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다.");
+    MODIFY_NICKNAME_FAIL(false,4161,"닉네임 변경에 실패하였습니다."),
+    SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
+    DELETE_FOOTPRINT_FAIL(false, 4260, "발자국 삭제에 실패하였습니다."),
+    MODIFY_FOOTPRINT_FAIL(false, 4261, "발자국 수정에 실패하였습니다.");
 
     private final boolean isSuccess;
     private final int code;
