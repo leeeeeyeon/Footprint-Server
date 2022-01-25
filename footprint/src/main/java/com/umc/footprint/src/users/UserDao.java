@@ -29,9 +29,10 @@ public class UserDao {
                 "SUM(W.distance) as distance, " +
                 "SUM(W.calorie) as calorie " +
                 "FROM Walk W " +
-                "INNER JOIN Goal G " +
+                "INNER JOIN (SELECT useridx, walkGoalTime FROM Goal WHERE useridx = ? and MONTH(createAt) = MONTH(NOW())) as G " +
                 "ON W.userIdx = G.userIdx " +
-                "WHERE W.userIdx = ? AND DATE(W.startAt) = DATE(NOW()) ";
+                "WHERE W.userIdx = ? AND DATE(W.startAt) = DATE(NOW()) " +
+                "GROUP BY G.walkGoalTime ";
         int getUserIdxParam = userIdx;
 
         return this.jdbcTemplate.query(getUserTodayQuery,
@@ -41,7 +42,7 @@ public class UserDao {
                         rs.getInt("walkTime"),
                         rs.getDouble("distance"),
                         rs.getInt("calorie")
-                ),getUserIdxParam);
+                ),getUserIdxParam,getUserIdxParam);
     }
 
     public int checkUserInWalk(int userIdx){
