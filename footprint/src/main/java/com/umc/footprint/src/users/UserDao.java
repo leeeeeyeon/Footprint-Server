@@ -73,9 +73,10 @@ public class UserDao {
         if(existUserIdx.size() == 0)
             throw new BaseException(INVALID_USERIDX);
 
+        System.out.println("CHECK POINT G1");
 
         // 1-1. get UserGoalDay
-        String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and DATE(createAt) = DATE(NOW())";
+        String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         UserGoalDay userGoalDay = this.jdbcTemplate.queryForObject(getUserGoalDayQuery,
                 (rs,rowNum) -> new UserGoalDay(
                         rs.getBoolean("sun"),
@@ -86,6 +87,8 @@ public class UserDao {
                         rs.getBoolean("fri"),
                         rs.getBoolean("sat")
                 ),userIdx);
+
+        System.out.println("CHECK POINT G2");
 
         // 1-2. List<Integer> 형태로 변형
         List<Integer> dayIdx = new ArrayList<>();
@@ -105,7 +108,7 @@ public class UserDao {
             dayIdx.add(7);
 
         // 2. get UserGoalTime
-        String getUserGoalTimeQuery = "SELECT walkGoalTime, walkTimeSlot FROM Goal WHERE userIdx = ? and DATE(createAt) = DATE(NOW())";
+        String getUserGoalTimeQuery = "SELECT walkGoalTime, walkTimeSlot FROM Goal WHERE userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         UserGoalTime userGoalTime = this.jdbcTemplate.queryForObject(getUserGoalTimeQuery,
                 (rs,rowNum) -> new UserGoalTime(
                         rs.getInt("walkGoalTime"),
@@ -125,7 +128,7 @@ public class UserDao {
         /*
          *   [ 1. 오늘 목표 달성률 계산 ] = todayGoalRate
          * */
-        String getUserTodayGoalRateQuery = "SELECT SUM(goalRate) FROM Walk WHERE userIdx = ? and DATE(startAt) = DATE(NOW())";
+        String getUserTodayGoalRateQuery = "SELECT IFNULL(SUM(goalRate),0) FROM Walk WHERE userIdx = ? and DATE(startAt) = DATE(NOW())";
         int todayGoalRate = this.jdbcTemplate.queryForObject(getUserTodayGoalRateQuery,int.class,userIdx);
 
 
