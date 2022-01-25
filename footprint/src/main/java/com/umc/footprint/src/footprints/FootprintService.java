@@ -38,10 +38,20 @@ public class FootprintService {
     // 발자국 삭제 (PATCH)
     public void deleteFootprint(int footprintIdx) throws BaseException {
         try {
+            int activeFootprint = footprintDao.activeFootprint(footprintIdx);
+            int footprintExist = footprintDao.footprintExist(footprintIdx);
+
+            if (footprintExist == 0) { // 발자국이 존재하지 않을 때
+                throw new BaseException(NO_EXIST_FOOTPRINT);
+            }
+            else if (activeFootprint == 0) { // 이미 삭제된 발자국
+                throw new BaseException(DELETED_FOOTPRINT);
+            }
             int result = footprintDao.deleteFootprint(footprintIdx); // 발자국 삭제 성공 - 1, 실패 - 0
 
+            // 발자국 삭제 실패 (Footprint, Photo 테이블 중 업데이트 되지 않은 테이블 존재)
             if (result == 0) {
-                throw new BaseException(DELETE_FOOTPRINT_FAIL); // 발자국 삭제 실패
+                throw new BaseException(DELETE_FOOTPRINT_FAIL);
             }
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
