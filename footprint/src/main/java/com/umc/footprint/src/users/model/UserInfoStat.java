@@ -14,6 +14,6 @@ public class UserInfoStat {
     private List<Double> userWeekDayRate;
     private int thisMonthWalkCount;
     private List<Integer> monthlyWalkCount;
-    private List<Integer>monthlyGoalRate;
-    private int avgGoalRate;
+    private int thisMonthGoalRate;
+    private List<Integer> monthlyGoalRate;
 }

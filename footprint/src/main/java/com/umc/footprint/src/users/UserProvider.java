@@ -50,14 +50,12 @@ public class UserProvider {
         try {
             // 1. user 달성률 정보
             UserInfoAchieve userInfoAchieve = userDao.getUserInfoAchieve(userIdx);
-            System.out.println("CHECK POINT 1");
+
             // 2. user 이번달 목표 정보
             GetUserGoalRes getUserGoalRes = userDao.getUserGoal(userIdx);
-            System.out.println("CHECK POINT 2");
 
             // 3. user 통계 정보
             UserInfoStat userInfoStat = userDao.getUserInfoStat(userIdx);
-            System.out.println("CHECK POINT 3");
 
             // 4. 1+2+3
             return new GetUserInfoRes(userInfoAchieve,getUserGoalRes,userInfoStat);

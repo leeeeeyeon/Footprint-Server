@@ -73,8 +73,6 @@ public class UserDao {
         if(existUserIdx.size() == 0)
             throw new BaseException(INVALID_USERIDX);
 
-        System.out.println("CHECK POINT G1");
-
         // 1-1. get UserGoalDay
         String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         UserGoalDay userGoalDay = this.jdbcTemplate.queryForObject(getUserGoalDayQuery,
@@ -87,8 +85,6 @@ public class UserDao {
                         rs.getBoolean("fri"),
                         rs.getBoolean("sat")
                 ),userIdx);
-
-        System.out.println("CHECK POINT G2");
 
         // 1-2. List<Integer> 형태로 변형
         List<Integer> dayIdx = new ArrayList<>();
@@ -245,16 +241,9 @@ public class UserDao {
         for(int i=6; i>=0; i--)
             monthlyWalkCount.add(this.jdbcTemplate.queryForObject(userMonthlyWalkCountQuery, int.class, userIdx, i));
 
-        System.out.println("[ thisMonthWalk ]");
-        System.out.println(thisMonthWalkCount);
-
-        System.out.println("[ monthlyWalkCount ]");
-        for(Integer m : monthlyWalkCount)
-            System.out.println(m);
-
 
         // [ 3. 이전 5달 범위 월별 달성률 & 평균 달성률 ] = List<Integer>monthlyGoalRate + avgGoalRate
-        // List 순서 : -5달 , ... , 전달 , 이번달 (총 6개 element)
+        // List 순서 : 평균, -5달 , ... , 전달 , 이번달 (총 7개 element)
 
         List<Integer> monthlyGoalRate = new ArrayList<>();
         int sumGoalRate = 0;
@@ -270,15 +259,10 @@ public class UserDao {
 
         int avgGoalRate = (int)((double)sumGoalRate / 6);
 
-        System.out.println("[ monthlyGoalRate ] ");
-        for(Integer m : monthlyGoalRate)
-            System.out.println(m);
+        // monthlyGoalRate index 0에 avgGoalRate 추가
+        monthlyGoalRate.add(0,avgGoalRate);
 
-        System.out.println("[ avgGoalRate ]");
-        System.out.println(avgGoalRate);
-
-
-        return new UserInfoStat(mostWalkDay,userWeekDayRate,thisMonthWalkCount,monthlyWalkCount,monthlyGoalRate,avgGoalRate);
+        return new UserInfoStat(mostWalkDay,userWeekDayRate,thisMonthWalkCount,monthlyWalkCount,monthlyGoalRate.get(6),monthlyGoalRate);
 
     }
 
