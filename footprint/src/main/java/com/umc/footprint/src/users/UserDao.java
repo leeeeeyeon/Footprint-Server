@@ -40,6 +40,18 @@ public class UserDao {
                 ),getUserIdxParam);
     }
 
+    // 유저 상태 조회 - validation에 사용
+    public String getStatus(int userIdx) {
+        String getStatusQuery = "select status from User where userIdx=?";
+        return this.jdbcTemplate.queryForObject(getStatusQuery, String.class, userIdx);
+    }
+
+    // 유저 존재 여부 조회
+    public int userExist(int userIdx) {
+        String userExistQuery = "select count(*) from User where userIdx=?";
+        return this.jdbcTemplate.queryForObject(userExistQuery, int.class, userIdx);
+    }
+
     // 해당 userIdx를 갖는 유저조회
     public GetUserRes getUser(int userIdx) {
         String getUserQuery = "select userIdx, nickname, `name`, email, status, User.badgeIdx, badgeUrl, age, sex, height, weight\n" +

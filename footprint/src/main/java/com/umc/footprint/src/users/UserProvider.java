@@ -38,6 +38,18 @@ public class UserProvider {
     // 해당 userIdx를 갖는 User의 정보 조회
     public GetUserRes getUser(int userIdx) throws BaseException {
         try {
+            int userExist = userDao.userExist(userIdx);
+            if (userExist == 0) {
+                throw new BaseException(INVALID_USERIDX);
+            }
+
+            String status = userDao.getStatus(userIdx);
+            if (status.equals("INACTIVE")) {
+                throw new BaseException(INACTIVE_USER);
+            }
+            else if (status.equals("BLACK")) {
+                throw new BaseException(BLACK_USER);
+            }
             GetUserRes getUserRes = userDao.getUser(userIdx);
             return getUserRes;
         } catch (Exception exception) {
