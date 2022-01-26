@@ -40,9 +40,20 @@ public class UserProvider {
         return userTodayRes;
     }
 
+
+    //월별 발자국(일기) 갯수 조회
+    public List<GetFootprintCount> getMonthFootprints(int userIdx, int year, int month) throws BaseException {
+        try {
+            List<GetFootprintCount> getMonthFootprints = userDao.getMonthFootprints(userIdx, year, month);
+            return getMonthFootprints;
+        } catch (Exception exception) {
+          throw new BaseException(DATABASE_ERROR);
+        }
+    }
+  
+
     // 해당 userIdx를 갖는 date의 산책 관련 정보 조회
     public List<GetUserDateRes> getUserDate(int userIdx, String date) throws BaseException {
-
 
         try {
             // Validation 2. Walk Table 안 존재하는 User인지 확인
@@ -59,6 +70,18 @@ public class UserProvider {
 
             return userDateRes;
         } catch(Exception exception){
+
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
+    //월별 달성률 및 누적 정보 조회
+    public GetMonthInfoRes getMonthInfoRes(int userIdx, int year, int month) throws BaseException {
+        try {
+            GetMonthInfoRes getMonthInfoRes = userDao.getMonthInfoRes(userIdx, year, month);
+            return getMonthInfoRes;
+          } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
     }
@@ -82,6 +105,16 @@ public class UserProvider {
             GetUserRes getUserRes = userDao.getUser(userIdx);
             return getUserRes;
         } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
+    public GetUserBadges getUserBadges(int userIdx) throws BaseException {
+        try {
+            GetUserBadges getUserBadges = userDao.getUserBadges(userIdx);
+            return getUserBadges;
+          } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
     }
@@ -125,5 +158,4 @@ public class UserProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
-
 }

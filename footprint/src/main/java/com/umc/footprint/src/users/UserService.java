@@ -1,28 +1,19 @@
 package com.umc.footprint.src.users;
 
-import com.umc.footprint.config.BaseException;
-
-import com.umc.footprint.config.BaseResponseStatus;
-import com.umc.footprint.src.users.model.PatchUserGoalReq;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
-
-import com.umc.footprint.src.users.model.GetUserRes;
-import com.umc.footprint.src.users.model.PostUserGoalReq;
-import com.umc.footprint.src.users.model.PostUserGoalRes;
-import com.umc.footprint.src.users.model.PatchNicknameReq;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.umc.footprint.config.BaseException;
 import static com.umc.footprint.config.BaseResponseStatus.*;
 
-import javax.transaction.Transactional;
+import com.umc.footprint.config.BaseException;
+import com.umc.footprint.config.BaseResponseStatus;
+import com.umc.footprint.src.users.model.*;
 
-import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
 
 
 @Service
@@ -32,6 +23,16 @@ public class UserService {
     @Autowired
     public UserService(UserDao userDao) {
         this.userDao = userDao;
+    }
+
+
+    public BadgeInfo patchRepBadge(int userIdx, int badgeIdx) throws BaseException {
+        try {
+            BadgeInfo patchRepBadgeInfo = userDao.patchRepBadge(userIdx, badgeIdx);
+            return patchRepBadgeInfo;
+          } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
 
     // 닉네임 수정(Patch)
@@ -85,9 +86,9 @@ public class UserService {
             if(result == 0 || resultNext ==0)
                 return 0;
             return 1;
+
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
     }
-
 }

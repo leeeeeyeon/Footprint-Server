@@ -1,27 +1,23 @@
 package com.umc.footprint.src.users;
 
-
-
-
 import com.umc.footprint.src.users.model.GetUserTodayRes;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.umc.footprint.src.users.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.umc.footprint.config.Constant;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
 
 import com.umc.footprint.config.BaseResponseStatus;
 import com.umc.footprint.config.BaseResponseStatus.*;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
@@ -151,8 +147,31 @@ public class UserController {
 
     }
 
-     * 목표 수정 API
 
+    @ResponseBody
+    @GetMapping("/{userIdx}/tmonth") // (GET) 127.0.0.1:3000/users/{userIdx}/tmonth
+    public BaseResponse<GetMonthInfoRes> getMonthInfo(@PathVariable("userIdx") int userIdx) {
+        // TO-DO-LIST
+        // jwt 확인?
+        // user테이블에 해당 userIdx가 존재하는지
+        // GoalDay 테이블에 해당 userIdx가 존재하는지
+
+        try {
+            LocalDate now = LocalDate.now();
+            int nowYear = now.getYear();
+            int nowMonth = now.getMonthValue();
+
+            GetMonthInfoRes getMonthInfoRes = userProvider.getMonthInfoRes(userIdx, nowYear, nowMonth);
+            return new BaseResponse<>(getMonthInfoRes);
+          } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+      
+    }
+  
+
+    /**
+     * 목표 수정 API
      * [PATCH] /users/:useridx/goals
      */
     // Path-variable
@@ -200,6 +219,30 @@ public class UserController {
             return new BaseResponse<>((exception.getStatus()));
         }
     }
+
+
+    @ResponseBody
+    @GetMapping("/{userIdx}/months/footprints") // (GET) 127.0.0.1:3000/users/{userIdx}/months/footprints?year=2021&month=2
+    public BaseResponse<List<GetFootprintCount>> getMonthFootprints(@PathVariable("userIdx") int userIdx,@RequestParam(required = true) int year, @RequestParam(required = true) int month) throws BaseException {
+        List<GetFootprintCount> getFootprintCounts = userProvider.getMonthFootprints(userIdx, year, month);
+        return new BaseResponse<>(getFootprintCounts);
+    }
+
+
+    @ResponseBody
+    @GetMapping("/{userIdx}/badges") // (GET) 127.0.0.1:3000/users/{userIdx}/badges
+    public BaseResponse<GetUserBadges> getUsersBadges(@PathVariable("userIdx") int userIdx) throws BaseException {
+            GetUserBadges getUserBadges = userProvider.getUserBadges(userIdx);
+            return new BaseResponse<>(getUserBadges);
+    }
+
+    @ResponseBody
+    @PatchMapping("/{userIdx}/badges/title/{badgeIdx}")
+    public BaseResponse<BadgeInfo> patchRepBadge(@PathVariable("userIdx") int userIdx, @PathVariable("badgeIdx") int badgeIdx) throws BaseException {
+        BadgeInfo patchRepBadgeInfo = userService.patchRepBadge(userIdx, badgeIdx);
+        return new BaseResponse<>(patchRepBadgeInfo);
+    }
+
 
     /**
      * 유저 세부 정보 조회 API
@@ -272,4 +315,5 @@ public class UserController {
             return new BaseResponse<>((exception.getStatus()));
         }
     }
+
 }
