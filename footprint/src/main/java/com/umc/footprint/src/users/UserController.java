@@ -96,6 +96,40 @@ public class UserController {
     }
 
     /**
+
+     * 유저 "이번달" 목표 조회 API
+     * [GET] /users/:userIdx/goals
+     */
+    // Path-variable
+    @ResponseBody
+    @GetMapping("/{userIdx}/goals") // (GET) 127.0.0.1:3000/users/:userIdx/goals
+    public BaseResponse<GetUserGoalRes> getUserGoal(@PathVariable("userIdx") int userIdx) {
+        try {
+            GetUserGoalRes getUserGoalRes = userProvider.getUserGoal(userIdx);
+            return new BaseResponse<>(getUserGoalRes);
+        } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+
+    }
+
+    /**
+     * 유저 "다음달" 목표 조회 API
+     * [GET] /users/:userIdx/goals/next
+     */
+    // Path-variable
+    @ResponseBody
+    @GetMapping("/{userIdx}/goals/next") // (GET) 127.0.0.1:3000/users/:userIdx/goals/next
+    public BaseResponse<GetUserGoalRes> getUserGoalNext(@PathVariable("userIdx") int userIdx) {
+        try {
+            GetUserGoalRes getUserGoalRes = userProvider.getUserGoalNext(userIdx);
+            return new BaseResponse<>(getUserGoalRes);
+        } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+
+    }
+
      * 목표 수정 API
 
      * [PATCH] /users/:useridx/goals
@@ -134,6 +168,16 @@ public class UserController {
         // Validaion 6. walkTimeSlot 범위 확인
         if(patchUserGoalReq.getWalkTimeSlot() > 7 || patchUserGoalReq.getWalkTimeSlot() < 1)
             return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_WALK_TIME_SLOT).getStatus());
+       
+       try {
+            userService.modifyGoal(userIdx, patchUserGoalReq);
+
+            String result ="목표가 수정되었습니다.";
+            return new BaseResponse<>(result);
+        } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
 
     /**
      * 유저 세부 정보 조회 API
@@ -151,20 +195,6 @@ public class UserController {
         }
 
     }
-
-
-
-        try {
-            userService.modifyGoal(userIdx, patchUserGoalReq);
-
-            String result ="목표가 수정되었습니다.";
-            return new BaseResponse<>(result);
-        } catch (BaseException exception) {
-            return new BaseResponse<>((exception.getStatus()));
-        }
-    }
-  
-
 
    /**
      * 목표 등록 API

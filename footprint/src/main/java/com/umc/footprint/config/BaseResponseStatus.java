@@ -32,7 +32,7 @@ public enum BaseResponseStatus {
     /**
      * 2000 : Request 오류
      */
-
+    INVALID_USERIDX(false,2100,"잘못된 유저 인덱스입니다."),
 
     INVALID_DATE(false,2000, "잘못된 날짜 형식입니다."),
     INVALID_USERIDX(false,2100,"잘못된 유저 인덱스입니다."),
