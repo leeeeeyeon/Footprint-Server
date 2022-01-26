@@ -14,7 +14,8 @@ import java.util.List;
 public class Footprint {
     private int footprintIdx;
     // coordinate 형식에 따라 string으로 받을 지 point로 받을 지 정함
-    private String coordinate;
+    private List<Double> coridnate;
+    private String str_coordinate;
     private String write;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime recordAt;
@@ -29,7 +30,7 @@ public class Footprint {
     private List<String> imgUrlList;
 
     public Footprint(String coordinate, String write, LocalDateTime recordAt, List<String> hashtagList, List<MultipartFile> photos) {
-        this.coordinate = coordinate;
+        this.str_coordinate = coordinate;
         this.write = write;
         this.recordAt = recordAt;
         this.hashtagList = hashtagList;

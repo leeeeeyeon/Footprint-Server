@@ -69,7 +69,7 @@ public class WalkDao {
                 @Override
                 public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
                     PreparedStatement preparedStatement = con.prepareStatement(footprintInsertQuery, Statement.RETURN_GENERATED_KEYS);
-                    preparedStatement.setString(1, f.getCoordinate());
+                    preparedStatement.setString(1, f.getStr_coordinate());
                     preparedStatement.setString(2, f.getWrite());
                     preparedStatement.setTimestamp(3, Timestamp.valueOf(f.getRecordAt()));
                     preparedStatement.setInt(4, walkIdx);

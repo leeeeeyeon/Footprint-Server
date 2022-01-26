@@ -12,4 +12,5 @@ import java.util.List;
 public class PostWalkReq {
     private Walk walk;
     private List<Footprint> footprintList;
+    private List<List<Double>> coordinates;
 }
