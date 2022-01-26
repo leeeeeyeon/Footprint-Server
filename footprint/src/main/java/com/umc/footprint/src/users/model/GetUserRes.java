@@ -11,10 +11,13 @@ import lombok.Setter;
 public class GetUserRes {
     private int userIdx;
     private String nickname;
-    private int badgeIdx;
     private String name;
+    private String email;
+    private String status;
+    private int badgeIdx;
+    private String badgeUrl;
     private int age;
-    private int sex;
+    private String sex;
     private int height;
     private int weight;
 }
