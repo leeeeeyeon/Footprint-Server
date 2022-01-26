@@ -28,7 +28,6 @@ public class WalkDao {
     }
 
     //Walk 테이블에 insert
-    @Transactional
     public int addWalk(Walk walk, String pathImgUrl) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -54,10 +53,10 @@ public class WalkDao {
             }
         }, keyHolder);
 
+        // 생성된 id값 int형으로 변환해서 반환
         return keyHolder.getKey().intValue();
     }
 
-    @Transactional
     public void addFootprint(List<Footprint> footprintList, int walkIdx) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -76,12 +75,12 @@ public class WalkDao {
                     return preparedStatement;
                 }
             }, keyHolder);
+            // 자동 생성되는 인덱스 리스트에 추가
             f.setFootprintIdx(keyHolder.getKey().intValue());
         }
     }
 
         //Photo 테이블에 insert
-    @Transactional
     public void addPhoto(int userIdx, List<Footprint> footprintList) {
         String photoInsertQuery = "insert into `Photo`(`imageUrl`, `userIdx`, `footprintIdx`) values (?,?,?)";
 
@@ -104,7 +103,6 @@ public class WalkDao {
 
     }
 
-    @Transactional
     public List<Pair<Integer, Integer>> addHashtag(List<Footprint> footprintList) {
         String hashtagInsertQuery = "insert into Hashtag(hashtag) values (?)";
 
@@ -132,7 +130,6 @@ public class WalkDao {
         return tagIdxList;
     }
 
-    @Transactional
     public void addTag(List<Pair<Integer, Integer>> tagIdxList, int userIdx) {
         String tagInsertQuery = "insert into Tag(hashtagIdx, footprintIdx, userIdx) values (?,?,?)";
 
@@ -154,7 +151,6 @@ public class WalkDao {
     }
 
     // 획득한 뱃지 매핑 테이블에 삽입
-    @Transactional
     public void addUserBadge(List<Integer> acquiredBadgeIdxList, int userIdx) {
         String userBadgeInsertQuery = "insert into UserBadge(userIdx, badgeIdx) values (?,?)";
 
