@@ -42,6 +42,7 @@ public enum BaseResponseStatus {
     MAX_WALK_GOAL_TIME(false, 2146,"목표산책시간이 최대시간 초과입니다."),
     INVALID_WALK_TIME_SLOT(false, 2147,"잘못된 산책 시간대 입니다."),
 
+
     /**
      * 3000 : Response 오류
      */
@@ -50,7 +51,10 @@ public enum BaseResponseStatus {
      * 4000 : Database, Server 오류
      */
     DATABASE_ERROR(false, 4000, "데이터베이스 연결에 실패하였습니다."),
-    SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다.");
+    SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
+    MODIFY_USER_GOAL_FAIL(false,4160,"사용자 목표 변경에 실패하였습니다.")
+    ;
+
 
     private final boolean isSuccess;
     private final int code;

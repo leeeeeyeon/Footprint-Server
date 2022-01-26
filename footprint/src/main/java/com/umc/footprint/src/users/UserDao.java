@@ -8,6 +8,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +64,31 @@ public class UserDao {
                         rs.getInt("weight")
                 ),
                 userIdx);
+    }
+
+
+    // Goal Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot MODIFY
+    public int modifyUserGoalTime(int userIdx, PatchUserGoalReq patchUserGoalReq){
+
+        String modifyUserGoalTimeQuery = "UPDATE GoalNext SET walkGoalTime = ?, walkTimeSlot = ?, updateAt = NOW() WHERE userIdx = ?";
+        Object[] modifyUserGoalTimeParams = new Object[]{ patchUserGoalReq.getWalkGoalTime(), patchUserGoalReq.getWalkTimeSlot(), userIdx };
+        return this.jdbcTemplate.update(modifyUserGoalTimeQuery,modifyUserGoalTimeParams);
+
+    }
+
+    // Goal Table에 userIdx에 맞는 요일(dayIdx) MODIFY
+    public int modifyUserGoalDay(int userIdx, PatchUserGoalReq patchUserGoalReq){
+
+        Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
+
+        for (int dayIdx : patchUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
+            days[dayIdx-1] = true;
+        }
+
+        String modifyUserGoalDayQuery = "UPDATE GoalDayNext SET sun = ?, mon = ?, tue = ?, wed = ?, thu = ?, fri = ?, sat = ?, updateAt = NOW() WHERE userIdx = ?";
+        Object[] modifyUserGoalDayParams = new Object[]{ days[0], days[1], days[2], days[3], days[4], days[5], days[6], userIdx };
+        return this.jdbcTemplate.update(modifyUserGoalDayQuery,modifyUserGoalDayParams);
+
     }
 
     // 해당 userIdx를 갖는 Goal의 Time 정보 & GoalDay의 요일 정보 CREATE
@@ -135,8 +162,5 @@ public class UserDao {
             return true;
         return false;
     }
-
-
-
 
 }
