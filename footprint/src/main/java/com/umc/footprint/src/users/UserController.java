@@ -135,6 +135,24 @@ public class UserController {
         if(patchUserGoalReq.getWalkTimeSlot() > 7 || patchUserGoalReq.getWalkTimeSlot() < 1)
             return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_WALK_TIME_SLOT).getStatus());
 
+    /**
+     * 유저 세부 정보 조회 API
+     * [GET] /users/:userIdx/infos
+     */
+    // Path-variable
+    @ResponseBody
+    @GetMapping("/{userIdx}/infos") // (GET) 127.0.0.1:3000/users/:userIdx/infos
+    public BaseResponse<GetUserInfoRes> getUserInfo(@PathVariable("userIdx") int userIdx) {
+        try {
+            GetUserInfoRes getUserInfoRes = userProvider.getUserInfo(userIdx);
+            return new BaseResponse<>(getUserInfoRes);
+        } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+
+    }
+
+
 
         try {
             userService.modifyGoal(userIdx, patchUserGoalReq);
