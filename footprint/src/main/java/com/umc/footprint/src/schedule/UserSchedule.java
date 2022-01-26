@@ -23,8 +23,8 @@ public class UserSchedule {
 
 
     @Transactional
-    @Scheduled(cron = "0 0/5 * * * ?")
-//    @Scheduled(cron = "0 0 0 1 * ?")
+//    @Scheduled(cron = "0 0/5 * * * ?")
+    @Scheduled(cron = "0 0 0 1 * ?")
     public void changeMonthGoal(){
         userDao.updateGoal();
         userDao.updateGoalDay();

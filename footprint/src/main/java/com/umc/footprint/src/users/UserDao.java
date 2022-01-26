@@ -75,7 +75,7 @@ public class UserDao {
 
 
         // 1-1. get UserGoalDay
-        String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ?";
+        String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         UserGoalDay userGoalDay = this.jdbcTemplate.queryForObject(getUserGoalDayQuery,
                 (rs,rowNum) -> new UserGoalDay(
                         rs.getBoolean("sun"),
@@ -105,7 +105,7 @@ public class UserDao {
             dayIdx.add(7);
 
         // 2. get UserGoalTime
-        String getUserGoalTimeQuery = "SELECT walkGoalTime, walkTimeSlot FROM Goal WHERE userIdx = ?";
+        String getUserGoalTimeQuery = "SELECT walkGoalTime, walkTimeSlot FROM Goal WHERE userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         UserGoalTime userGoalTime = this.jdbcTemplate.queryForObject(getUserGoalTimeQuery,
                 (rs,rowNum) -> new UserGoalTime(
                         rs.getInt("walkGoalTime"),
