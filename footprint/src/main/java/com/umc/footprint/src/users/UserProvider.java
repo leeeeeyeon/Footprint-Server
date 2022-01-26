@@ -1,6 +1,12 @@
 package com.umc.footprint.src.users;
 
 import com.umc.footprint.config.BaseException;
+import com.umc.footprint.src.walks.WalkDao;
+import com.umc.footprint.src.walks.model.Walk;
+
+import java.time.Duration;
+
+import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
 import com.umc.footprint.config.BaseResponse;
 
 import com.umc.footprint.src.users.model.GetUserTodayRes;
@@ -19,11 +25,11 @@ import static com.umc.footprint.config.BaseResponseStatus.*;
 @Service
 public class UserProvider {
 
-    private final UserDao userDao;
+    private final WalkDao walkDao;
 
     @Autowired
-    public UserProvider(UserDao userDao) {
-        this.userDao = userDao;
+    public UserProvider(WalkDao walkDao) {
+        this.walkDao = walkDao;
     }
 
 
@@ -44,7 +50,5 @@ public class UserProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
-
-
 
 }

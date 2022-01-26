@@ -52,6 +52,7 @@ public enum BaseResponseStatus {
      */
     DATABASE_ERROR(false, 4000, "데이터베이스 연결에 실패하였습니다."),
     SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
+    S3UPLOAD_ERROR(false, 4080, "파일 업로드에 실패하였습니다."),
     MODIFY_USER_GOAL_FAIL(false,4160,"사용자 목표 변경에 실패하였습니다.")
     ;
 
