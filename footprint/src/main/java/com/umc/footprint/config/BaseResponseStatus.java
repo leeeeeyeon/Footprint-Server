@@ -36,7 +36,7 @@ public enum BaseResponseStatus {
     INACTIVE_USER(false, 2122, "비활성화된 유저입니다."),
     BLACK_USER(false, 2123, "블랙 유저입니다."),
 
-    MAX_NICKNAME_LENGTH(false, 2160, "닉네임은 15자를 초과할 수 없습니다."),
+    MAX_NICKNAME_LENGTH(false, 2160, "닉네임은 8자를 초과할 수 없습니다."),
     NICKNAME_EXIST(false, 2161, "이미 존재하는 닉네임입니다."),
 
     INVALID_WALKIDX(false, 2200, "잘못된 산책 인덱스입니다."),

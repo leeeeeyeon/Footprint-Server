@@ -71,7 +71,7 @@ public class UserController {
     public BaseResponse<String> modifyNickname(@PathVariable("userIdx") int userIdx, @RequestBody User user) {
         try {
             PatchNicknameReq patchNicknameReq = new PatchNicknameReq(userIdx, user.getNickname());
-            if (user.getNickname().length() > 15) { // 닉네임 15자 초과
+            if (user.getNickname().length() > 8) { // 닉네임 8자 초과
                 throw new BaseException(MAX_NICKNAME_LENGTH);
             }
             userService.modifyNickname(patchNicknameReq);
