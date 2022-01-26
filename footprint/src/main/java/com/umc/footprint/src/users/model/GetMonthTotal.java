@@ -15,4 +15,8 @@ public class GetMonthTotal {
     public void avgCal(int dayCount){
         setMonthPerCal(monthPerCal/dayCount);
     }
+
+    public void convertSecToMin() {
+        setMonthTotalMin(monthTotalMin/60);
+    }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class GetMonthInfoRes {
-    private GetGoalDays getGoalDays;
+    private List<String> goalDayList;
     private List<GetDayRateRes> getDayRatesRes; //일별 달성률?
     private GetMonthTotal getMonthTotal; //누적 3종세트
 

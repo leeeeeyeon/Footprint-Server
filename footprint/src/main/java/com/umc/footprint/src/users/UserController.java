@@ -3,8 +3,7 @@ package com.umc.footprint.src.users;
 
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
-import com.umc.footprint.src.users.model.GetFootprintCount;
-import com.umc.footprint.src.users.model.GetMonthInfoRes;
+import com.umc.footprint.src.users.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,18 +25,21 @@ public class UserController {
         this.userService = userService;
     }
 
-    //이번달 날짜 별 달성률, 이번 달의 누적 산책시간, 누적 산책 거리, 평균 칼로리
-    // 1. 목표 요일만 받아와보자!
+
     @ResponseBody
     @GetMapping("/{userIdx}/tmonth") // (GET) 127.0.0.1:3000/users/{userIdx}/tmonth
     public BaseResponse<GetMonthInfoRes> getMonthInfo(@PathVariable("userIdx") int userIdx) {
-        try {
-            // 현재 날짜 구하기 (시스템 시계, 시스템 타임존)
-            LocalDate now = LocalDate.now();
-            int year = now.getYear(); //현재 년도
-            int month = now.getMonthValue(); //현재 월(달)
+        // TO-DO-LIST
+        // jwt 확인?
+        // user테이블에 해당 userIdx가 존재하는지
+        // GoalDay 테이블에 해당 userIdx가 존재하는지
 
-            GetMonthInfoRes getMonthInfoRes = userProvider.getMonthRes(userIdx, year, month);
+        try {
+            LocalDate now = LocalDate.now();
+            int nowYear = now.getYear();
+            int nowMonth = now.getMonthValue();
+
+            GetMonthInfoRes getMonthInfoRes = userProvider.getMonthInfoRes(userIdx, nowYear, nowMonth);
             return new BaseResponse<>(getMonthInfoRes);
         } catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));
@@ -52,4 +54,25 @@ public class UserController {
         return new BaseResponse<>(getFootprintCounts);
     }
 
+
+    @ResponseBody
+    @GetMapping("/{userIdx}/badges") // (GET) 127.0.0.1:3000/users/{userIdx}/badges
+    public BaseResponse<GetUserBadges> getUsersBadges(@PathVariable("userIdx") int userIdx) throws BaseException {
+            GetUserBadges getUserBadges = userProvider.getUserBadges(userIdx);
+            return new BaseResponse<>(getUserBadges);
+    }
+
+    @ResponseBody
+    @PatchMapping("/{userIdx}/badges/title/{badgeIdx}")
+    public BaseResponse<BadgeInfo> patchRepBadge(@PathVariable("userIdx") int userIdx, @PathVariable("badgeIdx") int badgeIdx) throws BaseException {
+        BadgeInfo patchRepBadgeInfo = userService.patchRepBadge(userIdx, badgeIdx);
+        return new BaseResponse<>(patchRepBadgeInfo);
+    }
+
+    /*@ResponseBody
+    @GetMapping("/{userIdx}/badges/status") // (GET) 127.0.0.1:3000/users/{userIdx}/badges/status
+    public BaseResponse<GetUserBadges> getUsersBadges(@PathVariable("userIdx") int userIdx) throws BaseException {
+        GetUserBadges getUserBadges = userProvider.getUserBadges(userIdx);
+        return new BaseResponse<>(getUserBadges);
+    }*/
 }
