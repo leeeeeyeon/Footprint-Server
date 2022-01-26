@@ -29,7 +29,7 @@ public class FootprintProvider {
                 throw new BaseException(INVALID_WALKIDX); // 잘못된 산책 인덱스에 접근 (11111)
             }
             else if (getFootprintRes.isEmpty()){
-                throw new BaseException(NO_EXIST_FOOTPRINT); // 산책 기록에 발자국이 없을 때
+                throw new BaseException(NO_FOOTPRINT_IN_WALK); // 산책 기록에 발자국이 없을 때
            }
             return getFootprintRes;
         } catch (Exception exception) {
