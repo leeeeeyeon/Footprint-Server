@@ -3,6 +3,7 @@ package com.umc.footprint.src.walks;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.walks.model.GetBadgeIdx;
 import com.umc.footprint.src.walks.model.Walk;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,18 @@ public class WalkProvider {
     public WalkProvider(WalkDao walkDao) {
         this.walkDao = walkDao;
     }
+
+
+    public GetWalkInfo getWalkInfo(int walkIdx) throws BaseException {
+        GetWalkInfo getWalkInfo = walkDao.getWalkInfo(walkIdx);
+        return getWalkInfo;
+        /*try {
+            GetWalkInfo getWalkInfo = walkDao.getWalkInfo(walkIdx);
+            return getWalkInfo;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }*/
+  }
 
     //
     public Walk getGoalRate(Walk walk) throws BaseException {
@@ -100,5 +113,6 @@ public class WalkProvider {
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
+
     }
 }

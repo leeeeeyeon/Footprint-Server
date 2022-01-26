@@ -1,14 +1,18 @@
 package com.umc.footprint.src.walks;
 
 import com.umc.footprint.config.BaseException;
+
 import com.umc.footprint.src.AwsS3Service;
 import com.umc.footprint.src.walks.model.Footprint;
 import com.umc.footprint.src.walks.model.GetBadgeIdx;
 import com.umc.footprint.src.walks.model.PostWalkReq;
 import com.umc.footprint.src.walks.model.PostWalkRes;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+
+import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
 
 
 import javax.transaction.Transactional;
@@ -86,6 +90,15 @@ public class WalkService {
             return postWalkRes;
 
         } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    public String deleteWalk(int walkIdx) throws BaseException {
+        try {
+            String result = walkDao.deleteWalk(walkIdx);
+            return result;
+        } catch (Exception exception) { // DB에 이상이 있는 경우 에러 메시지를 보냅니다.
             throw new BaseException(DATABASE_ERROR);
         }
     }
