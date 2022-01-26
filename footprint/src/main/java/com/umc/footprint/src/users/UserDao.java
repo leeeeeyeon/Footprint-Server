@@ -12,8 +12,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
-import static com.umc.footprint.config.BaseResponseStatus.EXIST_USER_ERROR;
+import static com.umc.footprint.config.BaseResponseStatus.*;
 
 @Repository
 public class UserDao {
@@ -69,11 +68,8 @@ public class UserDao {
     public int postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
 
         // Validation 7. Goal Table에 이미 존재하는 userIdx인지 확인
-        List<ExistUser> existUserIdx = this.jdbcTemplate.query("SELECT userIdx FROM Goal WHERE userIdx = ? ",
-                (rs, rowNum) -> new ExistUser(rs.getInt("userIdx")),userIdx);
-            if(existUserIdx.size() != 0){
-                throw new BaseException(EXIST_USER_ERROR);
-            }
+        if(checkUser(userIdx,"GoalNext") == true)
+            throw new BaseException(EXIST_USER_ERROR);
 
         // 1. Goal Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot Create
         int result1; // 1에서 update 확인용 result
@@ -104,11 +100,8 @@ public class UserDao {
     public int postGoalNext(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
 
         // Validation 7. GoalNext Table에 이미 존재하는 userIdx인지 확인
-        List<ExistUser> existUserIdx = this.jdbcTemplate.query("SELECT userIdx FROM GoalNext WHERE userIdx = ? ",
-                (rs, rowNum) -> new ExistUser(rs.getInt("userIdx")),userIdx);
-        if(existUserIdx.size() != 0){
-            throw new BaseException(EXIST_USER_ERROR);
-        }
+        if(checkUser(userIdx,"GoalNext") == true)
+                throw new BaseException(EXIST_USER_ERROR);
 
         // 1. GoalNext Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot Create
         int result1; // 1에서 update 확인용 result
@@ -133,6 +126,16 @@ public class UserDao {
 
         return 1;
     }
+
+    // true = 유저 있다 & false = 유저 없다.
+    public boolean checkUser(int userIdx, String tableName) throws BaseException {
+        int userCount = this.jdbcTemplate.queryForObject("SELECT count(*) FROM "+ tableName + " WHERE userIdx = ? ",int.class,userIdx);
+
+        if(userCount != 0)
+            return true;
+        return false;
+    }
+
 
 
 
