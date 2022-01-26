@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.umc.footprint.config.Constant;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
+
 import com.umc.footprint.config.BaseResponseStatus;
 import com.umc.footprint.config.BaseResponseStatus.*;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/users")
@@ -96,7 +96,28 @@ public class UserController {
     }
 
     /**
+     * 유저 닉네임 변경 API
+     * [PATCH] /users/:userIdx/nickname
+     */
+    @ResponseBody
+    @PatchMapping("/{userIdx}/nickname")
+    public BaseResponse<String> modifyNickname(@PathVariable("userIdx") int userIdx, @RequestBody User user) {
+        try {
+            PatchNicknameReq patchNicknameReq = new PatchNicknameReq(userIdx, user.getNickname());
+            if (user.getNickname().length() > 8) { // 닉네임 8자 초과
+                throw new BaseException(MAX_NICKNAME_LENGTH);
+            }
+            userService.modifyNickname(patchNicknameReq);
 
+            String result = "닉네임이 수정되었습니다.";
+            
+            return new BaseResponse<>(result);
+        } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
+
+    /*
      * 유저 "이번달" 목표 조회 API
      * [GET] /users/:userIdx/goals
      */
@@ -173,6 +194,7 @@ public class UserController {
             userService.modifyGoal(userIdx, patchUserGoalReq);
 
             String result ="목표가 수정되었습니다.";
+
             return new BaseResponse<>(result);
         } catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));
@@ -250,5 +272,4 @@ public class UserController {
             return new BaseResponse<>((exception.getStatus()));
         }
     }
-
 }
