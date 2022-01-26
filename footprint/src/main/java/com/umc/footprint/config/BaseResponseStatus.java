@@ -32,7 +32,12 @@ public enum BaseResponseStatus {
     /**
      * 2000 : Request 오류
      */
+
+
+    INVALID_DATE(false,2000, "잘못된 날짜 형식입니다."),
     INVALID_USERIDX(false,2100,"잘못된 유저 인덱스입니다."),
+    NOT_EXIST_USER_IN_WALK(false,2120, "아직 산책 기록이 없는 사용자입니다."),
+    NO_EXIST_WALK(false,2121, "해당 날짜에는 산책을 하지 않았습니다."),
     EXIST_USER_ERROR(false, 2140,"이미 존재하는 유저입니다."),
     MIN_DAYIDX(false, 2141,"산책요일을 최소 하나 이상 선택해야 합니다."),
     MAX_DAYIDX(false, 2142,"선택된 산책 요일이 너무 많습니다."),
@@ -46,11 +51,16 @@ public enum BaseResponseStatus {
      * 3000 : Response 오류
      */
 
+
     /**
      * 4000 : Database, Server 오류
      */
     DATABASE_ERROR(false, 4000, "데이터베이스 연결에 실패하였습니다."),
-    SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다.");
+    SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
+    S3UPLOAD_ERROR(false, 4080, "파일 업로드에 실패하였습니다."),
+    MODIFY_USER_GOAL_FAIL(false,4160,"사용자 목표 변경에 실패하였습니다.")
+    ;
+
 
     private final boolean isSuccess;
     private final int code;

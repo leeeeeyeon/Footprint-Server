@@ -1,6 +1,12 @@
 package com.umc.footprint.src.users;
 
 import com.umc.footprint.config.BaseException;
+import com.umc.footprint.src.walks.WalkDao;
+import com.umc.footprint.src.walks.model.Walk;
+
+import java.time.Duration;
+
+import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
 import com.umc.footprint.config.BaseResponse;
 
 import com.umc.footprint.src.users.model.GetUserTodayRes;
@@ -19,19 +25,42 @@ import static com.umc.footprint.config.BaseResponseStatus.*;
 @Service
 public class UserProvider {
 
-    private final UserDao userDao;
+    private final WalkDao walkDao;
 
     @Autowired
-    public UserProvider(UserDao userDao) {
-        this.userDao = userDao;
+    public UserProvider(WalkDao walkDao) {
+        this.walkDao = walkDao;
     }
 
-
+    // 해당 userIdx를 갖는 오늘 산책 관련 정보 조회
     public List<GetUserTodayRes> getUserToday(int userIdx) throws BaseException {
 
         List<GetUserTodayRes> userTodayRes = userDao.getUserToday(userIdx);
 
         return userTodayRes;
+    }
+
+    // 해당 userIdx를 갖는 date의 산책 관련 정보 조회
+    public List<GetUserDateRes> getUserDate(int userIdx, String date) throws BaseException {
+
+
+        try {
+            // Validation 2. Walk Table 안 존재하는 User인지 확인
+            int existUserResult = userDao.checkUserInWalk(userIdx);
+            if (existUserResult == 0)
+                throw new BaseException(NOT_EXIST_USER_IN_WALK);
+
+            // Validation 3. 해당 날짜에 User가 기록한 Walk가 있는지 확인
+            int existUserDateResult = userDao.checkUserDateWalk(userIdx, date);
+            if (existUserDateResult == 0)
+                throw new BaseException(NO_EXIST_WALK);
+
+            List<GetUserDateRes> userDateRes = userDao.getUserDate(userIdx, date);
+
+            return userDateRes;
+        } catch(Exception exception){
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
 
 
