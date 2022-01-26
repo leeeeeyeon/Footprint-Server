@@ -32,6 +32,8 @@ public enum BaseResponseStatus {
     /**
      * 2000 : Request 오류
      */
+
+    INVALID_DATE(false,2000, "잘못된 날짜 형식입니다."),
     INVALID_USERIDX(false,2100,"잘못된 유저 인덱스입니다."),
     EXIST_USER_ERROR(false, 2140,"이미 존재하는 유저입니다."),
     MIN_DAYIDX(false, 2141,"산책요일을 최소 하나 이상 선택해야 합니다."),
@@ -42,10 +44,13 @@ public enum BaseResponseStatus {
     MAX_WALK_GOAL_TIME(false, 2146,"목표산책시간이 최대시간 초과입니다."),
     INVALID_WALK_TIME_SLOT(false, 2147,"잘못된 산책 시간대 입니다."),
 
+    NOT_EXIST_USER_IN_WALK(false,2120, "아직 산책 기록이 없는 사용자입니다."),
+    NO_EXIST_WALK(false,2121, "해당 날짜에는 산책을 하지 않았습니다."),
 
     /**
      * 3000 : Response 오류
      */
+
 
     /**
      * 4000 : Database, Server 오류
