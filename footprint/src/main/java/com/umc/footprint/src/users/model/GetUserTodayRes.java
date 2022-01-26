@@ -4,6 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+/*
+ * userIdx에 해당하는 오늘 산책 정보 DTO
+ * */
+
 @Getter
 @Setter
 @AllArgsConstructor

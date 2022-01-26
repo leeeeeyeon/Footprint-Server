@@ -1,10 +1,29 @@
 package com.umc.footprint.src.users;
 
+import com.umc.footprint.config.BaseException;
+
+import com.umc.footprint.config.BaseResponseStatus;
+import com.umc.footprint.src.users.model.PatchUserGoalReq;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+
+import com.umc.footprint.src.users.model.GetUserRes;
+import com.umc.footprint.src.users.model.PostUserGoalReq;
+import com.umc.footprint.src.users.model.PostUserGoalRes;
 import com.umc.footprint.src.users.model.PatchNicknameReq;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.umc.footprint.config.BaseException;
 import static com.umc.footprint.config.BaseResponseStatus.*;
+
+import javax.transaction.Transactional;
+
+import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
+
 
 @Service
 public class UserService {
@@ -31,4 +50,44 @@ public class UserService {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public void modifyGoal(int userIdx, PatchUserGoalReq patchUserGoalReq) throws BaseException{
+        try{
+            int resultTime = userDao.modifyUserGoalTime(userIdx, patchUserGoalReq);
+            if(resultTime == 0)
+                throw new BaseException(BaseResponseStatus.MODIFY_USER_GOAL_FAIL);
+
+            int resultDay = userDao.modifyUserGoalDay(userIdx, patchUserGoalReq);
+            if(resultDay == 0)
+                throw new BaseException(BaseResponseStatus.MODIFY_USER_GOAL_FAIL);
+
+        } catch(Exception exception){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    // 월이 변하면 Goal(Day)Next 데이터를 Goal(Day) 로 옯겨줌 
+    public void monthlyChangeGoal(){
+
+    }
+
+
+    // 해당 userIdx를 갖는 Goal 정보 저장
+    @Transactional(rollbackOn = Exception.class)
+    public int postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException{
+        try {
+            int result = userDao.postGoal(userIdx, postUserGoalReq);
+            int resultNext = userDao.postGoalNext(userIdx, postUserGoalReq);
+
+            if(result == 0 || resultNext ==0)
+                return 0;
+            return 1;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
 }
