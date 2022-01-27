@@ -33,6 +33,10 @@ public class UserDao {
     }
 
 
+    /*
+    *** [1] GET METHOD
+    * */
+
     //월별 발자국(일기) 갯수 조회
     public List<GetFootprintCount> getMonthFootprints(int userIdx, int year, int month) {
         String Query = "select day(recordAt) as day, count(footprintIdx) as footprintCount from footprint\n" +
@@ -114,53 +118,6 @@ public class UserDao {
         return getUserBadges;
     }
 
-    public BadgeInfo patchRepBadge(int userIdx, int badgeIdx) {
-        //TO DO : badgeIdx의 뱃지가 ACTIVE인지 validation 검사하기
-        String patchRepBadgeQuery = "update user set badgeIdx=? where userIdx=?;";
-        Object[] patchRepBadgeParams = new Object[]{badgeIdx, userIdx};
-        this.jdbcTemplate.update(patchRepBadgeQuery, patchRepBadgeParams);
-
-        String repBadgeInfoQuery = "select * from badge where badgeIdx=(select badgeIdx from user where userIdx=?);";
-        BadgeInfo patchRepBadgeInfo = this.jdbcTemplate.queryForObject(repBadgeInfoQuery,
-                (rs, rowNum) -> new BadgeInfo(
-                        rs.getInt("badgeIdx"),
-                        rs.getString("badgeName"),
-                        rs.getString("badgeUrl")
-                ), userIdx);
-
-        return patchRepBadgeInfo;
-    }
-
-    public List<String> convertGoaldayBoolToString(GetGoalDays getGoalDays) {
-        List<String> goalDayString = new ArrayList<String>();
-
-        if(getGoalDays.isSun()) {
-            goalDayString.add("SUN");
-        }
-        if(getGoalDays.isMon()) {
-            goalDayString.add("MON");
-        }
-        if(getGoalDays.isTue()) {
-            goalDayString.add("TUE");
-        }
-        if(getGoalDays.isWed()) {
-            goalDayString.add("WED");
-        }
-        if(getGoalDays.isThu()) {
-            goalDayString.add("THU");
-        }
-        if(getGoalDays.isFri()) {
-            goalDayString.add("FRI");
-        }
-        if(getGoalDays.isSat()) {
-            goalDayString.add("SAT");
-        }
-
-        return goalDayString;
-    }
-  
-
-    // [ GET ]
     // 해당 userIdx를 갖는 오늘 산책 관련 정보 조회
     public List<GetUserTodayRes> getUserToday(int userIdx){
         String getUserTodayQuery = "SELECT SUM(W.goalRate) as goalRate, G.walkGoalTime, " +
@@ -182,28 +139,6 @@ public class UserDao {
                         rs.getDouble("distance"),
                         rs.getInt("calorie")
                 ),getUserIdxParam,getUserIdxParam);
-    }
-
-    public int checkUserInWalk(int userIdx){
-
-        String checkUserWalkQuery = "SELECT userIdx FROM Walk WHERE userIdx = ? GROUP BY userIdx";
-        List<Integer> existUser =  this.jdbcTemplate.queryForList(checkUserWalkQuery,int.class,userIdx);
-
-        if(existUser.size() != 0)
-            return 1;
-
-        return 0;
-    }
-
-    public int checkUserDateWalk(int userIdx, String date){
-
-        String checkUserWalkQuery = "SELECT userIdx FROM Walk WHERE DATE(startAt) = DATE(?) and userIdx = ? GROUP BY userIdx";
-        List<Integer> existWalk =  this.jdbcTemplate.queryForList(checkUserWalkQuery,int.class,date,userIdx);
-
-        if (existWalk.size() != 0)
-            return 1;
-
-        return 0;
     }
 
     // 해당 userIdx를 갖는 date의 산책 관련 정보 조회
@@ -230,7 +165,7 @@ public class UserDao {
         List<Hashtag> entireHashtag = this.jdbcTemplate.query(getHashtagQuery, (rs, rowNum) -> new Hashtag(
                 rs.getInt("walkIdx"),
                 rs.getString("hashtag")
-                ));
+        ));
 
 
         // 2-2. entireHashtag 를 WalkIdx 단위로 묶어주기(entireHashtag -> hashtagList)
@@ -258,18 +193,6 @@ public class UserDao {
         return getUserDateRes;
     }
 
-    // 유저 상태 조회 - validation에 사용
-    public String getStatus(int userIdx) {
-        String getStatusQuery = "select status from User where userIdx=?";
-        return this.jdbcTemplate.queryForObject(getStatusQuery, String.class, userIdx);
-    }
-  
-    // 유저 존재 여부 조회
-    public int userExist(int userIdx) {
-        String userExistQuery = "select count(*) from User where userIdx=?";
-        return this.jdbcTemplate.queryForObject(userExistQuery, int.class, userIdx);
-    }
-
     // 해당 userIdx를 갖는 유저조회
     public GetUserRes getUser(int userIdx) {
         String getUserQuery = "select userIdx, nickname, `name`, email, status, User.badgeIdx, badgeUrl, age, sex, height, weight\n" +
@@ -291,25 +214,6 @@ public class UserDao {
                 userIdx);
     }
 
-
-    // 닉네임 변경
-    public int modifyNickname(PatchNicknameReq patchNicknameReq) {
-        String modifyNicknameQuery = "update User set nickname = ? where userIdx = ?";
-        Object[] modifyNicknameParams = new Object[]{patchNicknameReq.getNickname(), patchNicknameReq.getUserIdx()};
-
-        return this.jdbcTemplate.update(modifyNicknameQuery, modifyNicknameParams); // 대응시켜 매핑시켜 쿼리 요청(생성했으면 1, 실패했으면 0)
-    }
-
-    // 중복 닉네임 검사
-    public int nicknameExist(PatchNicknameReq patchNicknameReq) {
-        String nickname = patchNicknameReq.getNickname();
-        String nicknameExistQuery = "select count(*) from User where nickname =?";
-
-        return jdbcTemplate.queryForObject(nicknameExistQuery, int.class, nickname);
-    }
-
-
-
     // 해당 userIdx를 갖는 유저의 달성정보 조회
     public UserInfoAchieve getUserInfoAchieve(int userIdx){
 
@@ -321,8 +225,8 @@ public class UserDao {
 
 
         /*
-        *   [ 2. 이번달 목표 달성률 계산 ] = monthGoalRate
-        * */
+         *   [ 2. 이번달 목표 달성률 계산 ] = monthGoalRate
+         * */
 
         // method monthlyGoalRate(userIdx,0) 호출
         int monthGoalRate = getMonthGoalRate(userIdx,0);
@@ -433,10 +337,8 @@ public class UserDao {
         for(int i=6; i>=0; i--)
             monthlyWalkCount.add(this.jdbcTemplate.queryForObject(userMonthlyWalkCountQuery, int.class, userIdx, i));
 
-
         // [ 3. 이전 5달 범위 월별 달성률 & 평균 달성률 ] = List<Integer>monthlyGoalRate + avgGoalRate
         // List 순서 : 평균, -5달 , ... , 전달 , 이번달 (총 7개 element)
-
         List<Integer> monthlyGoalRate = new ArrayList<>();
         int sumGoalRate = 0;
 
@@ -456,198 +358,6 @@ public class UserDao {
 
         return new UserInfoStat(mostWalkDay,userWeekDayRate,thisMonthWalkCount,monthlyWalkCount,monthlyGoalRate.get(6),monthlyGoalRate);
 
-    }
-
-
-
-    // 월 단위 달성률 계산 method
-    public int getMonthGoalRate(int userIdx, int beforeMonth){
-
-        // 1. 사용자의 원하는 달 전체 산책 시간 확인 (초 단위)
-        String getUserMonthWalkTimeQuery = "SELECT IFNULL(SUM(TIMESTAMPDIFF(second ,startAt,endAt)),0) as monthWalkTime FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
-        int userMonthWalkTime = this.jdbcTemplate.queryForObject(getUserMonthWalkTimeQuery,int.class,userIdx,beforeMonth);
-
-        // 2. 이번달 목표 시간 계산
-        // 2-1. 사용자 목표 요일 정보 확인
-        String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
-        UserGoalDay userGoalDay = this.jdbcTemplate.queryForObject(getUserGoalDayQuery,
-                (rs,rowNum) -> new UserGoalDay(
-                        rs.getBoolean("sun"),
-                        rs.getBoolean("mon"),
-                        rs.getBoolean("tue"),
-                        rs.getBoolean("wed"),
-                        rs.getBoolean("thu"),
-                        rs.getBoolean("fri"),
-                        rs.getBoolean("sat")
-                ),userIdx,beforeMonth);
-
-        // 2-2. 원하는 달 요일별 횟수 정보 확인
-        // 2-2-1. 원하는 달 최대 일수 알아오기
-        LocalDate month = LocalDate.now().minusMonths(beforeMonth);
-        int monthLength = month.lengthOfMonth();
-
-        // 2-2-2. 해당 월 첫 요일 알아오기
-        // *** 1:월 / 2:화 / ... / 7:일 ***
-        LocalDate firstDay = LocalDate.of(month.getYear(), month.getMonth(),1);
-        DayOfWeek dayOfWeek = firstDay.getDayOfWeek();
-        int firstDayIdx = dayOfWeek.getValue(); // 첫 요일 인덱스
-
-        // 2-2-3. 첫 요일 기준 그 달의 요일 수 계산
-        int weekNum = monthLength/7;
-        int moreDay = monthLength%7;
-
-        // 2-2-4. 해당 달의 요일별 횟수 저장
-        // dayCountArray[0] = 해당 달의 첫 요일(2021년 1월 기준 토요일)
-        int[] dayCountArray = {weekNum,weekNum,weekNum,weekNum,weekNum,weekNum,weekNum};
-        for (int i=0; i<moreDay; i++){
-            dayCountArray[i]++;
-        }
-
-        // 2-3. 해당 달 목표 시간 계산
-        // 2-3-1. GoalDay Table이 true 인 요일만 countDay에 sum
-        int countDay =0 ; // 해당 달의 선택한 일수 총합
-        int loopIdx = firstDayIdx; // firstDayIdx 를 시작으로 loop 을 돌 idx
-        for (int i=0; i<7; i++) {
-            switch (loopIdx % 7) {
-                case 1: // 월요일
-                    if(userGoalDay.isMon() == true)
-                        countDay += dayCountArray[i];
-                    break;
-                case 2: // 화요일
-                    if(userGoalDay.isTue() == true)
-                        countDay += dayCountArray[i];
-                    break;
-                case 3: // 수요일
-                    if(userGoalDay.isWed() == true)
-                        countDay += dayCountArray[i];
-                    break;
-                case 4: // 목요일
-                    if(userGoalDay.isThu() == true)
-                        countDay += dayCountArray[i];
-                    break;
-                case 5: // 금요일
-                    if(userGoalDay.isFri() == true)
-                        countDay += dayCountArray[i];
-                    break;
-                case 6: // 토요일
-                    if(userGoalDay.isSat() == true)
-                        countDay += dayCountArray[i];
-                    break;
-                case 0: // 일요일
-                    if(userGoalDay.isSun() == true)
-                        countDay += dayCountArray[i];
-                    break;
-            }
-            loopIdx++;
-        }
-
-        // 2-3-2. 하루 산책 목표 시간 확인
-        String getUserWalkGoalTimeQuery = "SELECT walkGoalTime FROM Goal WHERE userIdx = ? and MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
-        int userWalkGoalTime = this.jdbcTemplate.queryForObject(getUserWalkGoalTimeQuery,int.class,userIdx,beforeMonth);
-
-        // 2-3-3. 목표 시간 계산
-        int userMonthGoalTime = countDay * userWalkGoalTime;
-
-        // 3. 이번달 목표 달성률 계산
-        int monthGoalRate = (int)((userMonthWalkTime/ (double)( userMonthGoalTime*60 )) * 100);
-
-        return monthGoalRate;
-    }
-
-    // Goal Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot MODIFY
-    public int modifyUserGoalTime(int userIdx, PatchUserGoalReq patchUserGoalReq){
-
-        String modifyUserGoalTimeQuery = "UPDATE GoalNext SET walkGoalTime = ?, walkTimeSlot = ?, updateAt = NOW() WHERE userIdx = ?";
-        Object[] modifyUserGoalTimeParams = new Object[]{ patchUserGoalReq.getWalkGoalTime(), patchUserGoalReq.getWalkTimeSlot(), userIdx };
-        return this.jdbcTemplate.update(modifyUserGoalTimeQuery,modifyUserGoalTimeParams);
-
-    }
-
-    // Goal Table에 userIdx에 맞는 요일(dayIdx) MODIFY
-    public int modifyUserGoalDay(int userIdx, PatchUserGoalReq patchUserGoalReq){
-
-        Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
-
-        for (int dayIdx : patchUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
-            days[dayIdx-1] = true;
-        }
-
-        String modifyUserGoalDayQuery = "UPDATE GoalDayNext SET sun = ?, mon = ?, tue = ?, wed = ?, thu = ?, fri = ?, sat = ?, updateAt = NOW() WHERE userIdx = ?";
-        Object[] modifyUserGoalDayParams = new Object[]{ days[0], days[1], days[2], days[3], days[4], days[5], days[6], userIdx };
-        return this.jdbcTemplate.update(modifyUserGoalDayQuery,modifyUserGoalDayParams);
-
-    }
-
-    // 해당 userIdx를 갖는 Goal의 Time 정보 & GoalDay의 요일 정보 CREATE
-    public int postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
-
-        // Validation 7. Goal Table에 이미 존재하는 userIdx인지 확인
-        if(checkUser(userIdx,"GoalNext") == true)
-            throw new BaseException(EXIST_USER_ERROR);
-
-        // 1. Goal Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot Create
-        int result1; // 1에서 update 확인용 result
-        String createUserGoalTimeQuery = "INSERT INTO Goal (userIdx,walkGoalTime,walkTimeSlot) VALUES (?,?,?)";
-        Object[] createUserGoalTimeParams = new Object[]{userIdx, postUserGoalReq.getWalkGoalTime(), postUserGoalReq.getWalkTimeSlot()};
-        result1 = this.jdbcTemplate.update(createUserGoalTimeQuery,createUserGoalTimeParams);
-
-        // 2. GoalDay Table에 sun~fri Create
-        int result2; // 2에서 update 확인용 result
-        Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
-
-        for (int dayIdx : postUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
-            days[dayIdx-1] = true;
-        }
-
-        String createUserGoalDayQuery = "INSERT INTO GoalDay (userIdx,sun,mon,tue,wed,thu,fri,sat) VALUES (?,?,?,?,?,?,?,?)";
-        Object[] createUserGoalDayParams = new Object[]{ userIdx, days[0], days[1], days[2], days[3], days[4], days[5], days[6]};
-        result2 = this.jdbcTemplate.update(createUserGoalDayQuery,createUserGoalDayParams);
-
-        if (result1 == 0 || result2 == 0) // result1 과 result2 중 하나라도 0이면(영향을 미치지 못함) 0 return
-            return 0;
-
-        return 1;
-    }
-
-
-    // 해당 userIdx를 갖는 GoalNext의 Time 정보 & GoalDayNext의 요일 정보 CREATE
-    public int postGoalNext(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
-
-        // Validation 7. GoalNext Table에 이미 존재하는 userIdx인지 확인
-        if(checkUser(userIdx,"GoalNext") == true)
-                throw new BaseException(EXIST_USER_ERROR);
-
-        // 1. GoalNext Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot Create
-        int result1; // 1에서 update 확인용 result
-        String createUserGoalTimeQuery = "INSERT INTO GoalNext (userIdx,walkGoalTime,walkTimeSlot) VALUES (?,?,?)";
-        Object[] createUserGoalTimeNextParams = new Object[]{userIdx, postUserGoalReq.getWalkGoalTime(), postUserGoalReq.getWalkTimeSlot()};
-        result1 = this.jdbcTemplate.update(createUserGoalTimeQuery,createUserGoalTimeNextParams);
-
-        // 2. GoalDayNext Table에 sun~fri Create
-        int result2; // 2에서 update 확인용 result
-        Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
-
-        for (int dayIdx : postUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
-            days[dayIdx-1] = true;
-        }
-
-        String createUserGoalDayQuery = "INSERT INTO GoalDayNext (userIdx,sun,mon,tue,wed,thu,fri,sat) VALUES (?,?,?,?,?,?,?,?)";
-        Object[] createUserGoalDayNextParams = new Object[]{ userIdx, days[0], days[1], days[2], days[3], days[4], days[5], days[6]};
-        result2 = this.jdbcTemplate.update(createUserGoalDayQuery,createUserGoalDayNextParams);
-
-        if (result1 == 0 || result2 == 0) // result1 과 result2 중 하나라도 0이면(영향을 미치지 못함) 0 return
-            return 0;
-
-        return 1;
-    }
-
-    // true = 유저 있다 & false = 유저 없다.
-    public boolean checkUser(int userIdx, String tableName) throws BaseException {
-        int userCount = this.jdbcTemplate.queryForObject("SELECT count(*) FROM "+ tableName + " WHERE userIdx = ? ",int.class,userIdx);
-
-        if(userCount != 0)
-            return true;
-        return false;
     }
 
     // 해당 userIdx를 갖는 유저의 "이번달" 목표 조회
@@ -753,7 +463,307 @@ public class UserDao {
 
         // 3. GetUserGoalRes에 dayIdx 와 userGoalTime 합침
         return new GetUserGoalRes(dayIdx,userGoalTime);
+    }
 
+    /*
+     *** [2] POST METHOD
+     * */
+
+    // 해당 userIdx를 갖는 Goal의 Time 정보 & GoalDay의 요일 정보 CREATE
+    public int postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
+
+        // Validation 7. Goal Table에 이미 존재하는 userIdx인지 확인
+        if(checkUser(userIdx,"GoalNext") == true)
+            throw new BaseException(EXIST_USER_ERROR);
+
+        // 1. Goal Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot Create
+        int result1; // 1에서 update 확인용 result
+        String createUserGoalTimeQuery = "INSERT INTO Goal (userIdx,walkGoalTime,walkTimeSlot) VALUES (?,?,?)";
+        Object[] createUserGoalTimeParams = new Object[]{userIdx, postUserGoalReq.getWalkGoalTime(), postUserGoalReq.getWalkTimeSlot()};
+        result1 = this.jdbcTemplate.update(createUserGoalTimeQuery,createUserGoalTimeParams);
+
+        // 2. GoalDay Table에 sun~fri Create
+        int result2; // 2에서 update 확인용 result
+        Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
+
+        for (int dayIdx : postUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
+            days[dayIdx-1] = true;
+        }
+
+        String createUserGoalDayQuery = "INSERT INTO GoalDay (userIdx,sun,mon,tue,wed,thu,fri,sat) VALUES (?,?,?,?,?,?,?,?)";
+        Object[] createUserGoalDayParams = new Object[]{ userIdx, days[0], days[1], days[2], days[3], days[4], days[5], days[6]};
+        result2 = this.jdbcTemplate.update(createUserGoalDayQuery,createUserGoalDayParams);
+
+        if (result1 == 0 || result2 == 0) // result1 과 result2 중 하나라도 0이면(영향을 미치지 못함) 0 return
+            return 0;
+
+        return 1;
+    }
+
+
+    // 해당 userIdx를 갖는 GoalNext의 Time 정보 & GoalDayNext의 요일 정보 CREATE
+    public int postGoalNext(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
+
+        // Validation 7. GoalNext Table에 이미 존재하는 userIdx인지 확인
+        if(checkUser(userIdx,"GoalNext") == true)
+            throw new BaseException(EXIST_USER_ERROR);
+
+        // 1. GoalNext Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot Create
+        int result1; // 1에서 update 확인용 result
+        String createUserGoalTimeQuery = "INSERT INTO GoalNext (userIdx,walkGoalTime,walkTimeSlot) VALUES (?,?,?)";
+        Object[] createUserGoalTimeNextParams = new Object[]{userIdx, postUserGoalReq.getWalkGoalTime(), postUserGoalReq.getWalkTimeSlot()};
+        result1 = this.jdbcTemplate.update(createUserGoalTimeQuery,createUserGoalTimeNextParams);
+
+        // 2. GoalDayNext Table에 sun~fri Create
+        int result2; // 2에서 update 확인용 result
+        Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
+
+        for (int dayIdx : postUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
+            days[dayIdx-1] = true;
+        }
+
+        String createUserGoalDayQuery = "INSERT INTO GoalDayNext (userIdx,sun,mon,tue,wed,thu,fri,sat) VALUES (?,?,?,?,?,?,?,?)";
+        Object[] createUserGoalDayNextParams = new Object[]{ userIdx, days[0], days[1], days[2], days[3], days[4], days[5], days[6]};
+        result2 = this.jdbcTemplate.update(createUserGoalDayQuery,createUserGoalDayNextParams);
+
+        if (result1 == 0 || result2 == 0) // result1 과 result2 중 하나라도 0이면(영향을 미치지 못함) 0 return
+            return 0;
+
+        return 1;
+    }
+
+    /*
+     *** [3] PATCH METHOD
+     * */
+
+    public BadgeInfo patchRepBadge(int userIdx, int badgeIdx) {
+        //TO DO : badgeIdx의 뱃지가 ACTIVE인지 validation 검사하기
+        String patchRepBadgeQuery = "update user set badgeIdx=? where userIdx=?;";
+        Object[] patchRepBadgeParams = new Object[]{badgeIdx, userIdx};
+        this.jdbcTemplate.update(patchRepBadgeQuery, patchRepBadgeParams);
+
+        String repBadgeInfoQuery = "select * from badge where badgeIdx=(select badgeIdx from user where userIdx=?);";
+        BadgeInfo patchRepBadgeInfo = this.jdbcTemplate.queryForObject(repBadgeInfoQuery,
+                (rs, rowNum) -> new BadgeInfo(
+                        rs.getInt("badgeIdx"),
+                        rs.getString("badgeName"),
+                        rs.getString("badgeUrl")
+                ), userIdx);
+
+        return patchRepBadgeInfo;
+    }
+
+    // 닉네임 변경
+    public int modifyNickname(PatchNicknameReq patchNicknameReq) {
+        String modifyNicknameQuery = "update User set nickname = ? where userIdx = ?";
+        Object[] modifyNicknameParams = new Object[]{patchNicknameReq.getNickname(), patchNicknameReq.getUserIdx()};
+
+        return this.jdbcTemplate.update(modifyNicknameQuery, modifyNicknameParams); // 대응시켜 매핑시켜 쿼리 요청(생성했으면 1, 실패했으면 0)
+    }
+
+    // Goal Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot MODIFY
+    public int modifyUserGoalTime(int userIdx, PatchUserGoalReq patchUserGoalReq){
+
+        String modifyUserGoalTimeQuery = "UPDATE GoalNext SET walkGoalTime = ?, walkTimeSlot = ?, updateAt = NOW() WHERE userIdx = ?";
+        Object[] modifyUserGoalTimeParams = new Object[]{ patchUserGoalReq.getWalkGoalTime(), patchUserGoalReq.getWalkTimeSlot(), userIdx };
+        return this.jdbcTemplate.update(modifyUserGoalTimeQuery,modifyUserGoalTimeParams);
+
+    }
+
+    // Goal Table에 userIdx에 맞는 요일(dayIdx) MODIFY
+    public int modifyUserGoalDay(int userIdx, PatchUserGoalReq patchUserGoalReq){
+
+        Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
+
+        for (int dayIdx : patchUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
+            days[dayIdx-1] = true;
+        }
+
+        String modifyUserGoalDayQuery = "UPDATE GoalDayNext SET sun = ?, mon = ?, tue = ?, wed = ?, thu = ?, fri = ?, sat = ?, updateAt = NOW() WHERE userIdx = ?";
+        Object[] modifyUserGoalDayParams = new Object[]{ days[0], days[1], days[2], days[3], days[4], days[5], days[6], userIdx };
+        return this.jdbcTemplate.update(modifyUserGoalDayQuery,modifyUserGoalDayParams);
+
+    }
+
+    /*
+     *** [4] TOOL METHOD
+     * */
+
+    // GoalDay Table의 true인 요일 List<String>으로 return
+    public List<String> convertGoaldayBoolToString(GetGoalDays getGoalDays) {
+        List<String> goalDayString = new ArrayList<String>();
+
+        if(getGoalDays.isSun()) {
+            goalDayString.add("SUN");
+        }
+        if(getGoalDays.isMon()) {
+            goalDayString.add("MON");
+        }
+        if(getGoalDays.isTue()) {
+            goalDayString.add("TUE");
+        }
+        if(getGoalDays.isWed()) {
+            goalDayString.add("WED");
+        }
+        if(getGoalDays.isThu()) {
+            goalDayString.add("THU");
+        }
+        if(getGoalDays.isFri()) {
+            goalDayString.add("FRI");
+        }
+        if(getGoalDays.isSat()) {
+            goalDayString.add("SAT");
+        }
+
+        return goalDayString;
+    }
+
+    // true = 유저 있다 & false = 유저 없다.
+    public boolean checkUser(int userIdx, String tableName) throws BaseException {
+        int userCount = this.jdbcTemplate.queryForObject("SELECT count(*) FROM "+ tableName + " WHERE userIdx = ? ",int.class,userIdx);
+
+        if(userCount != 0)
+            return true;
+        return false;
+    }
+
+    public int checkUserInWalk(int userIdx){
+
+        String checkUserWalkQuery = "SELECT userIdx FROM Walk WHERE userIdx = ? GROUP BY userIdx";
+        List<Integer> existUser =  this.jdbcTemplate.queryForList(checkUserWalkQuery,int.class,userIdx);
+
+        if(existUser.size() != 0)
+            return 1;
+
+        return 0;
+    }
+
+    public int checkUserDateWalk(int userIdx, String date){
+
+        String checkUserWalkQuery = "SELECT userIdx FROM Walk WHERE DATE(startAt) = DATE(?) and userIdx = ? GROUP BY userIdx";
+        List<Integer> existWalk =  this.jdbcTemplate.queryForList(checkUserWalkQuery,int.class,date,userIdx);
+
+        if (existWalk.size() != 0)
+            return 1;
+
+        return 0;
+    }
+
+    // 유저 상태 조회 - validation에 사용
+    public String getStatus(int userIdx) {
+        String getStatusQuery = "select status from User where userIdx=?";
+        return this.jdbcTemplate.queryForObject(getStatusQuery, String.class, userIdx);
+    }
+  
+    // 유저 존재 여부 조회
+    public int userExist(int userIdx) {
+        String userExistQuery = "select count(*) from User where userIdx=?";
+        return this.jdbcTemplate.queryForObject(userExistQuery, int.class, userIdx);
+    }
+
+
+    // 중복 닉네임 검사
+    public int nicknameExist(PatchNicknameReq patchNicknameReq) {
+        String nickname = patchNicknameReq.getNickname();
+        String nicknameExistQuery = "select count(*) from User where nickname =?";
+
+        return jdbcTemplate.queryForObject(nicknameExistQuery, int.class, nickname);
+    }
+
+
+
+    // 월 단위 달성률 계산 method
+    public int getMonthGoalRate(int userIdx, int beforeMonth){
+
+        // 1. 사용자의 원하는 달 전체 산책 시간 확인 (초 단위)
+        String getUserMonthWalkTimeQuery = "SELECT IFNULL(SUM(TIMESTAMPDIFF(second ,startAt,endAt)),0) as monthWalkTime FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
+        int userMonthWalkTime = this.jdbcTemplate.queryForObject(getUserMonthWalkTimeQuery,int.class,userIdx,beforeMonth);
+
+        // 2. 이번달 목표 시간 계산
+        // 2-1. 사용자 목표 요일 정보 확인
+        String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
+        UserGoalDay userGoalDay = this.jdbcTemplate.queryForObject(getUserGoalDayQuery,
+                (rs,rowNum) -> new UserGoalDay(
+                        rs.getBoolean("sun"),
+                        rs.getBoolean("mon"),
+                        rs.getBoolean("tue"),
+                        rs.getBoolean("wed"),
+                        rs.getBoolean("thu"),
+                        rs.getBoolean("fri"),
+                        rs.getBoolean("sat")
+                ),userIdx,beforeMonth);
+
+        // 2-2. 원하는 달 요일별 횟수 정보 확인
+        // 2-2-1. 원하는 달 최대 일수 알아오기
+        LocalDate month = LocalDate.now().minusMonths(beforeMonth);
+        int monthLength = month.lengthOfMonth();
+
+        // 2-2-2. 해당 월 첫 요일 알아오기
+        // *** 1:월 / 2:화 / ... / 7:일 ***
+        LocalDate firstDay = LocalDate.of(month.getYear(), month.getMonth(),1);
+        DayOfWeek dayOfWeek = firstDay.getDayOfWeek();
+        int firstDayIdx = dayOfWeek.getValue(); // 첫 요일 인덱스
+
+        // 2-2-3. 첫 요일 기준 그 달의 요일 수 계산
+        int weekNum = monthLength/7;
+        int moreDay = monthLength%7;
+
+        // 2-2-4. 해당 달의 요일별 횟수 저장
+        // dayCountArray[0] = 해당 달의 첫 요일(2021년 1월 기준 토요일)
+        int[] dayCountArray = {weekNum,weekNum,weekNum,weekNum,weekNum,weekNum,weekNum};
+        for (int i=0; i<moreDay; i++){
+            dayCountArray[i]++;
+        }
+
+        // 2-3. 해당 달 목표 시간 계산
+        // 2-3-1. GoalDay Table이 true 인 요일만 countDay에 sum
+        int countDay =0 ; // 해당 달의 선택한 일수 총합
+        int loopIdx = firstDayIdx; // firstDayIdx 를 시작으로 loop 을 돌 idx
+        for (int i=0; i<7; i++) {
+            switch (loopIdx % 7) {
+                case 1: // 월요일
+                    if(userGoalDay.isMon() == true)
+                        countDay += dayCountArray[i];
+                    break;
+                case 2: // 화요일
+                    if(userGoalDay.isTue() == true)
+                        countDay += dayCountArray[i];
+                    break;
+                case 3: // 수요일
+                    if(userGoalDay.isWed() == true)
+                        countDay += dayCountArray[i];
+                    break;
+                case 4: // 목요일
+                    if(userGoalDay.isThu() == true)
+                        countDay += dayCountArray[i];
+                    break;
+                case 5: // 금요일
+                    if(userGoalDay.isFri() == true)
+                        countDay += dayCountArray[i];
+                    break;
+                case 6: // 토요일
+                    if(userGoalDay.isSat() == true)
+                        countDay += dayCountArray[i];
+                    break;
+                case 0: // 일요일
+                    if(userGoalDay.isSun() == true)
+                        countDay += dayCountArray[i];
+                    break;
+            }
+            loopIdx++;
+        }
+
+        // 2-3-2. 하루 산책 목표 시간 확인
+        String getUserWalkGoalTimeQuery = "SELECT walkGoalTime FROM Goal WHERE userIdx = ? and MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
+        int userWalkGoalTime = this.jdbcTemplate.queryForObject(getUserWalkGoalTimeQuery,int.class,userIdx,beforeMonth);
+
+        // 2-3-3. 목표 시간 계산
+        int userMonthGoalTime = countDay * userWalkGoalTime;
+
+        // 3. 이번달 목표 달성률 계산
+        int monthGoalRate = (int)((userMonthWalkTime/ (double)( userMonthGoalTime*60 )) * 100);
+
+        return monthGoalRate;
     }
 
 

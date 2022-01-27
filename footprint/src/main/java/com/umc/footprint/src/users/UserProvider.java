@@ -147,10 +147,8 @@ public class UserProvider {
         try {
             // 1. user 달성률 정보
             UserInfoAchieve userInfoAchieve = userDao.getUserInfoAchieve(userIdx);
-
             // 2. user 이번달 목표 정보
             GetUserGoalRes getUserGoalRes = userDao.getUserGoal(userIdx);
-
             // 3. user 통계 정보
             UserInfoStat userInfoStat = userDao.getUserInfoStat(userIdx);
 
