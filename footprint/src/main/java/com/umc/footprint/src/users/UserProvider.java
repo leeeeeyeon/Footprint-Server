@@ -59,8 +59,8 @@ public class UserProvider {
 
         try {
             // Validation 2. Walk Table 안 존재하는 User인지 확인
-            int existUserResult = userDao.checkUserInWalk(userIdx);
-            if (existUserResult == 0)
+            boolean existUserResult = userDao.checkUser(userIdx,"Walk");
+            if (existUserResult == false)
                 throw new BaseException(NOT_EXIST_USER_IN_WALK);
 
             // Validation 3. 해당 날짜에 User가 기록한 Walk가 있는지 확인
@@ -147,10 +147,8 @@ public class UserProvider {
         try {
             // 1. user 달성률 정보
             UserInfoAchieve userInfoAchieve = userDao.getUserInfoAchieve(userIdx);
-
             // 2. user 이번달 목표 정보
             GetUserGoalRes getUserGoalRes = userDao.getUserGoal(userIdx);
-
             // 3. user 통계 정보
             UserInfoStat userInfoStat = userDao.getUserInfoStat(userIdx);
 
