@@ -229,7 +229,7 @@ public class UserDao {
          * */
 
         // method monthlyGoalRate(userIdx,0) 호출
-        int monthGoalRate = getMonthGoalRate(userIdx,0);
+        int monthGoalRate = calcMonthGoalRate(userIdx,0);
 
         /*
          *   [ 3. 산책 횟수 계산 ] = userWalkCount
@@ -344,7 +344,7 @@ public class UserDao {
 
         // 현재 달 + 이전 5달 범위의 월별 달성률 계산 by getMonthGoalRate()
         for(int i=5; i>=0 ; i--) {
-            int goalRate = getMonthGoalRate(userIdx, i); // Method getMonthGoalRate
+            int goalRate = calcMonthGoalRate(userIdx, i); // Method getMonthGoalRate
             if (goalRate > 100) // 100 초과시 100으로 저장
                 goalRate = 100;
             monthlyGoalRate.add(goalRate);
@@ -627,17 +627,7 @@ public class UserDao {
         return false;
     }
 
-    public int checkUserInWalk(int userIdx){
-
-        String checkUserWalkQuery = "SELECT userIdx FROM Walk WHERE userIdx = ? GROUP BY userIdx";
-        List<Integer> existUser =  this.jdbcTemplate.queryForList(checkUserWalkQuery,int.class,userIdx);
-
-        if(existUser.size() != 0)
-            return 1;
-
-        return 0;
-    }
-
+    // 해당 날짜에 해당 유저가 산책을 했는지 확인
     public int checkUserDateWalk(int userIdx, String date){
 
         String checkUserWalkQuery = "SELECT userIdx FROM Walk WHERE DATE(startAt) = DATE(?) and userIdx = ? GROUP BY userIdx";
@@ -649,13 +639,13 @@ public class UserDao {
         return 0;
     }
 
-    // 유저 상태 조회 - validation에 사용
+    // 유저 상태 조회 - validation에 사용 <- 위 checkUser처럼 tableName도 받는 범용적인 상태 조회 method로 만들면 좋을듯! 
     public String getStatus(int userIdx) {
         String getStatusQuery = "select status from User where userIdx=?";
         return this.jdbcTemplate.queryForObject(getStatusQuery, String.class, userIdx);
     }
   
-    // 유저 존재 여부 조회
+    // 유저 존재 여부 조회 <- checkUser로 통일하면 좋을듯!
     public int userExist(int userIdx) {
         String userExistQuery = "select count(*) from User where userIdx=?";
         return this.jdbcTemplate.queryForObject(userExistQuery, int.class, userIdx);
@@ -672,8 +662,8 @@ public class UserDao {
 
 
 
-    // 월 단위 달성률 계산 method
-    public int getMonthGoalRate(int userIdx, int beforeMonth){
+    // 월 단위 달성률 계산
+    public int calcMonthGoalRate(int userIdx, int beforeMonth){
 
         // 1. 사용자의 원하는 달 전체 산책 시간 확인 (초 단위)
         String getUserMonthWalkTimeQuery = "SELECT IFNULL(SUM(TIMESTAMPDIFF(second ,startAt,endAt)),0) as monthWalkTime FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
@@ -767,6 +757,7 @@ public class UserDao {
     }
 
 
+    // UserController
     // 유저 목표 최신화
     // GoalNext -> Goal
     public void updateGoal(){
@@ -781,6 +772,7 @@ public class UserDao {
 
     }
 
+    // UserController
     // 유저 목표 요일 최신화
     // GoalDayNext -> GoalDay
     public void updateGoalDay(){
