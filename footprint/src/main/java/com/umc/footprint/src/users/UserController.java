@@ -2,6 +2,7 @@ package com.umc.footprint.src.users;
 
 import com.umc.footprint.src.users.model.GetUserTodayRes;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.umc.footprint.config.Constant;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
 
@@ -61,7 +61,7 @@ public class UserController {
 
         // Validation 1. 날짜 형식 검사
         if(!date.matches("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$")){
-            return new BaseResponse<>(new BaseException(INVALID_DATE).getStatus());
+            return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_USERIDX).getStatus());
         }
 
         // Provider 연결
@@ -101,7 +101,7 @@ public class UserController {
         try {
             PatchNicknameReq patchNicknameReq = new PatchNicknameReq(userIdx, user.getNickname());
             if (user.getNickname().length() > 8) { // 닉네임 8자 초과
-                throw new BaseException(MAX_NICKNAME_LENGTH);
+                throw new BaseException(BaseResponseStatus.MAX_NICKNAME_LENGTH);
             }
             userService.modifyNickname(patchNicknameReq);
 

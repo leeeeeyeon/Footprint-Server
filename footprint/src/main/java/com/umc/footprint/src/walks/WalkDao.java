@@ -1,8 +1,6 @@
 package com.umc.footprint.src.walks;
 
-import com.umc.footprint.src.walks.model.Footprint;
-import com.umc.footprint.src.walks.model.GetBadgeIdx;
-import com.umc.footprint.src.walks.model.Walk;
+import com.umc.footprint.src.walks.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
