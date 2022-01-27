@@ -33,8 +33,6 @@ public enum BaseResponseStatus {
      * 2000 : Request 오류
      */
 
-    INVALID_USERIDX(false,2100,"잘못된 유저 인덱스입니다."),
-
     INVALID_DATE(false,2000, "잘못된 날짜 형식입니다."),
     INVALID_USERIDX(false,2100,"잘못된 유저 인덱스입니다."),
     NOT_EXIST_USER_IN_WALK(false,2120, "아직 산책 기록이 없는 사용자입니다."),
@@ -57,6 +55,7 @@ public enum BaseResponseStatus {
 
     DELETED_FOOTPRINT(false, 2260, "이미 삭제된 발자국입니다."),
     NO_EXIST_FOOTPRINT(false, 2261, "존재하지 않는 발자국입니다."),
+    REQUEST_ERROR(false, 2262, "잘못된 산책 인덱스입니다."), // 임시 추가
 
     /**
      * 3000 : Response 오류

@@ -13,9 +13,6 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-
-
 @Service
 public class UserService {
     private final UserDao userDao;
@@ -77,7 +74,7 @@ public class UserService {
 
 
     // 해당 userIdx를 갖는 Goal 정보 저장
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public int postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException{
         try {
             int result = userDao.postGoal(userIdx, postUserGoalReq);

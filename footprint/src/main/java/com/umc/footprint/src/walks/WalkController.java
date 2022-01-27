@@ -2,8 +2,8 @@ package com.umc.footprint.src.walks;
 
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
-import com.umc.footprint.src.walks.model.PostWalkReq;
-import com.umc.footprint.src.walks.model.PostWalkRes;
+import com.umc.footprint.config.BaseResponseStatus;
+import com.umc.footprint.src.walks.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

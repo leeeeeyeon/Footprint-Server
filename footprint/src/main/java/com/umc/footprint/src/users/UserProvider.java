@@ -26,10 +26,12 @@ import static com.umc.footprint.config.BaseResponseStatus.*;
 public class UserProvider {
 
     private final WalkDao walkDao;
+    private final UserDao userDao;
 
     @Autowired
-    public UserProvider(WalkDao walkDao) {
+    public UserProvider(WalkDao walkDao,UserDao userDao) {
         this.walkDao = walkDao;
+        this.userDao = userDao;
     }
 
     // 해당 userIdx를 갖는 오늘 산책 관련 정보 조회
