@@ -10,6 +10,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class GetUserGoalRes {
+    private String month;
     private List<Integer> dayIdx;
     private UserGoalTime userGoalTime;
 }

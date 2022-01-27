@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -369,8 +371,14 @@ public class UserDao {
         if(existUserIdx.size() == 0)
             throw new BaseException(INVALID_USERIDX);
 
+        // 1. 이번달 정보 구하기
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        DateFormat df = new SimpleDateFormat("yyyy년 MM월");
+        String month = df.format(cal.getTime());
 
-        // 1-1. get UserGoalDay
+
+        // 2-1. get UserGoalDay
         String getUserGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         UserGoalDay userGoalDay = this.jdbcTemplate.queryForObject(getUserGoalDayQuery,
                 (rs,rowNum) -> new UserGoalDay(
@@ -383,7 +391,7 @@ public class UserDao {
                         rs.getBoolean("sat")
                 ),userIdx);
 
-        // 1-2. List<Integer> 형태로 변형
+        // 2-2. List<Integer> 형태로 변형
         List<Integer> dayIdx = new ArrayList<>();
         if(userGoalDay.isSun() == true)
             dayIdx.add(1);
@@ -400,7 +408,7 @@ public class UserDao {
         if(userGoalDay.isSat() == true)
             dayIdx.add(7);
 
-        // 2. get UserGoalTime
+        // 3. get UserGoalTime
         String getUserGoalTimeQuery = "SELECT walkGoalTime, walkTimeSlot FROM Goal WHERE userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         UserGoalTime userGoalTime = this.jdbcTemplate.queryForObject(getUserGoalTimeQuery,
                 (rs,rowNum) -> new UserGoalTime(
@@ -408,8 +416,8 @@ public class UserDao {
                         rs.getInt("walkTimeSlot")
                 ), userIdx);
 
-        // 3. GetUserGoalRes에 dayIdx 와 userGoalTime 합침
-        return new GetUserGoalRes(dayIdx,userGoalTime);
+        // 4. GetUserGoalRes에 dayIdx 와 userGoalTime 합침
+        return new GetUserGoalRes(month,dayIdx,userGoalTime);
 
     }
 
@@ -422,8 +430,15 @@ public class UserDao {
         if(existUserIdx.size() == 0)
             throw new BaseException(INVALID_USERIDX);
 
+        // 1. 다음달 정보 구하기
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.MONTH,1);
+        DateFormat df = new SimpleDateFormat("yyyy년 MM월");
+        String month = df.format(cal.getTime());
 
-        // 1-1. get UserGoalDay
+
+        // 2-1. get UserGoalDay
         String getUserGoalDayNextQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDayNext WHERE userIdx = ?";
         UserGoalDay userGoalDay = this.jdbcTemplate.queryForObject(getUserGoalDayNextQuery,
                 (rs,rowNum) -> new UserGoalDay(
@@ -436,7 +451,7 @@ public class UserDao {
                         rs.getBoolean("sat")
                 ),userIdx);
 
-        // 1-2. List<Integer> 형태로 변형
+        // 2-2. List<Integer> 형태로 변형
         List<Integer> dayIdx = new ArrayList<>();
         if(userGoalDay.isSun() == true)
             dayIdx.add(1);
@@ -453,7 +468,7 @@ public class UserDao {
         if(userGoalDay.isSat() == true)
             dayIdx.add(7);
 
-        // 2. get UserGoalTime
+        // 3. get UserGoalTime
         String getUserGoalTimeNextQuery = "SELECT walkGoalTime, walkTimeSlot FROM GoalNext WHERE userIdx = ?";
         UserGoalTime userGoalTime = this.jdbcTemplate.queryForObject(getUserGoalTimeNextQuery,
                 (rs,rowNum) -> new UserGoalTime(
@@ -461,8 +476,8 @@ public class UserDao {
                         rs.getInt("walkTimeSlot")
                 ), userIdx);
 
-        // 3. GetUserGoalRes에 dayIdx 와 userGoalTime 합침
-        return new GetUserGoalRes(dayIdx,userGoalTime);
+        // 4. GetUserGoalRes에 dayIdx 와 userGoalTime 합침
+        return new GetUserGoalRes(month,dayIdx,userGoalTime);
     }
 
     /*
@@ -639,7 +654,7 @@ public class UserDao {
         return 0;
     }
 
-    // 유저 상태 조회 - validation에 사용 <- 위 checkUser처럼 tableName도 받는 범용적인 상태 조회 method로 만들면 좋을듯! 
+    // 유저 상태 조회 - validation에 사용 <- 위 checkUser처럼 tableName도 받는 범용적인 상태 조회 method로 만들면 좋을듯!
     public String getStatus(int userIdx) {
         String getStatusQuery = "select status from User where userIdx=?";
         return this.jdbcTemplate.queryForObject(getStatusQuery, String.class, userIdx);
