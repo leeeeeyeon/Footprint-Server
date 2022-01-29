@@ -77,6 +77,7 @@ public class WalkDao {
         String walkInsertQuery = "insert into Walk(startAt, endAt, distance, coordinate, pathImageUrl, userIdx, goalRate, calorie) " +
                 "values (?,?,?,ST_GeomFromText(?),?,?,?,?)";
 
+        System.out.println("walk.getCoordinate() = " + walk.getCoordinate());
 
         this.jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
@@ -214,7 +215,7 @@ public class WalkDao {
 
     // 유저의 목표 시간 반환
     public int getWalkGoalTime(int userIdx) {
-        String getTimeQuery = "select walkGoalTime from Goal where userIdx = ?";
+        String getTimeQuery = "select walkGoalTime from Goal where userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         int getTimeParam = userIdx;
         return this.jdbcTemplate.queryForObject(getTimeQuery, int.class, getTimeParam);
     }

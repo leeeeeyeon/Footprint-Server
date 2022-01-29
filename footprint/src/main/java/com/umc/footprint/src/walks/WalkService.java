@@ -3,10 +3,7 @@ package com.umc.footprint.src.walks;
 import com.umc.footprint.config.BaseException;
 
 import com.umc.footprint.src.AwsS3Service;
-import com.umc.footprint.src.walks.model.Footprint;
-import com.umc.footprint.src.walks.model.GetBadgeIdx;
-import com.umc.footprint.src.walks.model.PostWalkReq;
-import com.umc.footprint.src.walks.model.PostWalkRes;
+import com.umc.footprint.src.walks.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -43,6 +40,16 @@ public class WalkService {
             String pathImgUrl = awsS3Service.uploadFile(request.getWalk().getPathImg());
 
             System.out.println("pathImgUrl = " + pathImgUrl);
+            // string으로 변환한 동선 저장
+            request.setWalk(new Walk(
+                    request.getWalk().getStartAt(),
+                    request.getWalk().getEndAt(),
+                    convertListToString(request.getCoordinates()),
+                    request.getWalk().getDistance(),
+                    request.getWalk().getUserIdx(),
+                    request.getWalk().getGoalRate(),
+                    request.getWalk().getCalorie()
+            ));
 
             // Walk Table에 삽입 후 생성된 walkIdx return
             int walkIdx = walkDao.addWalk(walkProvider.getGoalRate(request.getWalk()), pathImgUrl);
@@ -92,6 +99,39 @@ public class WalkService {
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
+    }
+
+    // List<List<>> -> String in WalkDao
+    public String convertListToString(List<List<Double>> inputList){
+
+        System.out.println("inputList : "+inputList);
+
+        StringBuilder str = new StringBuilder();
+        str.append("MULTILINESTRING(");
+        int count = 0;  // 1차원 범위의 List 경과 count (마지막 "," 빼기 위해)
+        for(List<Double> list : inputList){
+            str.append("(");
+            for(int i=0;i<list.size();i++){
+                str.append(list.get(i));
+
+                if(i == list.size()-1) {    // 마지막은 " " , "," 추가하지 않고 ")"
+                    str.append(")");
+                    break;
+                }
+
+                if (i%2 == 0)   // 짝수 번째 인덱스는 " " 추가
+                    str.append(" ");
+                else            // 홀수 번째 인덱스는 "," 추가
+                    str.append(",");
+            }
+            count++;
+            if(count != inputList.size())    // 1차원 범위의 List에서 마지막을 제외하고 "," 추가
+                str.append(",");
+        }
+        str.append(")");
+        String result = str.toString();
+
+        return result;
     }
 
     public String deleteWalk(int walkIdx) throws BaseException {
