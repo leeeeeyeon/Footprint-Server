@@ -16,8 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.users.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import static com.umc.footprint.config.BaseResponseStatus.*;
@@ -154,6 +152,18 @@ public class UserProvider {
 
             // 4. 1+2+3
             return new GetUserInfoRes(userInfoAchieve,getUserGoalRes,userInfoStat);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    public List<GetTagRes> getTagResult(int userIdx, String tag) throws BaseException {
+        try {
+            List<GetTagRes> getTagResult = userDao.getWalks(userIdx, tag);
+            if (getTagResult.isEmpty()) {
+                throw new BaseException(NO_EXIST_RESULT);
+            }
+            return getTagResult;
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }

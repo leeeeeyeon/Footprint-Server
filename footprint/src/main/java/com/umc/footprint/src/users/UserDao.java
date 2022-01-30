@@ -19,8 +19,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import javax.transaction.Transactional;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
@@ -480,6 +478,73 @@ public class UserDao {
         return new GetUserGoalRes(month,dayIdx,userGoalTime);
     }
 
+
+    // 태그 검색 결과 조회
+    public List<GetTagRes> getWalks(int userIdx, String tag) {
+        // 산책 날짜
+        String getWalkAtQuery = "select distinct cast(date_format(endAt, '%Y.%m.%d') as char(10)) from Hashtag\n" +
+                "inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
+                "inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
+                "inner join Walk W on F.walkIdx = W.walkIdx\n" +
+                "where W.walkIdx in (\n" + // 해당 태그를 가지고 있는 산책 기록의 인덱스들
+                "    select walkIdx from Hashtag\n" +
+                "    inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
+                "    inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
+                "    where hashtag=?" +
+                "    ) and W.userIdx=?";
+
+        List<String> walkAtList = jdbcTemplate.queryForList(getWalkAtQuery, String.class, tag, userIdx);
+
+        List<GetTagRes> result = new ArrayList<>(); // 최종 출력 값을 담을 리스트
+
+        for(String walkAt : walkAtList) {
+            // 산책 요일
+            String getDayQuery = "select case WEEKDAY(?)\n" +
+                    "    when '0' then '월'\n" +
+                    "    when '1' then '화'\n" +
+                    "    when '2' then '수'\n" +
+                    "    when '3' then '목'\n" +
+                    "    when '4' then '금'\n" +
+                    "    when '5' then '토'\n" +
+                    "    when '6' then '일'\n" +
+                    "    end as dayofweek";
+            String day = jdbcTemplate.queryForObject(getDayQuery, String.class, walkAt);
+            String walkAtResult = walkAt + " " + day;
+
+            // 태그를 가지고 있는 산책 기록 인덱스 조회
+            String walkIdxQuery = "select F.walkIdx from Hashtag\n" +
+                    "    inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
+                    "    inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
+                    "    inner join Walk W on F.walkIdx = W.walkIdx\n" +
+                    "    where hashtag=?\n" +
+                    "    and cast(date_format(endAt, '%Y.%m.%d') as char(10))=?";
+            List<Integer> walkIdxList = jdbcTemplate.queryForList(walkIdxQuery, int.class, tag, walkAt);
+
+            List<Walk> walks = new ArrayList<>(); // 해당 날짜 + 해당 해시태그를 가지는 산책 기록 리스트
+            for(Integer walkIdx : walkIdxList) {
+                // 산책 기록 하나 조회
+                String getWalkQuery = "select walkIdx, CONCAT(date_format(startAt, '%k:%i'),'~', date_format(endAt, '%k:%i')) as walkTime, pathImageUrl\n" +
+                        "from Walk W where W.walkIdx=?";
+                Walk walk = this.jdbcTemplate.queryForObject(getWalkQuery,
+                        (rs,rowNum)-> new Walk(
+                                rs.getInt("walkIdx"),
+                                rs.getString("walkTime"),
+                                rs.getString("pathImageUrl"),
+                                getTagList(walkIdx)
+                        )
+                        , walkIdx
+                );
+                walks.add(walk);
+            }
+
+            GetTagRes getTagRes = new GetTagRes(walkAtResult, walks);
+            result.add(getTagRes);
+        }
+
+        return result;
+    }
+
+
     /*
      *** [2] POST METHOD
      * */
@@ -801,6 +866,18 @@ public class UserDao {
         int updateAffectedRow = this.jdbcTemplate.update(updateGoalQuery);
 
 
+    }
+
+    // tag를 가진 발자국이 있는 산책기록에 해당하는 전체 태그 리스트
+    public List<String> getTagList(int walkIdx) {
+        String getTagQuery = "select hashtag from Hashtag\n" +
+                "inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
+                "inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
+                "inner join Walk W on F.walkIdx = W.walkIdx\n" +
+                "where F.walkIdx = ?";
+        List<String> tagList = jdbcTemplate.queryForList(getTagQuery, String.class, walkIdx);
+
+        return tagList;
     }
 
 }

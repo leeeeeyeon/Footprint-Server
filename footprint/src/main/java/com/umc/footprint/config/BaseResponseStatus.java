@@ -39,6 +39,8 @@ public enum BaseResponseStatus {
     NO_EXIST_WALK(false,2121, "해당 날짜에는 산책을 하지 않았습니다."),
     INACTIVE_USER(false, 2122, "비활성화된 유저입니다."),
     BLACK_USER(false, 2123, "블랙 유저입니다."),
+    NEED_TAG_INFO(false, 2124, "검색하고자 하는 태그를 입력해주세요."),
+    NO_EXIST_RESULT(false, 2125, "검색 결과가 존재하지 않습니다."),
     EXIST_USER_ERROR(false, 2140,"이미 존재하는 유저입니다."),
     MIN_DAYIDX(false, 2141,"산책요일을 최소 하나 이상 선택해야 합니다."),
     MAX_DAYIDX(false, 2142,"선택된 산책 요일이 너무 많습니다."),
