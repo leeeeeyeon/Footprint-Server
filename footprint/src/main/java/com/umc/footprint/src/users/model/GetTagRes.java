@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 
 public class GetTagRes {
-    // @JsonFormat(pattern = "yyy.MM.dd", timezone="Asia/Seoul") // 요일도 추후 추가하기
     private String walkAt;
     private List<Walk> walks;
 }

@@ -157,10 +157,11 @@ public class UserProvider {
         }
     }
 
+    // 해당 유저의 산책기록 중 태그를 포함하는 산책기록 조회
     public List<GetTagRes> getTagResult(int userIdx, String tag) throws BaseException {
         try {
             List<GetTagRes> getTagResult = userDao.getWalks(userIdx, tag);
-            if (getTagResult.isEmpty()) {
+            if (getTagResult.isEmpty()) { // 검색결과가 없음
                 throw new BaseException(NO_EXIST_RESULT);
             }
             return getTagResult;

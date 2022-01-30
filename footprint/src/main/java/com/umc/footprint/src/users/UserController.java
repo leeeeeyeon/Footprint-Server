@@ -327,7 +327,7 @@ public class UserController {
     @GetMapping("/{userIdx}/tags")
     public BaseResponse<List<GetTagRes>> getTags(@PathVariable("userIdx") int userIdx, @RequestParam(required = false) String tag) {
         try {
-            if (tag == null) {
+            if (tag == null) { // Query String(검색어)를 입력하지 않았을 경우
                 return new BaseResponse<>(new BaseException(BaseResponseStatus.NEED_TAG_INFO).getStatus());
             }
             List<GetTagRes> tagResult = userProvider.getTagResult(userIdx, tag);

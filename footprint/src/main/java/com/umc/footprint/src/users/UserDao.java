@@ -498,7 +498,7 @@ public class UserDao {
         List<GetTagRes> result = new ArrayList<>(); // 최종 출력 값을 담을 리스트
 
         for(String walkAt : walkAtList) {
-            // 산책 요일
+            // String에 요일 추가
             String getDayQuery = "select case WEEKDAY(?)\n" +
                     "    when '0' then '월'\n" +
                     "    when '1' then '화'\n" +
