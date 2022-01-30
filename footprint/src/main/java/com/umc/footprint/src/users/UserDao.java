@@ -719,16 +719,10 @@ public class UserDao {
         return 0;
     }
 
-    // 유저 상태 조회 - validation에 사용 <- 위 checkUser처럼 tableName도 받는 범용적인 상태 조회 method로 만들면 좋을듯!
-    public String getStatus(int userIdx) {
-        String getStatusQuery = "select status from User where userIdx=?";
+    // 유저 상태 조회 - validation에 사용
+    public String getStatus(int userIdx, String tableName) {
+        String getStatusQuery = "select status from "+ tableName + " where userIdx=?";
         return this.jdbcTemplate.queryForObject(getStatusQuery, String.class, userIdx);
-    }
-  
-    // 유저 존재 여부 조회 <- checkUser로 통일하면 좋을듯!
-    public int userExist(int userIdx) {
-        String userExistQuery = "select count(*) from User where userIdx=?";
-        return this.jdbcTemplate.queryForObject(userExistQuery, int.class, userIdx);
     }
 
 
