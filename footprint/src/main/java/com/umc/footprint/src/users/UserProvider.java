@@ -90,12 +90,12 @@ public class UserProvider {
     // 해당 userIdx를 갖는 User의 정보 조회
     public GetUserRes getUser(int userIdx) throws BaseException {
         try {
-            int userExist = userDao.userExist(userIdx);
-            if (userExist == 0) {
+            boolean userExist = userDao.checkUser(userIdx, "User");
+            if (userExist == false) {
                 throw new BaseException(INVALID_USERIDX);
             }
 
-            String status = userDao.getStatus(userIdx);
+            String status = userDao.getStatus(userIdx, "User");
             if (status.equals("INACTIVE")) {
                 throw new BaseException(INACTIVE_USER);
             }
