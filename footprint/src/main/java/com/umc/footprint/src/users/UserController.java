@@ -3,6 +3,7 @@ package com.umc.footprint.src.users;
 import com.umc.footprint.src.users.model.GetUserTodayRes;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +19,7 @@ import com.umc.footprint.config.BaseResponse;
 
 import com.umc.footprint.config.BaseResponseStatus;
 import com.umc.footprint.config.BaseResponseStatus.*;
+
 
 @RestController
 @RequestMapping("/users")
@@ -314,6 +316,26 @@ public class UserController {
         } catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));
         }
+    }
+
+    /**
+     * 태그 검색 API
+     * [GET] /users/:useridx/tags?tag=""
+     */
+    // Query String
+    @ResponseBody
+    @GetMapping("/{userIdx}/tags")
+    public BaseResponse<List<GetTagRes>> getTags(@PathVariable("userIdx") int userIdx, @RequestParam(required = false) String tag) {
+        try {
+            if (tag == null) { // Query String(검색어)를 입력하지 않았을 경우
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.NEED_TAG_INFO).getStatus());
+            }
+            List<GetTagRes> tagResult = userProvider.getTagResult(userIdx, tag);
+            return new BaseResponse<>(tagResult);
+        } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+
     }
 
 }
