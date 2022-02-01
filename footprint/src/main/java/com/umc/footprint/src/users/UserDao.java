@@ -414,6 +414,8 @@ public class UserDao {
                         rs.getInt("walkTimeSlot")
                 ), userIdx);
 
+        checkGoalModified(userIdx);
+
         // 4. GetUserGoalRes에 dayIdx 와 userGoalTime 합침
         return new GetUserGoalRes(month,dayIdx,userGoalTime);
 
@@ -883,6 +885,16 @@ public class UserDao {
         List<String> tagList = jdbcTemplate.queryForList(getTagQuery, String.class, walkIdx);
 
         return tagList;
+    }
+
+    // 다음달 목표 변경 여부 확인
+    public Boolean checkGoalModified(int userIdx){
+
+        String getUpdateAtQuery = "SELECT IF(MONTH(updateAt) = MONTH(NOW()), true, false) FROM GoalNext WHERE userIdx = ?";
+        Boolean updateBool = this.jdbcTemplate.queryForObject(getUpdateAtQuery,Boolean.class,userIdx);
+
+        return updateBool;
+
     }
 
 }
