@@ -150,8 +150,12 @@ public class UserController {
     }
 
 
+    /** yummy 4
+     * 이번달 정보 조회 API
+     * [GET] /users/:useridx/tmonth
+     */
     @ResponseBody
-    @GetMapping("/{userIdx}/tmonth") // (GET) 127.0.0.1:3000/users/{userIdx}/tmonth
+    @GetMapping("/{userIdx}/tmonth")
     public BaseResponse<GetMonthInfoRes> getMonthInfo(@PathVariable("userIdx") int userIdx) {
         // TO-DO-LIST
         // jwt 확인?
@@ -165,10 +169,10 @@ public class UserController {
 
             GetMonthInfoRes getMonthInfoRes = userProvider.getMonthInfoRes(userIdx, nowYear, nowMonth);
             return new BaseResponse<>(getMonthInfoRes);
-          } catch (BaseException exception) {
+        } catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));
         }
-      
+
     }
   
 
@@ -223,26 +227,71 @@ public class UserController {
     }
 
 
+    /** yummy 5
+     * 월별 발자국 개수 조회 API
+     * [GET] /users/:useridx/months/footprints?year=2021&month=2
+     */
     @ResponseBody
-    @GetMapping("/{userIdx}/months/footprints") // (GET) 127.0.0.1:3000/users/{userIdx}/months/footprints?year=2021&month=2
+    @GetMapping("/{userIdx}/months/footprints")
     public BaseResponse<List<GetFootprintCount>> getMonthFootprints(@PathVariable("userIdx") int userIdx,@RequestParam(required = true) int year, @RequestParam(required = true) int month) throws BaseException {
-        List<GetFootprintCount> getFootprintCounts = userProvider.getMonthFootprints(userIdx, year, month);
-        return new BaseResponse<>(getFootprintCounts);
+        try {
+            List<GetFootprintCount> getFootprintCounts = userProvider.getMonthFootprints(userIdx, year, month);
+            return new BaseResponse<>(getFootprintCounts);
+        }
+        catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
+
+    /** yummy 13
+     * 사용자 전체 뱃지 조회 API
+     * [GET] /users/:useridx/badges
+     */
+    @ResponseBody
+    @GetMapping("/{userIdx}/badges/status") //매달 첫 접속마다 요청되는 뱃지 확인 API - 이번달 획득 뱃지의 정보를 전달, 없으면 null 반환
+    public BaseResponse<BadgeInfo> getMonthlyBadgeStatus(@PathVariable("userIdx") int userIdx) throws BaseException {
+        try {
+            BadgeInfo getBadgeInfo = userProvider.getMonthlyBadgeStatus(userIdx);
+            return new BaseResponse<>(getBadgeInfo);
+        }
+        catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
     }
 
 
+
+
+    /** yummy 11
+     * 사용자 전체 뱃지 조회 API
+     * [GET] /users/:useridx/badges
+     */
     @ResponseBody
-    @GetMapping("/{userIdx}/badges") // (GET) 127.0.0.1:3000/users/{userIdx}/badges
+    @GetMapping("/{userIdx}/badges")
     public BaseResponse<GetUserBadges> getUsersBadges(@PathVariable("userIdx") int userIdx) throws BaseException {
+        try {
             GetUserBadges getUserBadges = userProvider.getUserBadges(userIdx);
             return new BaseResponse<>(getUserBadges);
+        }
+        catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
     }
 
+    /** yummy 12
+     * 사용자 대표 뱃지 수정 API
+     * [GET] /users/:useridx/badges/title/:badgeidx
+     */
     @ResponseBody
     @PatchMapping("/{userIdx}/badges/title/{badgeIdx}")
     public BaseResponse<BadgeInfo> patchRepBadge(@PathVariable("userIdx") int userIdx, @PathVariable("badgeIdx") int badgeIdx) throws BaseException {
-        BadgeInfo patchRepBadgeInfo = userService.patchRepBadge(userIdx, badgeIdx);
-        return new BaseResponse<>(patchRepBadgeInfo);
+        try {
+            BadgeInfo patchRepBadgeInfo = userService.patchRepBadge(userIdx, badgeIdx);
+            return new BaseResponse<>(patchRepBadgeInfo);
+        }
+        catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
     }
 
 

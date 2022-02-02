@@ -62,7 +62,7 @@ public enum BaseResponseStatus {
     /**
      * 3000 : Response 오류
      */
-
+    NO_MONTHLY_BADGE(false, 3030, "이번 달에 획득한 뱃지가 없습니다. (PRO, LOVER, MASTER)"),
 
     /**
      * 4000 : Database, Server 오류
