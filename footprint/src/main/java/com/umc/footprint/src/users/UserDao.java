@@ -414,8 +414,10 @@ public class UserDao {
                         rs.getInt("walkTimeSlot")
                 ), userIdx);
 
+        boolean goalNextModified = checkGoalModified(userIdx);
+
         // 4. GetUserGoalRes에 dayIdx 와 userGoalTime 합침
-        return new GetUserGoalRes(month,dayIdx,userGoalTime);
+        return new GetUserGoalRes(month,dayIdx,userGoalTime,goalNextModified);
 
     }
 
@@ -474,8 +476,10 @@ public class UserDao {
                         rs.getInt("walkTimeSlot")
                 ), userIdx);
 
+        boolean goalNextModified = checkGoalModified(userIdx);
+
         // 4. GetUserGoalRes에 dayIdx 와 userGoalTime 합침
-        return new GetUserGoalRes(month,dayIdx,userGoalTime);
+        return new GetUserGoalRes(month,dayIdx,userGoalTime,goalNextModified);
     }
 
 
@@ -550,7 +554,7 @@ public class UserDao {
      * */
 
     // 해당 userIdx를 갖는 Goal의 Time 정보 & GoalDay의 요일 정보 CREATE
-    public int postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
+    public int postGoal(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException {
 
         // Validation 7. Goal Table에 이미 존재하는 userIdx인지 확인
         if(checkUser(userIdx,"GoalNext") == true)
@@ -559,14 +563,14 @@ public class UserDao {
         // 1. Goal Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot Create
         int result1; // 1에서 update 확인용 result
         String createUserGoalTimeQuery = "INSERT INTO Goal (userIdx,walkGoalTime,walkTimeSlot) VALUES (?,?,?)";
-        Object[] createUserGoalTimeParams = new Object[]{userIdx, postUserGoalReq.getWalkGoalTime(), postUserGoalReq.getWalkTimeSlot()};
+        Object[] createUserGoalTimeParams = new Object[]{userIdx, patchUserInfoReq.getWalkGoalTime(), patchUserInfoReq.getWalkTimeSlot()};
         result1 = this.jdbcTemplate.update(createUserGoalTimeQuery,createUserGoalTimeParams);
 
         // 2. GoalDay Table에 sun~fri Create
         int result2; // 2에서 update 확인용 result
         Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
 
-        for (int dayIdx : postUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
+        for (int dayIdx : patchUserInfoReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
             days[dayIdx-1] = true;
         }
 
@@ -582,7 +586,7 @@ public class UserDao {
 
 
     // 해당 userIdx를 갖는 GoalNext의 Time 정보 & GoalDayNext의 요일 정보 CREATE
-    public int postGoalNext(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
+    public int postGoalNext(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException {
 
         // Validation 7. GoalNext Table에 이미 존재하는 userIdx인지 확인
         if(checkUser(userIdx,"GoalNext") == true)
@@ -591,14 +595,14 @@ public class UserDao {
         // 1. GoalNext Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot Create
         int result1; // 1에서 update 확인용 result
         String createUserGoalTimeQuery = "INSERT INTO GoalNext (userIdx,walkGoalTime,walkTimeSlot) VALUES (?,?,?)";
-        Object[] createUserGoalTimeNextParams = new Object[]{userIdx, postUserGoalReq.getWalkGoalTime(), postUserGoalReq.getWalkTimeSlot()};
+        Object[] createUserGoalTimeNextParams = new Object[]{userIdx, patchUserInfoReq.getWalkGoalTime(), patchUserInfoReq.getWalkTimeSlot()};
         result1 = this.jdbcTemplate.update(createUserGoalTimeQuery,createUserGoalTimeNextParams);
 
         // 2. GoalDayNext Table에 sun~fri Create
         int result2; // 2에서 update 확인용 result
         Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
 
-        for (int dayIdx : postUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
+        for (int dayIdx : patchUserInfoReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
             days[dayIdx-1] = true;
         }
 
@@ -611,6 +615,7 @@ public class UserDao {
 
         return 1;
     }
+
 
     /*
      *** [3] PATCH METHOD
@@ -663,6 +668,16 @@ public class UserDao {
         Object[] modifyUserGoalDayParams = new Object[]{ days[0], days[1], days[2], days[3], days[4], days[5], days[6], userIdx };
         return this.jdbcTemplate.update(modifyUserGoalDayQuery,modifyUserGoalDayParams);
 
+    }
+
+    // 초기 유저 추가 정보를 User 테이블에 추가
+    public int modifyUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) {
+
+        String patchUserInfoQuery = "UPDATE User SET nickname = ?, birth = ?, sex = ?, height = ?, weight = ? WHERE userIdx = ?";
+        Object[] patchUserInfoParams = new Object[]{patchUserInfoReq.getNickname(), patchUserInfoReq.getBirth(), patchUserInfoReq.getSex(),
+                patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), userIdx};
+
+        return this.jdbcTemplate.update(patchUserInfoQuery, patchUserInfoParams);
     }
 
     /*
@@ -719,16 +734,10 @@ public class UserDao {
         return 0;
     }
 
-    // 유저 상태 조회 - validation에 사용 <- 위 checkUser처럼 tableName도 받는 범용적인 상태 조회 method로 만들면 좋을듯!
-    public String getStatus(int userIdx) {
-        String getStatusQuery = "select status from User where userIdx=?";
+    // 유저 상태 조회 - validation에 사용
+    public String getStatus(int userIdx, String tableName) {
+        String getStatusQuery = "select status from "+ tableName + " where userIdx=?";
         return this.jdbcTemplate.queryForObject(getStatusQuery, String.class, userIdx);
-    }
-  
-    // 유저 존재 여부 조회 <- checkUser로 통일하면 좋을듯!
-    public int userExist(int userIdx) {
-        String userExistQuery = "select count(*) from User where userIdx=?";
-        return this.jdbcTemplate.queryForObject(userExistQuery, int.class, userIdx);
     }
 
 
@@ -878,6 +887,16 @@ public class UserDao {
         List<String> tagList = jdbcTemplate.queryForList(getTagQuery, String.class, walkIdx, "ACTIVE");
 
         return tagList;
+    }
+
+    // 다음달 목표 변경 여부 확인
+    public boolean checkGoalModified(int userIdx){
+
+        String getUpdateAtQuery = "SELECT IF(MONTH(updateAt) = MONTH(NOW()), true, false) FROM GoalNext WHERE userIdx = ?";
+        boolean updateBool = this.jdbcTemplate.queryForObject(getUpdateAtQuery,Boolean.class,userIdx);
+
+        return updateBool;
+
     }
 
 }

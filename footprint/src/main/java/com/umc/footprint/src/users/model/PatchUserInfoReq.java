@@ -9,7 +9,12 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class PostUserGoalReq {
+public class PatchUserInfoReq {
+    private String nickname;
+    private String sex;
+    private String birth;
+    private int height;
+    private int weight;
     private List<Integer> dayIdx;
     private int walkGoalTime;
     private int walkTimeSlot;

@@ -43,13 +43,12 @@ public class FootprintController {
      * 발자국 수정 API
      * [PATCH] /footprints/:footprintIdx
      */
-    /*
     @ResponseBody
     @PatchMapping("/{footprintIdx}")
-    public BaseResponse<String> modifyFootprint(@PathVariable("footprintIdx") int footprintIdx, @RequestBody Footprint footprint) {
+    public BaseResponse<String> modifyFootprint(@PathVariable("footprintIdx") int footprintIdx, Footprint footprint) {
         try {
-            PatchFootprintReq patchFootprintReq = new PatchFootprintReq(footprint.getFootprintIdx(),footprint.getWrite(), footprint.getPhotoList());
-            footprintService.modifyFootprint(patchFootprintReq);
+            PatchFootprintReq patchFootprintReq = new PatchFootprintReq(footprint.getWrite(), footprint.getPhotos(), footprint.getTagList());
+            footprintService.modifyFootprint(patchFootprintReq, footprintIdx);
 
             String result = "발자국이 수정되었습니다.";
             return new BaseResponse<>(result);
@@ -57,7 +56,6 @@ public class FootprintController {
             return new BaseResponse<>((exception.getStatus()));
         }
     }
-     */
 
     /**
      * 발자국 삭제 API
