@@ -414,8 +414,10 @@ public class UserDao {
                         rs.getInt("walkTimeSlot")
                 ), userIdx);
 
+        boolean goalNextModified = checkGoalModified(userIdx);
+
         // 4. GetUserGoalRes에 dayIdx 와 userGoalTime 합침
-        return new GetUserGoalRes(month,dayIdx,userGoalTime);
+        return new GetUserGoalRes(month,dayIdx,userGoalTime,goalNextModified);
 
     }
 
@@ -474,8 +476,10 @@ public class UserDao {
                         rs.getInt("walkTimeSlot")
                 ), userIdx);
 
+        boolean goalNextModified = checkGoalModified(userIdx);
+
         // 4. GetUserGoalRes에 dayIdx 와 userGoalTime 합침
-        return new GetUserGoalRes(month,dayIdx,userGoalTime);
+        return new GetUserGoalRes(month,dayIdx,userGoalTime,goalNextModified);
     }
 
 
@@ -491,9 +495,9 @@ public class UserDao {
                 "    inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
                 "    inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
                 "    where hashtag=?" +
-                "    ) and W.userIdx=?";
+                "    ) and W.userIdx=? and T.status=?";
 
-        List<String> walkAtList = jdbcTemplate.queryForList(getWalkAtQuery, String.class, tag, userIdx);
+        List<String> walkAtList = jdbcTemplate.queryForList(getWalkAtQuery, String.class, tag, userIdx, "ACTIVE");
 
         List<GetTagRes> result = new ArrayList<>(); // 최종 출력 값을 담을 리스트
 
@@ -517,8 +521,8 @@ public class UserDao {
                     "    inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
                     "    inner join Walk W on F.walkIdx = W.walkIdx\n" +
                     "    where hashtag=?\n" +
-                    "    and cast(date_format(endAt, '%Y.%m.%d') as char(10))=?";
-            List<Integer> walkIdxList = jdbcTemplate.queryForList(walkIdxQuery, int.class, tag, walkAt);
+                    "    and cast(date_format(endAt, '%Y.%m.%d') as char(10))=? and T.status=?";
+            List<Integer> walkIdxList = jdbcTemplate.queryForList(walkIdxQuery, int.class, tag, walkAt, "ACTIVE");
 
             List<Walk> walks = new ArrayList<>(); // 해당 날짜 + 해당 해시태그를 가지는 산책 기록 리스트
             for(Integer walkIdx : walkIdxList) {
@@ -750,6 +754,12 @@ public class UserDao {
     // 월 단위 달성률 계산
     public int calcMonthGoalRate(int userIdx, int beforeMonth){
 
+        // 0. 해당 달에 사용자 목표 기록이 있는지 확인
+        String checkGoalExistQuery = "SELECT count(*) FROM Goal WHERE userIdx = ? and MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
+        int checkGoalExist = this.jdbcTemplate.queryForObject(checkGoalExistQuery,int.class,userIdx,beforeMonth);
+        if(checkGoalExist == 0)
+            return 0;
+
         // 1. 사용자의 원하는 달 전체 산책 시간 확인 (초 단위)
         String getUserMonthWalkTimeQuery = "SELECT IFNULL(SUM(TIMESTAMPDIFF(second ,startAt,endAt)),0) as monthWalkTime FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
         int userMonthWalkTime = this.jdbcTemplate.queryForObject(getUserMonthWalkTimeQuery,int.class,userIdx,beforeMonth);
@@ -879,10 +889,20 @@ public class UserDao {
                 "inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
                 "inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
                 "inner join Walk W on F.walkIdx = W.walkIdx\n" +
-                "where F.walkIdx = ?";
-        List<String> tagList = jdbcTemplate.queryForList(getTagQuery, String.class, walkIdx);
+                "where F.walkIdx = ? and T.status = ?";
+        List<String> tagList = jdbcTemplate.queryForList(getTagQuery, String.class, walkIdx, "ACTIVE");
 
         return tagList;
+    }
+
+    // 다음달 목표 변경 여부 확인
+    public boolean checkGoalModified(int userIdx){
+
+        String getUpdateAtQuery = "SELECT IF(MONTH(updateAt) = MONTH(NOW()), true, false) FROM GoalNext WHERE userIdx = ?";
+        boolean updateBool = this.jdbcTemplate.queryForObject(getUpdateAtQuery,Boolean.class,userIdx);
+
+        return updateBool;
+
     }
 
 }

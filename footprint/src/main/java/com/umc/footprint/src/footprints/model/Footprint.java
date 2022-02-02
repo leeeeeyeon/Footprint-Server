@@ -1,6 +1,7 @@
 package com.umc.footprint.src.footprints.model;
 
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.*;
 import java.sql.Timestamp;
@@ -12,10 +13,8 @@ import java.util.List;
 
 public class Footprint {
     private int footprintIdx;
-    private Point coordinate;
     private String write;
-    private Timestamp recordAt;
-    private int walkIdx;
-    private String status;
-    private List<String> photoList;
+    private List<MultipartFile> photos; // 사진 저장
+    private List<String> photoList; // Url 저장
+    private List<String> tagList;
 }
