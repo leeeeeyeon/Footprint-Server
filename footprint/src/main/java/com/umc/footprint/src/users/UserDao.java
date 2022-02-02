@@ -754,6 +754,12 @@ public class UserDao {
     // 월 단위 달성률 계산
     public int calcMonthGoalRate(int userIdx, int beforeMonth){
 
+        // 0. 해당 달에 사용자 목표 기록이 있는지 확인
+        String checkGoalExistQuery = "SELECT count(*) FROM Goal WHERE userIdx = ? and MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
+        int checkGoalExist = this.jdbcTemplate.queryForObject(checkGoalExistQuery,int.class,userIdx,beforeMonth);
+        if(checkGoalExist == 0)
+            return 0;
+
         // 1. 사용자의 원하는 달 전체 산책 시간 확인 (초 단위)
         String getUserMonthWalkTimeQuery = "SELECT IFNULL(SUM(TIMESTAMPDIFF(second ,startAt,endAt)),0) as monthWalkTime FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
         int userMonthWalkTime = this.jdbcTemplate.queryForObject(getUserMonthWalkTimeQuery,int.class,userIdx,beforeMonth);
