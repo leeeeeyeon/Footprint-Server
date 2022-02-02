@@ -6,7 +6,6 @@ import com.umc.footprint.src.walks.model.Walk;
 
 import java.time.Duration;
 
-import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
 import com.umc.footprint.config.BaseResponse;
 
 import com.umc.footprint.src.users.model.GetUserTodayRes;
@@ -18,6 +17,7 @@ import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.users.model.*;
 
 import java.util.List;
+
 import static com.umc.footprint.config.BaseResponseStatus.*;
 
 @Service
@@ -110,6 +110,7 @@ public class UserProvider {
     }
 
 
+    //yummy
     public GetUserBadges getUserBadges(int userIdx) throws BaseException {
         try {
             GetUserBadges getUserBadges = userDao.getUserBadges(userIdx);
@@ -165,6 +166,20 @@ public class UserProvider {
                 throw new BaseException(NO_EXIST_RESULT);
             }
             return getTagResult;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    //yummy 13
+    // 이번달 사용자가 얻은 뱃지 조회 (PRO, LOVER, MASTER)
+    public BadgeInfo getMonthlyBadgeStatus(int userIdx) throws BaseException {
+        try {
+            BadgeInfo getBadgeInfo = userDao.getMonthlyBadgeStatus(userIdx);
+            if(getBadgeInfo==null) {
+                throw new BaseException(NO_MONTHLY_BADGE);
+            }
+            return getBadgeInfo;
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
