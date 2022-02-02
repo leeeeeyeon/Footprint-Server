@@ -2,6 +2,8 @@ package com.umc.footprint.src.users.model;
 
 import lombok.*;
 
+import java.sql.Timestamp;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -12,7 +14,7 @@ public class User {
     private String password;
     private int badgeIdx;
     private String name;
-    private int age;
+    private Timestamp birth;
     private int sex;
     private int height;
     private int weight;
