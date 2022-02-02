@@ -495,9 +495,9 @@ public class UserDao {
                 "    inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
                 "    inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
                 "    where hashtag=?" +
-                "    ) and W.userIdx=?";
+                "    ) and W.userIdx=? and T.status=?";
 
-        List<String> walkAtList = jdbcTemplate.queryForList(getWalkAtQuery, String.class, tag, userIdx);
+        List<String> walkAtList = jdbcTemplate.queryForList(getWalkAtQuery, String.class, tag, userIdx, "ACTIVE");
 
         List<GetTagRes> result = new ArrayList<>(); // 최종 출력 값을 담을 리스트
 
@@ -521,8 +521,8 @@ public class UserDao {
                     "    inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
                     "    inner join Walk W on F.walkIdx = W.walkIdx\n" +
                     "    where hashtag=?\n" +
-                    "    and cast(date_format(endAt, '%Y.%m.%d') as char(10))=?";
-            List<Integer> walkIdxList = jdbcTemplate.queryForList(walkIdxQuery, int.class, tag, walkAt);
+                    "    and cast(date_format(endAt, '%Y.%m.%d') as char(10))=? and T.status=?";
+            List<Integer> walkIdxList = jdbcTemplate.queryForList(walkIdxQuery, int.class, tag, walkAt, "ACTIVE");
 
             List<Walk> walks = new ArrayList<>(); // 해당 날짜 + 해당 해시태그를 가지는 산책 기록 리스트
             for(Integer walkIdx : walkIdxList) {
@@ -889,8 +889,8 @@ public class UserDao {
                 "inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
                 "inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
                 "inner join Walk W on F.walkIdx = W.walkIdx\n" +
-                "where F.walkIdx = ?";
-        List<String> tagList = jdbcTemplate.queryForList(getTagQuery, String.class, walkIdx);
+                "where F.walkIdx = ? and T.status = ?";
+        List<String> tagList = jdbcTemplate.queryForList(getTagQuery, String.class, walkIdx, "ACTIVE");
 
         return tagList;
     }
