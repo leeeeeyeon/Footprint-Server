@@ -32,7 +32,8 @@ jobs:
       run: chmod +x ./footprint/gradlew
         
     - name: Build with Gradle
-      run: ./footprint/gradlew build
+      working-directory: ./footprint
+      run: ./gradlew build
       
     - name: Publish Unit Test Results # test 후 result를 보기 위해 추가
       uses: EnricoMi/publish-unit-test-result-action@v1
