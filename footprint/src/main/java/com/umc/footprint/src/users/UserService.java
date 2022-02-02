@@ -67,11 +67,6 @@ public class UserService {
         }
     }
 
-    // 월이 변하면 Goal(Day)Next 데이터를 Goal(Day) 로 옯겨줌 
-    public void monthlyChangeGoal(){
-
-    }
-
 
     // 해당 userIdx를 갖는 Goal 정보 저장
     @Transactional(rollbackFor = Exception.class)
