@@ -550,7 +550,7 @@ public class UserDao {
      * */
 
     // 해당 userIdx를 갖는 Goal의 Time 정보 & GoalDay의 요일 정보 CREATE
-    public int postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
+    public int postGoal(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException {
 
         // Validation 7. Goal Table에 이미 존재하는 userIdx인지 확인
         if(checkUser(userIdx,"GoalNext") == true)
@@ -559,14 +559,14 @@ public class UserDao {
         // 1. Goal Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot Create
         int result1; // 1에서 update 확인용 result
         String createUserGoalTimeQuery = "INSERT INTO Goal (userIdx,walkGoalTime,walkTimeSlot) VALUES (?,?,?)";
-        Object[] createUserGoalTimeParams = new Object[]{userIdx, postUserGoalReq.getWalkGoalTime(), postUserGoalReq.getWalkTimeSlot()};
+        Object[] createUserGoalTimeParams = new Object[]{userIdx, patchUserInfoReq.getWalkGoalTime(), patchUserInfoReq.getWalkTimeSlot()};
         result1 = this.jdbcTemplate.update(createUserGoalTimeQuery,createUserGoalTimeParams);
 
         // 2. GoalDay Table에 sun~fri Create
         int result2; // 2에서 update 확인용 result
         Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
 
-        for (int dayIdx : postUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
+        for (int dayIdx : patchUserInfoReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
             days[dayIdx-1] = true;
         }
 
@@ -582,7 +582,7 @@ public class UserDao {
 
 
     // 해당 userIdx를 갖는 GoalNext의 Time 정보 & GoalDayNext의 요일 정보 CREATE
-    public int postGoalNext(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException {
+    public int postGoalNext(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException {
 
         // Validation 7. GoalNext Table에 이미 존재하는 userIdx인지 확인
         if(checkUser(userIdx,"GoalNext") == true)
@@ -591,14 +591,14 @@ public class UserDao {
         // 1. GoalNext Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot Create
         int result1; // 1에서 update 확인용 result
         String createUserGoalTimeQuery = "INSERT INTO GoalNext (userIdx,walkGoalTime,walkTimeSlot) VALUES (?,?,?)";
-        Object[] createUserGoalTimeNextParams = new Object[]{userIdx, postUserGoalReq.getWalkGoalTime(), postUserGoalReq.getWalkTimeSlot()};
+        Object[] createUserGoalTimeNextParams = new Object[]{userIdx, patchUserInfoReq.getWalkGoalTime(), patchUserInfoReq.getWalkTimeSlot()};
         result1 = this.jdbcTemplate.update(createUserGoalTimeQuery,createUserGoalTimeNextParams);
 
         // 2. GoalDayNext Table에 sun~fri Create
         int result2; // 2에서 update 확인용 result
         Boolean[] days = {false,false,false,false,false,false,false};   // false로 초기화
 
-        for (int dayIdx : postUserGoalReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
+        for (int dayIdx : patchUserInfoReq.getDayIdx()){ // dayIdx에 해당하는 요일만 true로 변경
             days[dayIdx-1] = true;
         }
 
@@ -611,6 +611,7 @@ public class UserDao {
 
         return 1;
     }
+
 
     /*
      *** [3] PATCH METHOD
@@ -663,6 +664,16 @@ public class UserDao {
         Object[] modifyUserGoalDayParams = new Object[]{ days[0], days[1], days[2], days[3], days[4], days[5], days[6], userIdx };
         return this.jdbcTemplate.update(modifyUserGoalDayQuery,modifyUserGoalDayParams);
 
+    }
+
+    // 초기 유저 추가 정보를 User 테이블에 추가
+    public int modifyUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) {
+
+        String patchUserInfoQuery = "UPDATE User SET nickname = ?, birth = ?, sex = ?, height = ?, weight = ? WHERE userIdx = ?";
+        Object[] patchUserInfoParams = new Object[]{patchUserInfoReq.getNickname(), patchUserInfoReq.getBirth(), patchUserInfoReq.getSex(),
+                patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), userIdx};
+
+        return this.jdbcTemplate.update(patchUserInfoQuery, patchUserInfoParams);
     }
 
     /*

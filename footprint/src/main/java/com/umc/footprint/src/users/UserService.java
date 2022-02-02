@@ -71,12 +71,13 @@ public class UserService {
 
     // 해당 userIdx를 갖는 Goal 정보 저장
     @Transactional(rollbackFor = Exception.class)
-    public int postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException{
+    public int postUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException{
         try {
-            int result = userDao.postGoal(userIdx, postUserGoalReq);
-            int resultNext = userDao.postGoalNext(userIdx, postUserGoalReq);
+            int resultInfo = userDao.modifyUserInfo(userIdx, patchUserInfoReq);
+            int result = userDao.postGoal(userIdx, patchUserInfoReq);
+            int resultNext = userDao.postGoalNext(userIdx, patchUserInfoReq);
 
-            if(result == 0 || resultNext ==0)
+            if(resultInfo == 0 || result == 0 || resultNext == 0)
                 return 0;
             return 1;
 
