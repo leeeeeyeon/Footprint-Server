@@ -5,11 +5,11 @@ files:
   - source:  /
     destination: /var/www/dev
     overwrite: yes
-permissions:
-  - object: /usr/www/dev
-    owner: root
-    group: root
-    mode: 755
+# permissions:
+#   - object: /usr/www/dev
+#     owner: root
+#     group: root
+#     mode: 755
 
 hooks:
   # 주의 할 점은 빈칸 yml파일 특성상 빈칸 개수를 중시해야하고 Tab을 쓰면 안된다는점
