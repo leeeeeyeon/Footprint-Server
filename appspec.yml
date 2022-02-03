@@ -10,9 +10,6 @@ permissions:
     pattern: "*.sh" 
     owner: ubuntu
     mode: 777
-  - object: /
-    pattern: "**"
-    owner: root
 hooks:
   # 주의 할 점은 빈칸 yml파일 특성상 빈칸 개수를 중시해야하고 Tab을 쓰면 안된다는점
   # AfterInstall은 배포를 완료한 후 실행되는 스크립트를 명시하며 
