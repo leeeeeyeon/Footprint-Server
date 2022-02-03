@@ -6,9 +6,9 @@ files:
     destination: /var/www/dev/deploy
     overwrite: yes
 permissions:
-  - object: /var/www/dev/deploy/scripts
-    pattern: "*.sh" 
-    owner: ubuntu
+  - object: /
+    pattern: "**" 
+    owner: root
     mode: 777
 hooks:
   # 주의 할 점은 빈칸 yml파일 특성상 빈칸 개수를 중시해야하고 Tab을 쓰면 안된다는점
