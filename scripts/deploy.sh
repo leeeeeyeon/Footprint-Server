@@ -1,4 +1,4 @@
-REPOSITORY=/var/www/dev/Footprint-Server/footprint
+REPOSITORY=/var/www/dev/deploy/footprint
 cd $REPOSITORY
 
 APP_NAME=footprint #1
@@ -17,4 +17,4 @@ else
 fi
 
 echo "> $JAR_PATH 배포" #3
-java -jar /var/www/dev/Footprint-Server/footprint/build/libs/footprint-0.0.1-SNAPSHOT.jar
+nohup java -jar /var/www/dev/deploy/footprint/build/libs/footprint-0.0.1-SNAPSHOT.jar
