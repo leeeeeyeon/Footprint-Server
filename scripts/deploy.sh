@@ -1,9 +1,9 @@
-REPOSITORY=/var/www/dev/deploy/footprint
-cd $REPOSITORY
+# REPOSITORY=/var/www/dev/deploy/footprint
+# cd $REPOSITORY
 
-APP_NAME=footprint #1
-JAR_NAME=$(ls $REPOSITORY/build/libs/ | grep '.jar' | tail -n 1)
-JAR_PATH=$REPOSITORY/build/libs/$JAR_NAME
+# APP_NAME=footprint #1
+# JAR_NAME=$(ls $REPOSITORY/build/libs/ | grep '.jar' | tail -n 1)
+# JAR_PATH=$REPOSITORY/build/libs/$JAR_NAME
 
 # CURRENT_PID=$(pgrep -f $APP_NAME)
 
@@ -17,4 +17,4 @@ JAR_PATH=$REPOSITORY/build/libs/$JAR_NAME
 # fi
 
 echo "> $JAR_PATH 배포" #3
-nohup java -jar $JAR_PATH #/var/www/dev/deploy/footprint/build/libs/footprint-0.0.1-SNAPSHOT.jar
+# nohup java -jar $JAR_PATH #/var/www/dev/deploy/footprint/build/libs/footprint-0.0.1-SNAPSHOT.jar
