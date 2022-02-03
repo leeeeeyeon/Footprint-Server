@@ -44,4 +44,4 @@ jobs:
         run: aws deploy create-deployment --application-name {footprint}
           --deployment-config-name CodeDeployDefault.OneAtATime
           --deployment-group-name {dev}
-          --s3-location bucket={mystepsbucket/deploy},bundleType=zip,key=$GITHUB_SHA.zip
+          --s3-location bucket={mystepsbucket},key=deploy/$GITHUB_SHA.zip,bundleType=zip
