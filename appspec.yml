@@ -8,7 +8,7 @@ files:
 permissions:
   - object: /var/www/dev/deploy/scripts
     pattern: "*.sh" 
-    owner: ec2-user
+    owner: ubuntu
     mode: 777
   - object: /
     pattern: /
