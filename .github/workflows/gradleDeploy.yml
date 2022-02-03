@@ -20,6 +20,9 @@ jobs:
       - name: Grant execute permission for gradlew
         working-directory: ./footprint
         run: chmod +x ./gradlew
+      
+      - name: Grant execute permission for deploy.sh
+        run: chmod +x ./scripts/deploy.sh
 
       - name: Build with Gradle
         working-directory: ./footprint
