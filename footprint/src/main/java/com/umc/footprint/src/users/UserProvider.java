@@ -195,4 +195,12 @@ public class UserProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    public int getUserIdx(String jwtId) throws BaseException {
+        try {
+            return userDao.getUserIdx(jwtId);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }
