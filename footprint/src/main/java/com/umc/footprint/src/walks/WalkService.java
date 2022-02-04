@@ -31,13 +31,8 @@ public class WalkService {
         this.awsS3Service = awsS3Service;
     }
 
-<<<<<<< HEAD
     @Transactional(rollbackFor = Exception.class)
-    public PostWalkRes saveRecord(PostWalkReq request) throws BaseException {
-=======
-    @Transactional
     public List<PostWalkRes> saveRecord(PostWalkReq request) throws BaseException {
->>>>>>> 19fe9d78d8a1131080070c36b79f53927c12aa66
         try {
             // 경로 이미지 URL 생성 및 S3 업로드
             String pathImgUrl = awsS3Service.uploadFile(request.getWalk().getPathImg());
