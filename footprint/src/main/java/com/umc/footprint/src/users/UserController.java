@@ -36,6 +36,22 @@ public class UserController {
     }
 
     /**
+     * 유저 로그인 API
+     * [POST] /users/auth/login
+     */
+    @ResponseBody
+    @PostMapping("/auth/login")
+    public BaseResponse<PostLoginRes> login(@RequestBody PostLoginReq postLoginReq) {
+        try {
+            PostLoginRes postLoginRes = new PostLoginRes();
+            userService.postUserLogin(postLoginReq);
+            return new BaseResponse<>(postLoginRes);
+        } catch (BaseException exception) {
+            return new BaseResponse<>(exception.getStatus());
+        }
+    }
+
+    /**
      * 유저 오늘 산책관련 정보 조회 API
      * [GET] /users/:userIdx/today
      */

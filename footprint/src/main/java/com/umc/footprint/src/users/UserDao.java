@@ -14,12 +14,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.text.ParseException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import javax.transaction.Transactional;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
 
@@ -710,9 +707,8 @@ public class UserDao {
     }
 
 
-    /*
-     *** [2] POST METHOD
-     * */
+
+
 
     // 해당 userIdx를 갖는 Goal의 Time 정보 & GoalDay의 요일 정보 CREATE
     public int postGoal(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException {
@@ -1067,4 +1063,12 @@ public class UserDao {
 
     }
 
+    // 로그인 정보 입력
+    public void postUserLogin(PostLoginReq postLoginReq) {
+        String postLoginQuery = "insert into User(userId, username, email) values (?,?,?)";
+        String userId = postLoginReq.getUserId();
+        String username = postLoginReq.getUsername();
+        String email = postLoginReq.getEmail();
+        this.jdbcTemplate.queryForObject(postLoginQuery, String.class, userId, username, email);
+    }
 }

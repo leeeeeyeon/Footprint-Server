@@ -80,4 +80,13 @@ public class UserService {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    public void postUserLogin(PostLoginReq postLoginReq) throws BaseException {
+        try {
+            userDao.postUserLogin(postLoginReq);
+
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }
