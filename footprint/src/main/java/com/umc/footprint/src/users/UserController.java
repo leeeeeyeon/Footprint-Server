@@ -342,15 +342,12 @@ public class UserController {
      */
     // Path-variable
     @ResponseBody
-    @PostMapping("/{useridx}/infos") // [POST] /users/:useridx/goals
-    public BaseResponse<String> postGoal(@PathVariable("useridx") int userIdx, @RequestBody PatchUserInfoReq patchUserInfoReq){
+    @PostMapping("/infos") // [POST] /users/:useridx/goals
+    public BaseResponse<String> postGoal( @RequestBody PatchUserInfoReq patchUserInfoReq){
 
         try {
             String jwtId = jwtService.getUserId();
-            int userIdByJwt = userProvider.getUserIdx(jwtId);
-            if (userIdByJwt != userIdx) {
-                return new BaseResponse<>(INVALID_USER_JWT);
-            }
+            int userIdx = userProvider.getUserIdx(jwtId);
 
             // Validation 0. 날짜 형식 검사
             if(!patchUserInfoReq.getBirth().matches("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$")){
