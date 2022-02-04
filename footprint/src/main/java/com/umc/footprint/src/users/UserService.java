@@ -6,20 +6,23 @@ import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponseStatus;
 import com.umc.footprint.src.users.model.*;
 
+import com.umc.footprint.utils.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
     private final UserDao userDao;
+    private final UserProvider userProvider;
+    private final JwtService jwtService;
 
     @Autowired
-    public UserService(UserDao userDao) {
+    public UserService(UserDao userDao, UserProvider userProvider, JwtService jwtService) {
         this.userDao = userDao;
+        this.userProvider = userProvider;
+        this.jwtService = jwtService;
     }
 
 
@@ -79,5 +82,30 @@ public class UserService {
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public PostLoginRes postUserLogin(PostLoginReq postLoginReq) throws BaseException {
+        // email 중복 확인 있으면 status에 Done 넣고 return
+        System.out.println("UserService.postUserLogin1");
+        PostLoginRes result = userProvider.checkEmail(postLoginReq.getEmail());
+        System.out.println("result.getStatus() = " + result.getStatus());
+        switch (result.getStatus()) {
+            case "NONE":
+                try {
+                    System.out.println("UserService.postUserLogin2");
+                    // 암호화
+                    String jwt = jwtService.createJwt(postLoginReq.getUserId());
+                    userDao.postUserLogin(postLoginReq);
+
+                    return new PostLoginRes(jwt, "ONGOING");
+                } catch (Exception exception) {
+                    throw new BaseException(DATABASE_ERROR);
+                }
+            case "DONE":
+            case "ONGOING":
+                return result;
+        }
+        return null;
     }
 }

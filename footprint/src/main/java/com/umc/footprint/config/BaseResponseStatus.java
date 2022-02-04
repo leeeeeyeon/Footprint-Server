@@ -34,6 +34,9 @@ public enum BaseResponseStatus {
      */
 
     INVALID_DATE(false,2000, "잘못된 날짜 형식입니다."),
+    EMPTY_JWT(false, 2001, "JWT를 입력해주세요."),
+    INVALID_JWT(false, 2002, "유효하지 않은 JWT입니다."),
+    INVALID_USER_JWT(false,2003,"권한이 없는 유저의 접근입니다."),
     INVALID_USERIDX(false,2100,"잘못된 유저 인덱스입니다."),
     NOT_EXIST_USER_IN_WALK(false,2120, "아직 산책 기록이 없는 사용자입니다."),
     NO_EXIST_WALK(false,2121, "해당 날짜에는 산책을 하지 않았습니다."),
@@ -49,6 +52,8 @@ public enum BaseResponseStatus {
     MIN_WALK_GOAL_TIME(false, 2145,"목표산책시간이 최소시간 미만입니다."),
     MAX_WALK_GOAL_TIME(false, 2146,"목표산책시간이 최대시간 초과입니다."),
     INVALID_WALK_TIME_SLOT(false, 2147,"잘못된 산책 시간대 입니다."),
+    POST_USERS_EMPTY_EMAIL(false, 2148, "이메일을 입력해주세요."),
+    POST_USERS_INVALID_EMAIL(false, 2016, "이메일 형식을 확인해주세요."),
     MAX_NICKNAME_LENGTH(false, 2160, "닉네임은 8자를 초과할 수 없습니다."),
 
     INVALID_WALKIDX(false, 2200, "잘못된 산책 인덱스입니다."),

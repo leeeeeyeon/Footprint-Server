@@ -3,12 +3,12 @@ package com.umc.footprint.src.users;
 import com.umc.footprint.src.users.model.GetUserTodayRes;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.umc.footprint.src.users.model.*;
+import com.umc.footprint.utils.JwtService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,21 +18,45 @@ import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
 
 import com.umc.footprint.config.BaseResponseStatus;
-import com.umc.footprint.config.BaseResponseStatus.*;
+
+import static com.umc.footprint.config.BaseResponseStatus.*;
+import static com.umc.footprint.utils.ValidationRegax.isRegexEmail;
 
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-    @Autowired
     private final UserProvider userProvider;
-    @Autowired
     private final UserService userService;
+    private final JwtService jwtService;
 
-    public UserController(UserProvider userProvider, UserService userService) {
+    @Autowired
+    public UserController(UserProvider userProvider, UserService userService, JwtService jwtService) {
         this.userProvider = userProvider;
         this.userService = userService;
+        this.jwtService = jwtService;
+    }
+    /**
+     * 유저 로그인 API
+     * [POST] /users/auth/login
+     */
+    @ResponseBody
+    @PostMapping("/auth/login")
+    public BaseResponse<PostLoginRes> postUser(@RequestBody PostLoginReq postLoginReq) {
+        if (postLoginReq.getEmail() == null) {
+            return new BaseResponse<>(POST_USERS_EMPTY_EMAIL);
+        }
+        //이메일 정규표현: 입력받은 이메일이 email@domain.xxx와 같은 형식인지 검사합니다. 형식이 올바르지 않다면 에러 메시지를 보냅니다.
+        if (!isRegexEmail(postLoginReq.getEmail())) {
+            return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
+        }
+        try {
+            PostLoginRes postLoginRes = userService.postUserLogin(postLoginReq);
+            return new BaseResponse<>(postLoginRes);
+        } catch (BaseException exception) {
+            return new BaseResponse<>(exception.getStatus());
+        }
     }
 
     /**
@@ -318,57 +342,65 @@ public class UserController {
      */
     // Path-variable
     @ResponseBody
-    @PostMapping("/{useridx}/infos") // [POST] /users/:useridx/goals
-    public BaseResponse<String> postGoal(@PathVariable("useridx") int userIdx, @RequestBody PatchUserInfoReq patchUserInfoReq){
-
-        // Validation 0. 날짜 형식 검사
-        if(!patchUserInfoReq.getBirth().matches("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$")){
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_DATE).getStatus());
-        }
-
-        // Validaion 1. userIdx 가 0 이하일 경우 exception
-        if(userIdx <= 0)
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_USERIDX).getStatus());
-
-        // Validaion 2. dayIdx 길이 확인
-        if(patchUserInfoReq.getDayIdx().size() == 0) // 요일 0개 선택
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.MIN_DAYIDX).getStatus());
-        if(patchUserInfoReq.getDayIdx().size() > 7)  // 요일 7개 초과 선택
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.MAX_DAYIDX).getStatus());
-
-        // Validaion 3. dayIdx 숫자 범위 확인
-        for (Integer dayIdx : patchUserInfoReq.getDayIdx()){
-            if (dayIdx > 7 || dayIdx < 1)
-                return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_DAYIDX).getStatus());
-        }
-
-        // Validaion 4. dayIdx 중복된 숫자 확인
-        Set<Integer> setDayIDx = new HashSet<>(patchUserInfoReq.getDayIdx());
-        if(patchUserInfoReq.getDayIdx().size() != setDayIDx.size()) // dayIdx 크기를 set으로 변형시킨 dayIdx 크기와 비교. 크기가 다르면 중복된 값 존재
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.OVERLAP_DAYIDX).getStatus());
-
-        // Validaion 5. walkGoalTime 범위 확인
-        if(patchUserInfoReq.getWalkGoalTime() < 10) // 최소 산책 목표 시간 미만
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.MIN_WALK_GOAL_TIME).getStatus());
-        if(patchUserInfoReq.getWalkGoalTime() > 240) // 최대 산책 목표 시간 초과
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.MAX_WALK_GOAL_TIME).getStatus());
-
-        // Validaion 6. walkTimeSlot 범위 확인
-        if(patchUserInfoReq.getWalkTimeSlot() > 7 || patchUserInfoReq.getWalkTimeSlot() < 1)
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_WALK_TIME_SLOT).getStatus());
-
+    @PostMapping("/infos") // [POST] /users/:useridx/goals
+    public BaseResponse<String> postGoal(@RequestBody PatchUserInfoReq patchUserInfoReq){
 
         try {
-            int result = userService.postUserInfo(userIdx, patchUserInfoReq);
+            // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
+            String userId = jwtService.getUserId();
+            System.out.println("userId = " + userId);
+            // userId로 userIdx 추출
+            int userIdx = userProvider.getUserIdx(userId);
 
-            String resultMsg = "정보 저장에 성공하였습니다.";
-            if(result == 0)
-                resultMsg = "정보 저장에 실패하였습니다.";
+            // Validaion 1. userIdx 가 0 이하일 경우 exception
+            if(userIdx <= 0)
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_USERIDX).getStatus());
 
-            return new BaseResponse<>(resultMsg);
+            // Validaion 2. dayIdx 길이 확인
+            if(patchUserInfoReq.getDayIdx().size() == 0) // 요일 0개 선택
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.MIN_DAYIDX).getStatus());
+            if(patchUserInfoReq.getDayIdx().size() > 7)  // 요일 7개 초과 선택
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.MAX_DAYIDX).getStatus());
+
+            // Validaion 3. dayIdx 숫자 범위 확인
+            for (Integer dayIdx : patchUserInfoReq.getDayIdx()){
+                if (dayIdx > 7 || dayIdx < 1)
+                    return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_DAYIDX).getStatus());
+            }
+
+            // Validaion 4. dayIdx 중복된 숫자 확인
+            Set<Integer> setDayIDx = new HashSet<>(patchUserInfoReq.getDayIdx());
+            if(patchUserInfoReq.getDayIdx().size() != setDayIDx.size()) // dayIdx 크기를 set으로 변형시킨 dayIdx 크기와 비교. 크기가 다르면 중복된 값 존재
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.OVERLAP_DAYIDX).getStatus());
+
+            // Validaion 5. walkGoalTime 범위 확인
+            if(patchUserInfoReq.getWalkGoalTime() < 10) // 최소 산책 목표 시간 미만
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.MIN_WALK_GOAL_TIME).getStatus());
+            if(patchUserInfoReq.getWalkGoalTime() > 240) // 최대 산책 목표 시간 초과
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.MAX_WALK_GOAL_TIME).getStatus());
+
+            // Validaion 6. walkTimeSlot 범위 확인
+            if(patchUserInfoReq.getWalkTimeSlot() > 7 || patchUserInfoReq.getWalkTimeSlot() < 1)
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_WALK_TIME_SLOT).getStatus());
+
+
+            try {
+                int result = userService.postUserInfo(userIdx, patchUserInfoReq);
+
+                String resultMsg = "정보 저장에 성공하였습니다.";
+                if(result == 0)
+                    resultMsg = "정보 저장에 실패하였습니다.";
+
+                return new BaseResponse<>(resultMsg);
+            } catch (BaseException exception) {
+                return new BaseResponse<>((exception.getStatus()));
+            }
+
         } catch (BaseException exception) {
-            return new BaseResponse<>((exception.getStatus()));
+            return new BaseResponse<>(exception.getStatus());
         }
+
+
     }
 
     /**

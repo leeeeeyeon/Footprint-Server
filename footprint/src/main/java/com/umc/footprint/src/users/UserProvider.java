@@ -2,18 +2,13 @@ package com.umc.footprint.src.users;
 
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.walks.WalkDao;
-import com.umc.footprint.src.walks.model.Walk;
-
-import java.time.Duration;
-
-import com.umc.footprint.config.BaseResponse;
 
 import com.umc.footprint.src.users.model.GetUserTodayRes;
+import com.umc.footprint.utils.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.users.model.*;
 
 import java.util.List;
@@ -25,11 +20,13 @@ public class UserProvider {
 
     private final WalkDao walkDao;
     private final UserDao userDao;
+    private final JwtService jwtService;
 
     @Autowired
-    public UserProvider(WalkDao walkDao,UserDao userDao) {
+    public UserProvider(WalkDao walkDao, UserDao userDao, JwtService jwtService) {
         this.walkDao = walkDao;
         this.userDao = userDao;
+        this.jwtService = jwtService;
     }
 
     // 해당 userIdx를 갖는 오늘 산책 관련 정보 조회
@@ -180,6 +177,37 @@ public class UserProvider {
                 throw new BaseException(NO_MONTHLY_BADGE);
             }
             return getBadgeInfo;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // email을 통해 유저 중복 검사
+    public PostLoginRes checkEmail(String email) throws BaseException {
+        System.out.println("UserProvider.checkEmail1");
+        try {
+            if (userDao.checkEmail(email) == 1) {
+                System.out.println("UserProvider.checkEmail2");
+                // email로 userId랑 상태 추출
+                PostLoginRes postLoginRes = userDao.getUserIdAndStatus(email);
+                // userId 암호화
+                String jwtId = jwtService.createJwt(postLoginRes.getJwtId());
+                // response에 저장
+                postLoginRes.setJwtId(jwtId);
+                return postLoginRes;
+            } else {
+                return new PostLoginRes("", "NONE");
+            }
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // userId로 userIdx 추출
+    public int getUserIdx(String userId) throws BaseException {
+        try {
+            System.out.println("UserProvider.getUserIdx");
+            return userDao.getUserIdx(userId);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }

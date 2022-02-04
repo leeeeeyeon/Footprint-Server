@@ -14,12 +14,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.text.ParseException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import javax.transaction.Transactional;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
 
@@ -710,9 +707,8 @@ public class UserDao {
     }
 
 
-    /*
-     *** [2] POST METHOD
-     * */
+
+
 
     // 해당 userIdx를 갖는 Goal의 Time 정보 & GoalDay의 요일 정보 CREATE
     public int postGoal(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException {
@@ -835,9 +831,10 @@ public class UserDao {
     // 초기 유저 추가 정보를 User 테이블에 추가
     public int modifyUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) {
 
-        String patchUserInfoQuery = "UPDATE User SET nickname = ?, birth = ?, sex = ?, height = ?, weight = ? WHERE userIdx = ?";
+        System.out.println("userIdx = " + userIdx);
+        String patchUserInfoQuery = "UPDATE User SET nickname = ?, birth = ?, sex = ?, height = ?, weight = ?, status = ? WHERE userIdx = ?";
         Object[] patchUserInfoParams = new Object[]{patchUserInfoReq.getNickname(), patchUserInfoReq.getBirth(), patchUserInfoReq.getSex(),
-                patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), userIdx};
+                patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), "DONE",userIdx};
 
         return this.jdbcTemplate.update(patchUserInfoQuery, patchUserInfoParams);
     }
@@ -1065,6 +1062,39 @@ public class UserDao {
 
         return updateBool;
 
+    }
+
+    // 로그인 정보 입력
+    public void postUserLogin(PostLoginReq postLoginReq) {
+        String postLoginQuery = "insert into User(userId, username, email, providerType, status) values (?,?,?,?,?)";
+        System.out.println("UserDao.postUserLogin");
+        String status = "ONGOING";
+        Object[] postLoginParmas = new Object[]{postLoginReq.getUserId(), postLoginReq.getUsername(), postLoginReq.getEmail(), postLoginReq.getProviderType(), status};
+        this.jdbcTemplate.update(postLoginQuery,  postLoginParmas);
+    }
+
+    public PostLoginRes getUserIdAndStatus(String email) {
+        System.out.println("UserDao.getUserIdAndStatus");
+        String checkEmailQuery = "select userId, status from User where email = ?";
+        return this.jdbcTemplate.queryForObject(checkEmailQuery,
+                (rs, rowNum) -> new PostLoginRes(
+                        rs.getString("userId"),
+                        rs.getString("status")
+                ), email);
+    }
+
+    public int checkEmail(String email) {
+        System.out.println("UserDao.checkEmail");
+        String checkEmailQuery = "select exists(select email from User where email = ?)";
+        return this.jdbcTemplate.queryForObject(checkEmailQuery,
+                int.class,
+                email);
+    }
+
+    public int getUserIdx(String userId) {
+        System.out.println("UserDao.getUserIdx");
+        String getUserIdxQuery = "select userIdx from User where userId = ?";
+        return this.jdbcTemplate.queryForObject(getUserIdxQuery, int.class, userId);
     }
 
 }
