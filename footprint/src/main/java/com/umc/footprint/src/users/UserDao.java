@@ -1091,10 +1091,10 @@ public class UserDao {
                 email);
     }
 
-    public int getUserIdx(String jwtId) {
+    public int getUserIdx(String userId) {
         System.out.println("UserDao.getUserIdx");
         String getUserIdxQuery = "select userIdx from User where userId = ?";
-        return this.jdbcTemplate.queryForObject(getUserIdxQuery, int.class, jwtId);
+        return this.jdbcTemplate.queryForObject(getUserIdxQuery, int.class, userId);
     }
 
 }

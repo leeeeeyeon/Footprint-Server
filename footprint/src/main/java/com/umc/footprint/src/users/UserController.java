@@ -343,12 +343,14 @@ public class UserController {
     // Path-variable
     @ResponseBody
     @PostMapping("/infos") // [POST] /users/:useridx/goals
-    public BaseResponse<String> postGoal( @RequestBody PatchUserInfoReq patchUserInfoReq){
+    public BaseResponse<String> postGoal(@RequestBody PatchUserInfoReq patchUserInfoReq){
 
         try {
-            String jwtId = jwtService.getUserId();
-            System.out.println("jwtId = " + jwtId);
-            int userIdx = userProvider.getUserIdx(jwtId);
+            // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
+            String userId = jwtService.getUserId();
+            System.out.println("userId = " + userId);
+            // userId로 userIdx 추출
+            int userIdx = userProvider.getUserIdx(userId);
 
             System.out.println("UserController.postGoal");
             // Validation 0. 날짜 형식 검사
