@@ -19,8 +19,7 @@ import com.umc.footprint.config.BaseResponse;
 
 import com.umc.footprint.config.BaseResponseStatus;
 
-import static com.umc.footprint.config.BaseResponseStatus.POST_USERS_EMPTY_EMAIL;
-import static com.umc.footprint.config.BaseResponseStatus.POST_USERS_INVALID_EMAIL;
+import static com.umc.footprint.config.BaseResponseStatus.*;
 import static com.umc.footprint.utils.ValidationRegax.isRegexEmail;
 
 
@@ -346,54 +345,67 @@ public class UserController {
     @PostMapping("/{useridx}/infos") // [POST] /users/:useridx/goals
     public BaseResponse<String> postGoal(@PathVariable("useridx") int userIdx, @RequestBody PatchUserInfoReq patchUserInfoReq){
 
-        // Validation 0. 날짜 형식 검사
-        if(!patchUserInfoReq.getBirth().matches("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$")){
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_DATE).getStatus());
-        }
-
-        // Validaion 1. userIdx 가 0 이하일 경우 exception
-        if(userIdx <= 0)
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_USERIDX).getStatus());
-
-        // Validaion 2. dayIdx 길이 확인
-        if(patchUserInfoReq.getDayIdx().size() == 0) // 요일 0개 선택
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.MIN_DAYIDX).getStatus());
-        if(patchUserInfoReq.getDayIdx().size() > 7)  // 요일 7개 초과 선택
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.MAX_DAYIDX).getStatus());
-
-        // Validaion 3. dayIdx 숫자 범위 확인
-        for (Integer dayIdx : patchUserInfoReq.getDayIdx()){
-            if (dayIdx > 7 || dayIdx < 1)
-                return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_DAYIDX).getStatus());
-        }
-
-        // Validaion 4. dayIdx 중복된 숫자 확인
-        Set<Integer> setDayIDx = new HashSet<>(patchUserInfoReq.getDayIdx());
-        if(patchUserInfoReq.getDayIdx().size() != setDayIDx.size()) // dayIdx 크기를 set으로 변형시킨 dayIdx 크기와 비교. 크기가 다르면 중복된 값 존재
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.OVERLAP_DAYIDX).getStatus());
-
-        // Validaion 5. walkGoalTime 범위 확인
-        if(patchUserInfoReq.getWalkGoalTime() < 10) // 최소 산책 목표 시간 미만
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.MIN_WALK_GOAL_TIME).getStatus());
-        if(patchUserInfoReq.getWalkGoalTime() > 240) // 최대 산책 목표 시간 초과
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.MAX_WALK_GOAL_TIME).getStatus());
-
-        // Validaion 6. walkTimeSlot 범위 확인
-        if(patchUserInfoReq.getWalkTimeSlot() > 7 || patchUserInfoReq.getWalkTimeSlot() < 1)
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_WALK_TIME_SLOT).getStatus());
-
-
         try {
-            int result = userService.postUserInfo(userIdx, patchUserInfoReq);
+            String jwtId = jwtService.getUserId();
+            int userIdByJwt = userProvider.getUserIdx(jwtId);
+            if (userIdByJwt != userIdx) {
+                return new BaseResponse<>(INVALID_USER_JWT);
+            }
 
-            String resultMsg = "정보 저장에 성공하였습니다.";
-            if(result == 0)
-                resultMsg = "정보 저장에 실패하였습니다.";
+            // Validation 0. 날짜 형식 검사
+            if(!patchUserInfoReq.getBirth().matches("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$")){
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_DATE).getStatus());
+            }
 
-            return new BaseResponse<>(resultMsg);
+            // Validaion 1. userIdx 가 0 이하일 경우 exception
+            if(userIdx <= 0)
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_USERIDX).getStatus());
+
+            // Validaion 2. dayIdx 길이 확인
+            if(patchUserInfoReq.getDayIdx().size() == 0) // 요일 0개 선택
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.MIN_DAYIDX).getStatus());
+            if(patchUserInfoReq.getDayIdx().size() > 7)  // 요일 7개 초과 선택
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.MAX_DAYIDX).getStatus());
+
+            // Validaion 3. dayIdx 숫자 범위 확인
+            for (Integer dayIdx : patchUserInfoReq.getDayIdx()){
+                if (dayIdx > 7 || dayIdx < 1)
+                    return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_DAYIDX).getStatus());
+            }
+
+            // Validaion 4. dayIdx 중복된 숫자 확인
+            Set<Integer> setDayIDx = new HashSet<>(patchUserInfoReq.getDayIdx());
+            if(patchUserInfoReq.getDayIdx().size() != setDayIDx.size()) // dayIdx 크기를 set으로 변형시킨 dayIdx 크기와 비교. 크기가 다르면 중복된 값 존재
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.OVERLAP_DAYIDX).getStatus());
+
+            // Validaion 5. walkGoalTime 범위 확인
+            if(patchUserInfoReq.getWalkGoalTime() < 10) // 최소 산책 목표 시간 미만
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.MIN_WALK_GOAL_TIME).getStatus());
+            if(patchUserInfoReq.getWalkGoalTime() > 240) // 최대 산책 목표 시간 초과
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.MAX_WALK_GOAL_TIME).getStatus());
+
+            // Validaion 6. walkTimeSlot 범위 확인
+            if(patchUserInfoReq.getWalkTimeSlot() > 7 || patchUserInfoReq.getWalkTimeSlot() < 1)
+                return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_WALK_TIME_SLOT).getStatus());
+
+
+            try {
+                int result = userService.postUserInfo(userIdx, patchUserInfoReq);
+
+                String resultMsg = "정보 저장에 성공하였습니다.";
+                if(result == 0)
+                    resultMsg = "정보 저장에 실패하였습니다.";
+
+                return new BaseResponse<>(resultMsg);
+            } catch (BaseException exception) {
+                return new BaseResponse<>((exception.getStatus()));
+            }
+
         } catch (BaseException exception) {
-            return new BaseResponse<>((exception.getStatus()));
+            return new BaseResponse<>(exception.getStatus());
         }
+
+
     }
 
     /**

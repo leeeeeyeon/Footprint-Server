@@ -1091,4 +1091,9 @@ public class UserDao {
                 int.class,
                 email);
     }
+
+    public int getUserIdx(String jwtId) {
+        String getUserIdxQuery = "select userId from User where userId = ?";
+        return this.jdbcTemplate.queryForObject(getUserIdxQuery, int.class, jwtId);
+    }
 }
