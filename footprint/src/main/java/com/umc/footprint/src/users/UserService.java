@@ -98,7 +98,7 @@ public class UserService {
                     String jwt = jwtService.createJwt(postLoginReq.getUserId());
                     userDao.postUserLogin(postLoginReq, jwt);
 
-                    return new PostLoginRes(jwt, "Ongoing");
+                    return new PostLoginRes(jwt, "ONGOING");
                 } catch (Exception exception) {
                     throw new BaseException(DATABASE_ERROR);
                 }
