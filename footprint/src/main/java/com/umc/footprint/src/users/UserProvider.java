@@ -185,7 +185,9 @@ public class UserProvider {
         try {
             if (userDao.checkEmail(email) == 1) {
                 System.out.println("UserProvider.checkEmail2");
-                return userDao.getUserIdAndStatus(email);
+                PostLoginRes postLoginRes = userDao.getUserIdAndStatus(email);
+                postLoginRes.setStatus("DONE");
+                return postLoginRes;
             } else {
                 return new PostLoginRes("", "NONE");
             }

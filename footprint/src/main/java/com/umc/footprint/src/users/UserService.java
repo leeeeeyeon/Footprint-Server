@@ -84,10 +84,12 @@ public class UserService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public PostLoginRes postUserLogin(PostLoginReq postLoginReq) throws BaseException {
         // email 중복 확인 있으면 status에 Done 넣고 return
         System.out.println("UserService.postUserLogin1");
         PostLoginRes result = userProvider.checkEmail(postLoginReq.getEmail());
+        System.out.println("result.getStatus() = " + result.getStatus());
         switch (result.getStatus()) {
             case "NONE":
                 try {
@@ -100,8 +102,10 @@ public class UserService {
                 } catch (Exception exception) {
                     throw new BaseException(DATABASE_ERROR);
                 }
-            default:
+            case "DONE":
+            case "ONGOING":
                 return result;
         }
+        return null;
     }
 }
