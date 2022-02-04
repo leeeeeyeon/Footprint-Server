@@ -352,12 +352,6 @@ public class UserController {
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
-            System.out.println("UserController.postGoal");
-            // Validation 0. 날짜 형식 검사
-            if(!patchUserInfoReq.getBirth().matches("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$")){
-                return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_DATE).getStatus());
-            }
-
             // Validaion 1. userIdx 가 0 이하일 경우 exception
             if(userIdx <= 0)
                 return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_USERIDX).getStatus());
