@@ -13,4 +13,5 @@ public class PostLoginReq {
     private String userId;
     private String username;
     private String email;
+    private String providerType;
 }
