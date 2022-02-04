@@ -831,9 +831,10 @@ public class UserDao {
     // 초기 유저 추가 정보를 User 테이블에 추가
     public int modifyUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) {
 
+        System.out.println("userIdx = " + userIdx);
         String patchUserInfoQuery = "UPDATE User SET nickname = ?, birth = ?, sex = ?, height = ?, weight = ?, status = ? WHERE userIdx = ?";
         Object[] patchUserInfoParams = new Object[]{patchUserInfoReq.getNickname(), patchUserInfoReq.getBirth(), patchUserInfoReq.getSex(),
-                patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), userIdx, "DONE"};
+                patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), "DONE",userIdx};
 
         return this.jdbcTemplate.update(patchUserInfoQuery, patchUserInfoParams);
     }
