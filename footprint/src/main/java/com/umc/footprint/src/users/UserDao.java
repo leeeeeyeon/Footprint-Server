@@ -1065,9 +1065,9 @@ public class UserDao {
 
     // 로그인 정보 입력
     public void postUserLogin(PostLoginReq postLoginReq, String jwt) {
-        String postLoginQuery = "insert into User(userId, username, email, status) values (?,?,?,?)";
+        String postLoginQuery = "insert into User(userId, username, email, status, providerType) values (?,?,?,?,?)";
         System.out.println("UserDao.postUserLogin");
-        Object[] postLoginParmas = new Object[]{jwt, postLoginReq.getUsername(), postLoginReq.getEmail(), "ONGOING"};
+        Object[] postLoginParmas = new Object[]{jwt, postLoginReq.getUsername(), postLoginReq.getEmail(), "ONGOING", postLoginReq.getProviderType()};
         this.jdbcTemplate.update(postLoginQuery,  postLoginParmas);
     }
 
