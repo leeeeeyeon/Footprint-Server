@@ -63,7 +63,7 @@ public class UserController {
 
         // Validation 1. 날짜 형식 검사
         if(!date.matches("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$")){
-            return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_USERIDX).getStatus());
+            return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_DATE).getStatus());
         }
 
         // Provider 연결
@@ -150,8 +150,12 @@ public class UserController {
     }
 
 
+    /** yummy 4
+     * 이번달 정보 조회 API
+     * [GET] /users/:useridx/tmonth
+     */
     @ResponseBody
-    @GetMapping("/{userIdx}/tmonth") // (GET) 127.0.0.1:3000/users/{userIdx}/tmonth
+    @GetMapping("/{userIdx}/tmonth")
     public BaseResponse<GetMonthInfoRes> getMonthInfo(@PathVariable("userIdx") int userIdx) {
         // TO-DO-LIST
         // jwt 확인?
@@ -165,10 +169,10 @@ public class UserController {
 
             GetMonthInfoRes getMonthInfoRes = userProvider.getMonthInfoRes(userIdx, nowYear, nowMonth);
             return new BaseResponse<>(getMonthInfoRes);
-          } catch (BaseException exception) {
+        } catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));
         }
-      
+
     }
   
 
@@ -223,26 +227,71 @@ public class UserController {
     }
 
 
+    /** yummy 5
+     * 월별 발자국 개수 조회 API
+     * [GET] /users/:useridx/months/footprints?year=2021&month=2
+     */
     @ResponseBody
-    @GetMapping("/{userIdx}/months/footprints") // (GET) 127.0.0.1:3000/users/{userIdx}/months/footprints?year=2021&month=2
+    @GetMapping("/{userIdx}/months/footprints")
     public BaseResponse<List<GetFootprintCount>> getMonthFootprints(@PathVariable("userIdx") int userIdx,@RequestParam(required = true) int year, @RequestParam(required = true) int month) throws BaseException {
-        List<GetFootprintCount> getFootprintCounts = userProvider.getMonthFootprints(userIdx, year, month);
-        return new BaseResponse<>(getFootprintCounts);
+        try {
+            List<GetFootprintCount> getFootprintCounts = userProvider.getMonthFootprints(userIdx, year, month);
+            return new BaseResponse<>(getFootprintCounts);
+        }
+        catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
+
+    /** yummy 13
+     * 사용자 전체 뱃지 조회 API
+     * [GET] /users/:useridx/badges
+     */
+    @ResponseBody
+    @GetMapping("/{userIdx}/badges/status") //매달 첫 접속마다 요청되는 뱃지 확인 API - 이번달 획득 뱃지의 정보를 전달, 없으면 null 반환
+    public BaseResponse<BadgeInfo> getMonthlyBadgeStatus(@PathVariable("userIdx") int userIdx) throws BaseException {
+        try {
+            BadgeInfo getBadgeInfo = userProvider.getMonthlyBadgeStatus(userIdx);
+            return new BaseResponse<>(getBadgeInfo);
+        }
+        catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
     }
 
 
+
+
+    /** yummy 11
+     * 사용자 전체 뱃지 조회 API
+     * [GET] /users/:useridx/badges
+     */
     @ResponseBody
-    @GetMapping("/{userIdx}/badges") // (GET) 127.0.0.1:3000/users/{userIdx}/badges
+    @GetMapping("/{userIdx}/badges")
     public BaseResponse<GetUserBadges> getUsersBadges(@PathVariable("userIdx") int userIdx) throws BaseException {
+        try {
             GetUserBadges getUserBadges = userProvider.getUserBadges(userIdx);
             return new BaseResponse<>(getUserBadges);
+        }
+        catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
     }
 
+    /** yummy 12
+     * 사용자 대표 뱃지 수정 API
+     * [GET] /users/:useridx/badges/title/:badgeidx
+     */
     @ResponseBody
     @PatchMapping("/{userIdx}/badges/title/{badgeIdx}")
     public BaseResponse<BadgeInfo> patchRepBadge(@PathVariable("userIdx") int userIdx, @PathVariable("badgeIdx") int badgeIdx) throws BaseException {
-        BadgeInfo patchRepBadgeInfo = userService.patchRepBadge(userIdx, badgeIdx);
-        return new BaseResponse<>(patchRepBadgeInfo);
+        try {
+            BadgeInfo patchRepBadgeInfo = userService.patchRepBadge(userIdx, badgeIdx);
+            return new BaseResponse<>(patchRepBadgeInfo);
+        }
+        catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
     }
 
 
@@ -264,53 +313,57 @@ public class UserController {
     }
 
    /**
-     * 목표 등록 API
-     * [POST] /users/:useridx/goals
+     * 초기 정보 등록 API
+     * [POST] /users/:useridx/infos
      */
     // Path-variable
     @ResponseBody
-    @PostMapping("/{useridx}/goals") // [POST] /users/:useridx/goals
-    public BaseResponse<String> postGoal(@PathVariable("useridx") int userIdx, @RequestBody PostUserGoalReq postUserGoalReq){
+    @PostMapping("/{useridx}/infos") // [POST] /users/:useridx/goals
+    public BaseResponse<String> postGoal(@PathVariable("useridx") int userIdx, @RequestBody PatchUserInfoReq patchUserInfoReq){
 
+        // Validation 0. 날짜 형식 검사
+        if(!patchUserInfoReq.getBirth().matches("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$")){
+            return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_DATE).getStatus());
+        }
 
         // Validaion 1. userIdx 가 0 이하일 경우 exception
         if(userIdx <= 0)
             return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_USERIDX).getStatus());
 
         // Validaion 2. dayIdx 길이 확인
-        if(postUserGoalReq.getDayIdx().size() == 0) // 요일 0개 선택
+        if(patchUserInfoReq.getDayIdx().size() == 0) // 요일 0개 선택
             return new BaseResponse<>(new BaseException(BaseResponseStatus.MIN_DAYIDX).getStatus());
-        if(postUserGoalReq.getDayIdx().size() > 7)  // 요일 7개 초과 선택
+        if(patchUserInfoReq.getDayIdx().size() > 7)  // 요일 7개 초과 선택
             return new BaseResponse<>(new BaseException(BaseResponseStatus.MAX_DAYIDX).getStatus());
 
         // Validaion 3. dayIdx 숫자 범위 확인
-        for (Integer dayIdx : postUserGoalReq.getDayIdx()){
+        for (Integer dayIdx : patchUserInfoReq.getDayIdx()){
             if (dayIdx > 7 || dayIdx < 1)
                 return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_DAYIDX).getStatus());
         }
 
         // Validaion 4. dayIdx 중복된 숫자 확인
-        Set<Integer> setDayIDx = new HashSet<>(postUserGoalReq.getDayIdx());
-        if(postUserGoalReq.getDayIdx().size() != setDayIDx.size()) // dayIdx 크기를 set으로 변형시킨 dayIdx 크기와 비교. 크기가 다르면 중복된 값 존재
+        Set<Integer> setDayIDx = new HashSet<>(patchUserInfoReq.getDayIdx());
+        if(patchUserInfoReq.getDayIdx().size() != setDayIDx.size()) // dayIdx 크기를 set으로 변형시킨 dayIdx 크기와 비교. 크기가 다르면 중복된 값 존재
             return new BaseResponse<>(new BaseException(BaseResponseStatus.OVERLAP_DAYIDX).getStatus());
 
         // Validaion 5. walkGoalTime 범위 확인
-        if(postUserGoalReq.getWalkGoalTime() < 10) // 최소 산책 목표 시간 미만
+        if(patchUserInfoReq.getWalkGoalTime() < 10) // 최소 산책 목표 시간 미만
             return new BaseResponse<>(new BaseException(BaseResponseStatus.MIN_WALK_GOAL_TIME).getStatus());
-        if(postUserGoalReq.getWalkGoalTime() > 240) // 최대 산책 목표 시간 초과
+        if(patchUserInfoReq.getWalkGoalTime() > 240) // 최대 산책 목표 시간 초과
             return new BaseResponse<>(new BaseException(BaseResponseStatus.MAX_WALK_GOAL_TIME).getStatus());
 
         // Validaion 6. walkTimeSlot 범위 확인
-        if(postUserGoalReq.getWalkTimeSlot() > 7 || postUserGoalReq.getWalkTimeSlot() < 1)
+        if(patchUserInfoReq.getWalkTimeSlot() > 7 || patchUserInfoReq.getWalkTimeSlot() < 1)
             return new BaseResponse<>(new BaseException(BaseResponseStatus.INVALID_WALK_TIME_SLOT).getStatus());
 
 
         try {
-            int result = userService.postGoal(userIdx, postUserGoalReq);
+            int result = userService.postUserInfo(userIdx, patchUserInfoReq);
 
-            String resultMsg = "목표 저장에 성공하였습니다.";
+            String resultMsg = "정보 저장에 성공하였습니다.";
             if(result == 0)
-                resultMsg = "목표 저장에 실패하였습니다.";
+                resultMsg = "정보 저장에 실패하였습니다.";
 
             return new BaseResponse<>(resultMsg);
         } catch (BaseException exception) {

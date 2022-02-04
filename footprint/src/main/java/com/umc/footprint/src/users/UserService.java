@@ -35,13 +35,9 @@ public class UserService {
     // 닉네임 수정(Patch)
     public void modifyNickname(PatchNicknameReq patchNicknameReq) throws BaseException {
         try {
-            int nicknameExist = userDao.nicknameExist(patchNicknameReq);
             int result = userDao.modifyNickname(patchNicknameReq);
 
-            if (nicknameExist != 0) { // 중복된 닉네임
-                throw new BaseException(NICKNAME_EXIST);
-            }
-            else if (result == 0) { // 닉네임 변경 실패
+            if (result == 0) { // 닉네임 변경 실패
                 throw new BaseException(MODIFY_NICKNAME_FAIL);
             }
         } catch (Exception exception) { // DB에 이상이 있는 경우 에러 메시지를 보냅니다.
@@ -67,20 +63,16 @@ public class UserService {
         }
     }
 
-    // 월이 변하면 Goal(Day)Next 데이터를 Goal(Day) 로 옯겨줌 
-    public void monthlyChangeGoal(){
-
-    }
-
 
     // 해당 userIdx를 갖는 Goal 정보 저장
     @Transactional(rollbackFor = Exception.class)
-    public int postGoal(int userIdx, PostUserGoalReq postUserGoalReq) throws BaseException{
+    public int postUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException{
         try {
-            int result = userDao.postGoal(userIdx, postUserGoalReq);
-            int resultNext = userDao.postGoalNext(userIdx, postUserGoalReq);
+            int resultInfo = userDao.modifyUserInfo(userIdx, patchUserInfoReq);
+            int result = userDao.postGoal(userIdx, patchUserInfoReq);
+            int resultNext = userDao.postGoalNext(userIdx, patchUserInfoReq);
 
-            if(result == 0 || resultNext ==0)
+            if(resultInfo == 0 || result == 0 || resultNext == 0)
                 return 0;
             return 1;
 

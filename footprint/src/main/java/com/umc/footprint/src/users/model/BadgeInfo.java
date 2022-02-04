@@ -9,12 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class BadgeInfo {
-    @NonNull
     private int badgeIdx;
-
-    @NonNull
     private String badgeName;
-
-    @NonNull
-    private String badgeImageUrl;
+    private String badgeUrl;
+    private String badgeDate;
 }

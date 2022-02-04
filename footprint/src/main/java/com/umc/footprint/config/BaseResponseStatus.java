@@ -50,7 +50,6 @@ public enum BaseResponseStatus {
     MAX_WALK_GOAL_TIME(false, 2146,"목표산책시간이 최대시간 초과입니다."),
     INVALID_WALK_TIME_SLOT(false, 2147,"잘못된 산책 시간대 입니다."),
     MAX_NICKNAME_LENGTH(false, 2160, "닉네임은 8자를 초과할 수 없습니다."),
-    NICKNAME_EXIST(false, 2161, "이미 존재하는 닉네임입니다."),
 
     INVALID_WALKIDX(false, 2200, "잘못된 산책 인덱스입니다."),
     NO_FOOTPRINT_IN_WALK(false, 2221, "해당 산책 기록에는 발자국이 존재하지 않습니다."),
@@ -62,7 +61,7 @@ public enum BaseResponseStatus {
     /**
      * 3000 : Response 오류
      */
-
+    NO_MONTHLY_BADGE(false, 3030, "이번 달에 획득한 뱃지가 없습니다. (PRO, LOVER, MASTER)"),
 
     /**
      * 4000 : Database, Server 오류
