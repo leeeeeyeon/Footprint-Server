@@ -2,18 +2,12 @@ package com.umc.footprint.src.users;
 
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.walks.WalkDao;
-import com.umc.footprint.src.walks.model.Walk;
-
-import java.time.Duration;
-
-import com.umc.footprint.config.BaseResponse;
 
 import com.umc.footprint.src.users.model.GetUserTodayRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.users.model.*;
 
 import java.util.List;
@@ -180,6 +174,21 @@ public class UserProvider {
                 throw new BaseException(NO_MONTHLY_BADGE);
             }
             return getBadgeInfo;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // email을 통해 유저 중복 검사
+    public PostLoginRes checkEmail(String email) throws BaseException {
+        System.out.println("UserProvider.checkEmail1");
+        try {
+            if (userDao.checkEmail(email) == 1) {
+                System.out.println("UserProvider.checkEmail2");
+                return userDao.getUserIdAndStatus(email);
+            } else {
+                return new PostLoginRes("", "NONE");
+            }
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }

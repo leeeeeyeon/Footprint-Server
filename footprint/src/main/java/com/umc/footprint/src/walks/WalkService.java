@@ -11,12 +11,9 @@ import org.springframework.stereotype.Service;
 
 import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
 
-
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
 
 
 @Service
@@ -33,7 +30,7 @@ public class WalkService {
         this.awsS3Service = awsS3Service;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public PostWalkRes saveRecord(PostWalkReq request) throws BaseException {
         try {
             // 경로 이미지 URL 생성 및 S3 업로드

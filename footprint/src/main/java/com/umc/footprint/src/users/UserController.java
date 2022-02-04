@@ -3,12 +3,12 @@ package com.umc.footprint.src.users;
 import com.umc.footprint.src.users.model.GetUserTodayRes;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.umc.footprint.src.users.model.*;
+import com.umc.footprint.utils.JwtService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,21 +18,25 @@ import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
 
 import com.umc.footprint.config.BaseResponseStatus;
-import com.umc.footprint.config.BaseResponseStatus.*;
+
+import static com.umc.footprint.config.BaseResponseStatus.POST_USERS_EMPTY_EMAIL;
+import static com.umc.footprint.config.BaseResponseStatus.POST_USERS_INVALID_EMAIL;
+import static com.umc.footprint.utils.ValidationRegax.isRegexEmail;
 
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-    @Autowired
     private final UserProvider userProvider;
-    @Autowired
     private final UserService userService;
+    private final JwtService jwtService;
 
-    public UserController(UserProvider userProvider, UserService userService) {
+    @Autowired
+    public UserController(UserProvider userProvider, UserService userService, JwtService jwtService) {
         this.userProvider = userProvider;
         this.userService = userService;
+        this.jwtService = jwtService;
     }
 
     /**
@@ -41,10 +45,16 @@ public class UserController {
      */
     @ResponseBody
     @PostMapping("/auth/login")
-    public BaseResponse<PostLoginRes> login(@RequestBody PostLoginReq postLoginReq) {
+    public BaseResponse<PostLoginRes> postUser(@RequestBody PostLoginReq postLoginReq) {
+        if (postLoginReq.getEmail() == null) {
+            return new BaseResponse<>(POST_USERS_EMPTY_EMAIL);
+        }
+        //이메일 정규표현: 입력받은 이메일이 email@domain.xxx와 같은 형식인지 검사합니다. 형식이 올바르지 않다면 에러 메시지를 보냅니다.
+        if (!isRegexEmail(postLoginReq.getEmail())) {
+            return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
+        }
         try {
-            PostLoginRes postLoginRes = new PostLoginRes();
-            userService.postUserLogin(postLoginReq);
+            PostLoginRes postLoginRes = userService.postUserLogin(postLoginReq);
             return new BaseResponse<>(postLoginRes);
         } catch (BaseException exception) {
             return new BaseResponse<>(exception.getStatus());

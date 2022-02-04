@@ -831,9 +831,9 @@ public class UserDao {
     // 초기 유저 추가 정보를 User 테이블에 추가
     public int modifyUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) {
 
-        String patchUserInfoQuery = "UPDATE User SET nickname = ?, birth = ?, sex = ?, height = ?, weight = ? WHERE userIdx = ?";
+        String patchUserInfoQuery = "UPDATE User SET nickname = ?, birth = ?, sex = ?, height = ?, weight = ?, status = ? WHERE userIdx = ?";
         Object[] patchUserInfoParams = new Object[]{patchUserInfoReq.getNickname(), patchUserInfoReq.getBirth(), patchUserInfoReq.getSex(),
-                patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), userIdx};
+                patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), userIdx, "DONE"};
 
         return this.jdbcTemplate.update(patchUserInfoQuery, patchUserInfoParams);
     }
@@ -1064,11 +1064,28 @@ public class UserDao {
     }
 
     // 로그인 정보 입력
-    public void postUserLogin(PostLoginReq postLoginReq) {
-        String postLoginQuery = "insert into User(userId, username, email) values (?,?,?)";
-        String userId = postLoginReq.getUserId();
-        String username = postLoginReq.getUsername();
-        String email = postLoginReq.getEmail();
-        this.jdbcTemplate.queryForObject(postLoginQuery, String.class, userId, username, email);
+    public void postUserLogin(PostLoginReq postLoginReq, String jwt) {
+        String postLoginQuery = "insert into User(userId, username, email, status) values (?,?,?,?)";
+        System.out.println("UserDao.postUserLogin");
+        Object[] postLoginParmas = new Object[]{jwt, postLoginReq.getUsername(), postLoginReq.getEmail(), "ONGOING"};
+        this.jdbcTemplate.update(postLoginQuery,  postLoginParmas);
+    }
+
+    public PostLoginRes getUserIdAndStatus(String email) {
+        System.out.println("UserDao.getUserIdAndStatus");
+        String checkEmailQuery = "select userId, status from User where email = ?";
+        return this.jdbcTemplate.queryForObject(checkEmailQuery,
+                (rs, rowNum) -> new PostLoginRes(
+                        rs.getString("userId"),
+                        rs.getString("status")
+                ), email);
+    }
+
+    public int checkEmail(String email) {
+        System.out.println("UserDao.checkEmail");
+        String checkEmailQuery = "select exists(select email from User where email = ?)";
+        return this.jdbcTemplate.queryForObject(checkEmailQuery,
+                int.class,
+                email);
     }
 }
