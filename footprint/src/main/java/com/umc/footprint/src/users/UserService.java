@@ -96,7 +96,7 @@ public class UserService {
                     System.out.println("UserService.postUserLogin2");
                     // 암호화
                     String jwt = jwtService.createJwt(postLoginReq.getUserId());
-                    userDao.postUserLogin(postLoginReq, jwt);
+                    userDao.postUserLogin(postLoginReq);
 
                     return new PostLoginRes(jwt, "ONGOING");
                 } catch (Exception exception) {

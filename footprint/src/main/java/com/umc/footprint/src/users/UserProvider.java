@@ -198,6 +198,7 @@ public class UserProvider {
 
     public int getUserIdx(String jwtId) throws BaseException {
         try {
+            System.out.println("UserProvider.getUserIdx");
             return userDao.getUserIdx(jwtId);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
