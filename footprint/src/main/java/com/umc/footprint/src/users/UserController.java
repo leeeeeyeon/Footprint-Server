@@ -38,7 +38,6 @@ public class UserController {
         this.userService = userService;
         this.jwtService = jwtService;
     }
-
     /**
      * 유저 로그인 API
      * [POST] /users/auth/login
