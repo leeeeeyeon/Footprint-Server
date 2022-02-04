@@ -8,6 +8,8 @@ import com.umc.footprint.src.walks.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/walks")
 public class WalkController {
@@ -25,11 +27,11 @@ public class WalkController {
      *  실시간 처리 API
      *  [Post] /walks
      */
-    @PostMapping("")
-    public BaseResponse<PostWalkRes> saveRecord(@ModelAttribute PostWalkReq request) throws BaseException {
+    @PostMapping("") // (POST) 127.0.0.1:3000/walks/
+    public BaseResponse<List<PostWalkRes>> saveRecord(@ModelAttribute PostWalkReq request) throws BaseException {
         try {
-            PostWalkRes postWalkRes = walkService.saveRecord(request);
-            return new BaseResponse<>(postWalkRes);
+            List<PostWalkRes> postWalkResList = walkService.saveRecord(request);
+            return new BaseResponse<>(postWalkResList);
         } catch (BaseException exception) {
             return new BaseResponse<>(exception.getStatus());
         }

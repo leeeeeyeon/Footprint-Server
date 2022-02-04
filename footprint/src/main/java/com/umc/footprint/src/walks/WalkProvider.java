@@ -36,6 +36,7 @@ public class WalkProvider {
     //
     public Walk getGoalRate(Walk walk) throws BaseException {
         try {
+            System.out.println("WalkProvider.getGoalRate");
             // 산책 시간
             Integer walkTime = Math.toIntExact(Duration.between(walk.getStartAt(), walk.getEndAt()).toMinutes());
             // 산책 목표 시간
@@ -114,4 +115,16 @@ public class WalkProvider {
         }
 
     }
+
+    // 뱃지 idx에 해당하는 이름과 url 반환
+    public List<PostWalkRes> getBadgeInfo(List<Integer> acquiredBadgeIdxList) throws BaseException {
+        try {
+            List<PostWalkRes> postWalkResList = walkDao.getBadgeInfo(acquiredBadgeIdxList);
+            return postWalkResList;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
 }

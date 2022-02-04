@@ -15,8 +15,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PostWalkRes {
     // 뱃지 이름, 뱃지 url
-    private List<Map<String, String>> badgeList;
-
+    private int badgeIdx;
+    private String badgeName;
+    private String badgeUrl;
 }
 
 
