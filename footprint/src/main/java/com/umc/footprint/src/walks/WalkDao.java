@@ -21,6 +21,8 @@ import java.util.List;
 public class WalkDao {
     private JdbcTemplate jdbcTemplate;
 
+
+
     @Autowired
     public void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -215,13 +217,15 @@ public class WalkDao {
 
     // 유저의 목표 시간 반환
     public int getWalkGoalTime(int userIdx) {
-        String getTimeQuery = "select walkGoalTime from Goal where userIdx = ? and MONTH(createAt) = MONTH(NOW())";
+        String getTimeQuery = "select walkGoalTime from Goal where userIdx = ?";
         int getTimeParam = userIdx;
         return this.jdbcTemplate.queryForObject(getTimeQuery, int.class, getTimeParam);
     }
 
     public GetBadgeIdx getAcquiredBadgeIdxList(int userIdx) {
         // 거리, 기록 관련 쿼리
+
+        System.out.println("WalkDao.getAcquiredBadgeIdxList");
         String getDisRecBadgeQuery = "SELECT \n" +
                 "       CASE\n" +
                 "            WHEN (sum(walk.distance) between 10 and 30) then 2\n" +
@@ -254,4 +258,19 @@ public class WalkDao {
         return this.jdbcTemplate.queryForList(getBadgeIdxListQuery, int.class, userIdx);
     }
 
+    // 뱃지 정보 조회
+    public List<PostWalkRes> getBadgeInfo(List<Integer> badgeIdxList) {
+        String getBadgeInfoQuery = "select badgeIdx, badgeName, badgeUrl from Badge where badgeIdx = ?";
+        List<PostWalkRes> postWalkResList = new ArrayList<PostWalkRes>();
+        for (Integer badgeIdx : badgeIdxList) {
+            postWalkResList.add(this.jdbcTemplate.queryForObject(getBadgeInfoQuery,
+                    (rs, rowNum) -> new PostWalkRes(
+                            rs.getInt("badgeIdx"),
+                            rs.getString("badgeName"),
+                            rs.getString("badgeUrl")
+                    ), badgeIdx));
+        }
+
+        return postWalkResList;
+    }
 }

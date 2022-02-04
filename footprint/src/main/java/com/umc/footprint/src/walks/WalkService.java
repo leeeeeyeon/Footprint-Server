@@ -14,6 +14,7 @@ import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
 
 import javax.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
@@ -34,7 +35,7 @@ public class WalkService {
     }
 
     @Transactional
-    public PostWalkRes saveRecord(PostWalkReq request) throws BaseException {
+    public List<PostWalkRes> saveRecord(PostWalkReq request) throws BaseException {
         try {
             // 경로 이미지 URL 생성 및 S3 업로드
             String pathImgUrl = awsS3Service.uploadFile(request.getWalk().getPathImg());
@@ -84,7 +85,7 @@ public class WalkService {
             walkDao.addTag(tagIdxList, request.getWalk().getUserIdx());
 
             // badge 획득 여부 확인 및 id 반환
-            PostWalkRes postWalkRes = new PostWalkRes();
+            List<PostWalkRes> postWalkResList = new ArrayList<PostWalkRes>();
             List<Integer> acquiredBadgeIdxList = walkProvider.getAcquiredBadgeIdxList(request.getWalk().getUserIdx());
 
             // UserBadge 테이블에 획득한 뱃지 삽입
@@ -94,7 +95,10 @@ public class WalkService {
             System.out.println("acquiredBadgeIdxList = " + acquiredBadgeIdxList);
             //획득한 뱃지 넣기 (뱃지 아이디로 뱃지 이름이랑 그림 반환)
 
-            return postWalkRes;
+            postWalkResList = walkProvider.getBadgeInfo(acquiredBadgeIdxList);
+            System.out.println("postWalkResList = " + postWalkResList);
+
+            return postWalkResList;
 
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);

@@ -14,7 +14,7 @@ import java.util.List;
 public class Footprint {
     private int footprintIdx;
     // coordinate 형식에 따라 string으로 받을 지 point로 받을 지 정함
-    private List<Double> coridnate;
+    private List<Double> coordinates;
     private String str_coordinate;
     private String write;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
