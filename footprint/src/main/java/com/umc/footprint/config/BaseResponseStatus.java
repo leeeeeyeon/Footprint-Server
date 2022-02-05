@@ -59,6 +59,9 @@ public enum BaseResponseStatus {
     INVALID_WALKIDX(false, 2200, "잘못된 산책 인덱스입니다."),
     NO_FOOTPRINT_IN_WALK(false, 2221, "해당 산책 기록에는 발자국이 존재하지 않습니다."),
 
+    NOT_MATCH_IMAGE_COUNT(false, 2140, "Footprint 개수와 FootprintImg의 개수가 다릅니다."),
+    EXCEED_FOOTPRINT_SIZE(false, 2241, "photoMatchNumList를 확인해주십시요."),
+
     DELETED_FOOTPRINT(false, 2260, "이미 삭제된 발자국입니다."),
     NO_EXIST_FOOTPRINT(false, 2261, "존재하지 않는 발자국입니다."),
     REQUEST_ERROR(false, 2262, "잘못된 산책 인덱스입니다."), // 임시 추가
