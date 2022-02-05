@@ -65,10 +65,14 @@ public class AwsS3Service {
         System.out.println("AwsS3Service.uploadFile start");
 
 
+        System.out.println("oneMultipartFile.getOriginalFilename() = " + oneMultipartFile.getOriginalFilename());
         String OnefileName = createFileName(oneMultipartFile.getOriginalFilename());
+        System.out.println("OnefileName = " + OnefileName);
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(oneMultipartFile.getSize());
+        System.out.println("objectMetadata.getContentLength() = " + objectMetadata.getContentLength());
         objectMetadata.setContentType(oneMultipartFile.getContentType());
+        System.out.println("objectMetadata.getContentType() = " + objectMetadata.getContentType());
 
         try (InputStream inputStream = oneMultipartFile.getInputStream()) {
             amazonS3.putObject(new PutObjectRequest(bucket, OnefileName, inputStream, objectMetadata)
