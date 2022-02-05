@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -14,8 +14,8 @@ import java.util.List;
 
 public class GetFootprintRes {
     private int footprintIdx;
-    @JsonFormat(pattern = "hh:mm", timezone = "Asia/Seoul")
-    private Timestamp recordAt;
+    @JsonFormat(pattern = "HH:mm", timezone = "Asia/Seoul")
+    private LocalDateTime recordAt;
     private String write;
     private List<String> photoList;
     private List<String> tagList;
