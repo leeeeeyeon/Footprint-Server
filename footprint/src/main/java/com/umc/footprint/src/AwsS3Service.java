@@ -62,6 +62,8 @@ public class AwsS3Service {
     // 파일 하나 넣을 때
     public String uploadFile(MultipartFile oneMultipartFile) throws BaseException {
         String photoUrl;
+        System.out.println("AwsS3Service.uploadFile start");
+
 
         String OnefileName = createFileName(oneMultipartFile.getOriginalFilename());
         ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -76,8 +78,9 @@ public class AwsS3Service {
         }
 
         photoUrl = amazonS3.getUrl(bucket, OnefileName).toString();
+        System.out.println("getFileExtension(photo) = " + getFileExtension(photoUrl));
 
-
+        System.out.println("AwsS3Service.uploadFile end");
         return photoUrl;
     }
 
