@@ -10,6 +10,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
+import static com.umc.footprint.config.BaseResponseStatus.EXCEED_FOOTPRINT_SIZE;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,43 +35,83 @@ public class WalkService {
     @Transactional(rollbackFor = Exception.class)
     public List<PostWalkRes> saveRecord(PostWalkReq request) throws BaseException {
         try {
+            System.out.println("1. 동선 이미지: file -> url ");
             // 경로 이미지 URL 생성 및 S3 업로드
-            String pathImgUrl = awsS3Service.uploadFile(request.getWalk().getPathImg());
-
+            String pathImgUrl = awsS3Service.uploadFile(request.getPhotos().get(0));
             System.out.println("pathImgUrl = " + pathImgUrl);
+
+            System.out.println("2. url로 바꾼 동선 이미지 SaveWalk 객체에 저장");
             // string으로 변환한 동선 저장
-            request.setWalk(new Walk(
-                    request.getWalk().getStartAt(),
-                    request.getWalk().getEndAt(),
-                    convertListToString(request.getCoordinates()),
-                    request.getWalk().getDistance(),
-                    request.getWalk().getUserIdx(),
-                    request.getWalk().getGoalRate(),
-                    request.getWalk().getCalorie()
-            ));
+            request.setWalkStrCoordinate(
+                    SaveWalk.builder()
+                            .startAt(request.getWalk().getStartAt())
+                            .endAt(request.getWalk().getEndAt())
+                            .distance(request.getWalk().getDistance())
+                            .str_coordinates(convert2DListToString(request.getWalk().getCoordinates()))
+                            .userIdx(request.getWalk().getUserIdx())
+                            .goalRate(walkProvider.getGoalRate(request.getWalk()))
+                            .calorie(request.getWalk().getCalorie())
+                            .photoMatchNumList(request.getWalk().getPhotoMatchNumList())
+                            .build()
+            );
 
             // Walk Table에 삽입 후 생성된 walkIdx return
-            int walkIdx = walkDao.addWalk(walkProvider.getGoalRate(request.getWalk()), pathImgUrl);
+            System.out.println("3. Walk 테이블에 insert 후 walkIdx 반환");
+            int walkIdx = walkDao.addWalk(request.getWalk(), pathImgUrl);
+
 
             System.out.println("walkIdx = " + walkIdx);
 
+            System.out.println("4. 발자국 기록 사진들 List<MultipartFile> -> List<String> 으로 변환");
+            List<String> imgUrlList = awsS3Service.uploadFile(request.getPhotos());
+
+            //  발자국 Photo 이미지 URL 생성 및 S3 업로드
+            System.out.println("5. 발자국 좌표 List<Double> -> String 으로 변환 후 SaveFootprint 객체에 저장");
+            ArrayList<SaveFootprint> convertedFootprints = new ArrayList<>();
+            int imgInputStartIndex = 1;
+            for (int i = 0; i < request.getWalk().getPhotoMatchNumList().size(); i++) {
+                String convertedCoordinate = convertListToString(request.getFootprintList().get(i).getCoordinates());
+                System.out.println("convertedCoordinate = " + convertedCoordinate);
+                int imgInputEndIndex = imgInputStartIndex + request.getWalk().getPhotoMatchNumList().get(i);
+                System.out.println("imgInputEndIndex = " + imgInputEndIndex);
+                if (imgInputEndIndex > request.getPhotos().size()) {
+                    throw new BaseException(EXCEED_FOOTPRINT_SIZE);
+                }
+                List<String> imgInputList = new ArrayList<String>(imgUrlList.subList(imgInputStartIndex, imgInputEndIndex));
+                SaveFootprint convertedFootprint = SaveFootprint.builder()
+                        .str_coordinate(convertedCoordinate)
+                        .write(request.getFootprintList().get(i).getWrite())
+                        .recordAt(request.getFootprintList().get(i).getRecordAt())
+                        .walkIdx(request.getFootprintList().get(i).getWalkIdx())
+                        .hashtagList(request.getFootprintList().get(i).getHashtagList())
+                        .imgUrlList(imgInputList)
+                        .build();
+
+                convertedFootprints.add(convertedFootprint);
+                imgInputStartIndex = imgInputEndIndex;
+            }
+            System.out.println("WalkService.saveRecord1");
+            request.setConvertedFootprints(convertedFootprints);
+            System.out.println("WalkService.saveRecord2");
+
             // Footprint Table에 삽입 후 생성된 footprintIdx Footprint에 초기화
+            System.out.println("6. Footprint 테이블에 삽입후 footprintIdx SaveFootprint 테이블에 삽입");
+            for (SaveFootprint footprint : request.getFootprintList()) {
+                System.out.println("footprint.getFootprintIdx() = " + footprint.getWrite());
+            }
             walkDao.addFootprint(request.getFootprintList(), walkIdx);
 
-            for (Footprint footprint : request.getFootprintList()) {
+            for (SaveFootprint footprint : request.getFootprintList()) {
                 System.out.println("footprint.getFootprintIdx() = " + footprint.getFootprintIdx());
             }
 
-            //  발자국 Photo 이미지 URL 생성 및 S3 업로드
-            for (Footprint footprint : request.getFootprintList()) {
-                footprint.setImgUrlList(awsS3Service.uploadFile(footprint.getPhotos()));
-                System.out.println("footprint.getImgUrlList() = " + footprint.getImgUrlList());
-            }
 
             // Photo Table에 삽입
+            System.out.println("7. Photo 테이블에 삽입");
             walkDao.addPhoto(request.getWalk().getUserIdx(), request.getFootprintList());
 
             // Hashtag Table에 삽입 후 tagIdx(hashtagIdx, footprintIdx) mapping pair 반환
+            System.out.println("8. Hashtag 테이블에 삽입 후 매핑된 Idx 반환 ");
             List<Pair<Integer, Integer>> tagIdxList = walkDao.addHashtag(request.getFootprintList());
 
             for (Pair<Integer, Integer> tag : tagIdxList) {
@@ -79,19 +120,23 @@ public class WalkService {
             }
 
             // Tag Table에 삽입
+            System.out.println("9. Tag 테이블에 삽입");
             walkDao.addTag(tagIdxList, request.getWalk().getUserIdx());
 
             // badge 획득 여부 확인 및 id 반환
+            System.out.println("10. badge 획득 여부 확인 후 얻은 badgeIdxList 반환");
             List<PostWalkRes> postWalkResList = new ArrayList<PostWalkRes>();
             List<Integer> acquiredBadgeIdxList = walkProvider.getAcquiredBadgeIdxList(request.getWalk().getUserIdx());
 
             // UserBadge 테이블에 획득한 뱃지 삽입
+            System.out.println("11. 얻은 뱃지 리스트 UserBadge 테이블에 삽입");
             if (!acquiredBadgeIdxList.isEmpty()) { // 획득한 뱃지가 있을 경우 삽입
                 walkDao.addUserBadge(acquiredBadgeIdxList, request.getWalk().getUserIdx());
             }
             System.out.println("acquiredBadgeIdxList = " + acquiredBadgeIdxList);
             //획득한 뱃지 넣기 (뱃지 아이디로 뱃지 이름이랑 그림 반환)
 
+            System.out.println("12. 뱃지 리스트로 이름과 url 반환 후 request 객체에 저장");
             postWalkResList = walkProvider.getBadgeInfo(acquiredBadgeIdxList);
             System.out.println("postWalkResList = " + postWalkResList);
 
@@ -103,7 +148,7 @@ public class WalkService {
     }
 
     // List<List<>> -> String in WalkDao
-    public String convertListToString(List<List<Double>> inputList){
+    public String convert2DListToString(List<List<Double>> inputList){
 
         System.out.println("inputList : "+inputList);
 
@@ -131,6 +176,20 @@ public class WalkService {
         }
         str.append(")");
         String result = str.toString();
+
+        return result;
+    }
+
+    public String convertListToString(List<Double> inputList) {
+        System.out.println("inputList = " + inputList);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("POINT(");
+        stringBuilder.append(inputList.get(0));
+        stringBuilder.append(" ");
+        stringBuilder.append(inputList.get(1));
+        stringBuilder.append(")");
+        String result = stringBuilder.toString();
 
         return result;
     }
