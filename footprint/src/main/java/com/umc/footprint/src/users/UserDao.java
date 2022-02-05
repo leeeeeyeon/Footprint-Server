@@ -685,17 +685,19 @@ public class UserDao {
             List<Walk> walks = new ArrayList<>(); // 해당 날짜 + 해당 해시태그를 가지는 산책 기록 리스트
             for(Integer walkIdx : walkIdxList) {
                 // 산책 기록 하나 조회
-                String getWalkQuery = "select walkIdx, CONCAT(date_format(startAt, '%k:%i'),'~', date_format(endAt, '%k:%i')) as walkTime, pathImageUrl\n" +
+                String getUserDateWalkQuery = "select walkIdx, date_format(startAt, '%k:%i') as startTime, date_format(endAt, '%k:%i') as endTime, pathImageUrl\n" +
                         "from Walk W where W.walkIdx=?";
-                Walk walk = this.jdbcTemplate.queryForObject(getWalkQuery,
-                        (rs,rowNum)-> new Walk(
+                UserDateWalk userDateWalk = this.jdbcTemplate.queryForObject(getUserDateWalkQuery,
+                        (rs, rowNum)-> new UserDateWalk(
                                 rs.getInt("walkIdx"),
-                                rs.getString("walkTime"),
-                                rs.getString("pathImageUrl"),
-                                getTagList(walkIdx)
+                                rs.getString("startTime"),
+                                rs.getString("endTime"),
+                                rs.getString("pathImageUrl")
                         )
                         , walkIdx
                 );
+
+                Walk walk = new Walk(userDateWalk, getTagList(walkIdx));
                 walks.add(walk);
             }
 
