@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 
-public class Walk {
+public class SearchWalk {
     private UserDateWalk userDateWalk;
     private List<String> hashtag;
 }
