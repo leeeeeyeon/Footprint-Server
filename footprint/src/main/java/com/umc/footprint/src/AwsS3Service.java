@@ -94,13 +94,19 @@ public class AwsS3Service {
 
     private String createFileName(String fileName) { // 먼저 파일 업로드 시, 파일명을 난수화하기 위해 random으로 돌립니다.
         System.out.println("AwsS3Service.createFileName enter");
-        return UUID.randomUUID().toString().concat(getFileExtension(fileName));
+        String newFileName = UUID.randomUUID().toString().concat(getFileExtension(fileName));
+        System.out.println("newFileName = " + newFileName);
+        System.out.println("AwsS3Service.createFileName exit");
+        return newFileName;
     }
 
     private String getFileExtension(String fileName) { // file 형식이 잘못된 경우를 확인하기 위해 만들어진 로직이며, 파일 타입과 상관없이 업로드할 수 있게 하기 위해 .의 존재 유무만 판단하였습니다.
         try {
             System.out.println("AwsS3Service.getFileExtension enter");
-            return fileName.substring(fileName.lastIndexOf("."));
+            String extension = fileName.substring(fileName.lastIndexOf("."));
+            System.out.println("extension = " + extension);
+            System.out.println("AwsS3Service.getFileExtension exit");
+            return extension;
         } catch (StringIndexOutOfBoundsException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 형식의 파일(" + fileName + ") 입니다.");
         }
