@@ -45,7 +45,7 @@ public class FootprintController {
      */
     @ResponseBody
     @PatchMapping("/{footprintIdx}")
-    public BaseResponse<String> modifyFootprint(@PathVariable("footprintIdx") int footprintIdx, Footprint footprint) {
+    public BaseResponse<String> modifyFootprint(@PathVariable("footprintIdx") int footprintIdx, GetFootprint footprint) {
         try {
             PatchFootprintReq patchFootprintReq = new PatchFootprintReq(footprint.getWrite(), footprint.getPhotos(), footprint.getTagList());
             footprintService.modifyFootprint(patchFootprintReq, footprintIdx);
