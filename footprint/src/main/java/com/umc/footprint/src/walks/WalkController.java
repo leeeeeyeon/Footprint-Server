@@ -68,6 +68,7 @@ public class WalkController {
         System.out.println("footprintList = " + footprintList.get(0).getRecordAt());
 
         System.out.println("photos = " + photos.get(0).getOriginalFilename());
+        System.out.println("photos.get(0).getContentType() = " + photos.get(0).getContentType());
 
         try {
 
