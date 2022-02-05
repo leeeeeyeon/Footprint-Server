@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 
-public class Footprint {
+public class GetFootprint {
     private int footprintIdx;
     private String write;
     private List<MultipartFile> photos; // 사진 저장

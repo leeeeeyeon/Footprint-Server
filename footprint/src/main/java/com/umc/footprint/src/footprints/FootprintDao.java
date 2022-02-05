@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -43,7 +44,7 @@ public class FootprintDao {
         return this.jdbcTemplate.query(getFootprintsQuery,
                 (rs, rowNum) -> new GetFootprintRes(
                         rs.getInt("footprintIdx"),
-                        rs.getTimestamp("recordAt"),
+                        rs.getObject("recordAt", LocalDateTime.class),
                         rs.getString("write"),
                         getPhotoList(rs.getInt("footprintIdx")),
                         getTagList(rs.getInt("footprintIdx"))
@@ -98,8 +99,8 @@ public class FootprintDao {
     public List<String> getTagList(int footprintIdx) {
         String getTagQuery = "select hashtag from Tag T\n" +
                 "inner join Hashtag H on T.hashtagIdx = H.hashtagIdx\n" +
-                "where footprintIdx=?";
-        List<String> tagList = jdbcTemplate.queryForList(getTagQuery, String.class, footprintIdx);
+                "where footprintIdx=? and T.status=?";
+        List<String> tagList = jdbcTemplate.queryForList(getTagQuery, String.class, footprintIdx, "ACTIVE");
 
         return tagList;
     }
