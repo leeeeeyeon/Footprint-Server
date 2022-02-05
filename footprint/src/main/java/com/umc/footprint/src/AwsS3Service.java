@@ -32,6 +32,8 @@ public class AwsS3Service {
     // 파일 여러 개 넣을 때
     public ArrayList<String> uploadFile(List<MultipartFile> multipartFile) {
         ArrayList<String> photoUrlList = new ArrayList<>();
+        System.out.println("AwsS3Service.uploadFile start");
+
 
         // forEach 구문을 통해 multipartFile로 넘어온 파일들 하나씩 fileNameList에 추가
         multipartFile.forEach(file -> {
@@ -49,6 +51,10 @@ public class AwsS3Service {
 
             photoUrlList.add(amazonS3.getUrl(bucket, fileName).toString());
         });
+
+        System.out.println("getFileExtension(photoUrlList.get(0)) = " + getFileExtension(photoUrlList.get(0)));
+
+        System.out.println("AwsS3Service.uploadFile end");
 
         return photoUrlList;
     }
@@ -70,6 +76,7 @@ public class AwsS3Service {
         }
 
         photoUrl = amazonS3.getUrl(bucket, OnefileName).toString();
+
 
         return photoUrl;
     }
