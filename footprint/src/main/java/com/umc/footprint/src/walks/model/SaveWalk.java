@@ -38,6 +38,10 @@ public class SaveWalk {
         this.calorie = calorie;
         this.photoMatchNumList = photoMatchNumList;
     }
+
+    public void setUserIdx(int userIdx) {
+        this.userIdx = userIdx;
+    }
 }
 
 
