@@ -10,8 +10,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1125,10 +1127,11 @@ public class UserDao {
         System.out.println("UserDao.getUserIdAndStatus");
         String checkEmailQuery = "select userId, status from User where email = ?";
         return this.jdbcTemplate.queryForObject(checkEmailQuery,
-                (rs, rowNum) -> new PostLoginRes(
-                        rs.getString("userId"),
-                        rs.getString("status")
-                ), email);
+                (rs, rowNum) -> PostLoginRes.builder()
+                        .jwtId(rs.getString("userId"))
+                        .status(rs.getString("status"))
+                        .build()
+                , email);
     }
 
     public int checkEmail(String email) {
@@ -1145,4 +1148,18 @@ public class UserDao {
         return this.jdbcTemplate.queryForObject(getUserIdxQuery, int.class, userId);
     }
 
+    public LocalDateTime getUserLogAt(int userIdx) {
+        System.out.println("UserDao.checkMonthChanged");
+        String getUserLogAtQuery = "select logAt from User where userIdx = ?";
+        Timestamp logAt = this.jdbcTemplate.queryForObject(getUserLogAtQuery, Timestamp.class, userIdx);
+        return logAt.toLocalDateTime();
+    }
+
+    public void modifyUserLogAt(LocalDateTime now, int userIdx) {
+        System.out.println("UserDao.modifyUserLogAt");
+        String modifyUserLogAtQuery = "update User set logAt = ? where userIdx = ?";
+        Object[] modifyUserLogAtParams = new Object[]{now, userIdx};
+
+        this.jdbcTemplate.update(modifyUserLogAtQuery,modifyUserLogAtParams);
+    }
 }

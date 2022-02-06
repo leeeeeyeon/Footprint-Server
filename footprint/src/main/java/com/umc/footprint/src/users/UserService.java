@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import java.time.LocalDateTime;
+import java.time.Month;
+
 @Service
 public class UserService {
     private final UserDao userDao;
@@ -100,11 +103,40 @@ public class UserService {
                     String jwt = jwtService.createJwt(postLoginReq.getUserId());
                     userDao.postUserLogin(postLoginReq);
 
-                    return new PostLoginRes(jwt, "ONGOING");
+                    return PostLoginRes.builder()
+                            .jwtId(jwt)
+                            .status("ONGOING").build();
                 } catch (Exception exception) {
                     throw new BaseException(DATABASE_ERROR);
                 }
             case "ACTIVE":
+                try {
+                    System.out.println("UserService.postUserLogin ACTIVE USER");
+                    // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
+                    String userId = jwtService.getUserId();
+                    System.out.println("userId = " + userId);
+                    // userId로 userIdx 추출
+                    int userIdx = userProvider.getUserIdx(userId);
+
+                    // 이전에 로그인 했던 시간
+                    LocalDateTime beforeLogAt = userDao.getUserLogAt(userIdx);
+                    LocalDateTime now = LocalDateTime.now();
+                    // 달이 같은 경우
+                    if (beforeLogAt.getMonth() == LocalDateTime.now().getMonth()) {
+                        // 달이 바뀌지 않았다고 response에 저장
+                        result.setCheckMonthChanged(false);
+                    } else {
+                        // 달이 바뀌었다고 response에 저장
+                        result.setCheckMonthChanged(true);
+                    }
+                    // 현재 로그인하는 시간 logAt에 저장
+                    System.out.println("now = " + now);
+                    userDao.modifyUserLogAt(now, userIdx);
+
+                    return result;
+                } catch (Exception exception) {
+                    throw new BaseException(DATABASE_ERROR);
+                }
             case "ONGOING":
                 return result;
         }
