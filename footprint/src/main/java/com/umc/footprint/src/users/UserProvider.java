@@ -297,7 +297,10 @@ public class UserProvider {
                 postLoginRes.setJwtId(jwtId);
                 return postLoginRes;
             } else {
-                return new PostLoginRes("", "NONE");
+                return PostLoginRes.builder()
+                        .jwtId("")
+                        .status("NONE")
+                        .build();
             }
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);

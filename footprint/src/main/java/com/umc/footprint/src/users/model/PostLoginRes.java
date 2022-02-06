@@ -19,4 +19,8 @@ public class PostLoginRes {
     public void setCheckMonthChanged(boolean checkFlag) {
         this.checkMonthChanged = checkFlag;
     }
+
+    public void setJwtId(String jwtId) {
+        this.jwtId = jwtId;
+    }
 }
