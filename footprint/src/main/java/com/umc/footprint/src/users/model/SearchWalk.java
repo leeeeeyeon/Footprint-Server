@@ -4,16 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.text.DateFormat;
 import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 
-public class Walk {
-    int walkIdx;
-    String walkTime;
-    String pathImageUrl;
-    List<String> tagList;
+public class SearchWalk {
+    private UserDateWalk userDateWalk;
+    private List<String> hashtag;
 }

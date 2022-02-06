@@ -107,14 +107,85 @@ public class UserProvider {
     }
 
 
-    //yummy
+    // yummy11
+    // 사용자 전체 뱃지 조회 API
     public GetUserBadges getUserBadges(int userIdx) throws BaseException {
-        try {
+       // try {
             GetUserBadges getUserBadges = userDao.getUserBadges(userIdx);
+
+            for(BadgeOrder badge : getUserBadges.getBadgeList()) {
+                if(badge.getBadgeDate() == "0") {
+                    switch (badge.getBadgeIdx()) {
+                        case 1 :
+                            badge.setBadgeOrder(0);
+                            break;
+                        case 2 :
+                            badge.setBadgeOrder(1);
+                            break;
+                        case 3 :
+                            badge.setBadgeOrder(2);
+                            break;
+                        case 4 :
+                            badge.setBadgeOrder(3);
+                            break;
+                        case 5 :
+                            badge.setBadgeOrder(4);
+                            break;
+                        case 6 :
+                            badge.setBadgeOrder(5);
+                            break;
+                        case 7 :
+                            badge.setBadgeOrder(6);
+                            break;
+                        case 8 :
+                            badge.setBadgeOrder(7);
+                            break;
+                        default:
+                            if(badge.getBadgeDate().charAt(5)=='1') {
+                                if(badge.getBadgeDate().charAt(6)=='-') { //1월
+                                    badge.setBadgeOrder(8);
+                                }
+                                if(badge.getBadgeDate().charAt(6)=='0') { //10월
+                                    badge.setBadgeOrder(17);
+                                }
+                                if(badge.getBadgeDate().charAt(6)=='1') { //11월
+                                    badge.setBadgeOrder(18);
+                                }
+                                if(badge.getBadgeDate().charAt(6)=='2') { //12월
+                                    badge.setBadgeOrder(19);
+                                }
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='2') {
+                                badge.setBadgeOrder(9);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='3') {
+                                badge.setBadgeOrder(10);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='4') {
+                                badge.setBadgeOrder(11);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='5') {
+                                badge.setBadgeOrder(12);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='6') {
+                                badge.setBadgeOrder(13);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='7') {
+                                badge.setBadgeOrder(14);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='8') {
+                                badge.setBadgeOrder(15);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='9') {
+                                badge.setBadgeOrder(16);
+                            }
+                    }
+                }
+            }
             return getUserBadges;
-          } catch (Exception exception) {
-            throw new BaseException(DATABASE_ERROR);
-        }
+          //} catch (Exception exception) {
+          //  throw new BaseException(DATABASE_ERROR);
+        //}
     }
 
 

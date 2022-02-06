@@ -94,7 +94,35 @@ public class UserDao {
     }
 
 
-    public GetUserBadges getUserBadges(int userIdx) {
+    //yammy 13
+    // 사용자 전체 뱃지 조회 API
+    // TO-DO-List : 화면에 표시되는 뱃지 순서 포함해서 보내주기!!
+    /*
+    * 뱃지 순서
+0 - 발자국 스타터
+1 - 누적 10km
+2 - 누적 30km
+3 - 누적 50km
+4 - 누적 100km
+5 - 누적 기록 10회
+6 - 누적 기록 30회
+7 - 누적 기록 50회
+8 - 1월
+9 - 2월
+10 - 3월
+11 - 4월
+12 - 5월
+13 - 6월
+14 - 7월
+15 - 8월
+16 - 9월
+17 - 10월
+18 - 11월
+19 - 12월
+20 - 년도 뱃지(미정)*/
+    //대표 뱃지 조회
+    public BadgeInfo getRepBadgeInfo(int userIdx) {
+        //대표 뱃지 조회
         String getRepBadgeQuery = "select * from badge where badgeIdx=(select badgeIdx from user where userIdx=?);";
         BadgeInfo repBadgeInfo = this.jdbcTemplate.queryForObject(getRepBadgeQuery,
                 (rs,rowNum) -> new BadgeInfo(
@@ -103,6 +131,10 @@ public class UserDao {
                         rs.getString("badgeUrl"),
                         rs.getString("badgeDate")), userIdx);
 
+        return repBadgeInfo;
+    }
+
+    public List<BadgeInfo> getBadgeList(int userIdx) {
         String getUserBadgesQuery = "select * from badge where badgeIdx in " +
                 "(select badgeIdx from userbadge where userIdx=? and status='ACTIVE');";
         List<BadgeInfo> badgeInfoList = this.jdbcTemplate.query(getUserBadgesQuery,
@@ -111,6 +143,30 @@ public class UserDao {
                         rs.getString("badgeName"),
                         rs.getString("badgeUrl"),
                         rs.getString("badgeDate")),
+                userIdx);
+
+        return badgeInfoList;
+    }
+    public GetUserBadges getUserBadges(int userIdx) {
+        //대표 뱃지 조회
+        String getRepBadgeQuery = "select * from footprintdb.Badge where badgeIdx=(select badgeIdx from footprintdb.User where userIdx=?);";
+        BadgeInfo repBadgeInfo = this.jdbcTemplate.queryForObject(getRepBadgeQuery,
+                (rs,rowNum) -> new BadgeInfo(
+                        rs.getInt("badgeIdx"),
+                        rs.getString("badgeName"),
+                        rs.getString("badgeUrl"),
+                        rs.getString("badgeDate")), userIdx);
+
+        //전체 뱃지 조회
+        String getUserBadgesQuery = "select * from footprintdb.Badge where badgeIdx in " +
+                "(select badgeIdx from footprintdb.UserBadge where userIdx=? and status='ACTIVE');";
+        List<BadgeOrder> badgeInfoList = this.jdbcTemplate.query(getUserBadgesQuery,
+                (rs, rowNum) -> new BadgeOrder(
+                        rs.getInt("badgeIdx"),
+                        rs.getString("badgeName"),
+                        rs.getString("badgeUrl"),
+                        rs.getString("badgeDate"),
+                        0),
                 userIdx);
 
         GetUserBadges getUserBadges = new GetUserBadges(repBadgeInfo, badgeInfoList);
@@ -682,20 +738,22 @@ public class UserDao {
                     "    and cast(date_format(endAt, '%Y.%m.%d') as char(10))=? and T.status=?";
             List<Integer> walkIdxList = jdbcTemplate.queryForList(walkIdxQuery, int.class, tag, walkAt, "ACTIVE");
 
-            List<Walk> walks = new ArrayList<>(); // 해당 날짜 + 해당 해시태그를 가지는 산책 기록 리스트
+            List<SearchWalk> walks = new ArrayList<>(); // 해당 날짜 + 해당 해시태그를 가지는 산책 기록 리스트
             for(Integer walkIdx : walkIdxList) {
                 // 산책 기록 하나 조회
-                String getWalkQuery = "select walkIdx, CONCAT(date_format(startAt, '%k:%i'),'~', date_format(endAt, '%k:%i')) as walkTime, pathImageUrl\n" +
+                String getUserDateWalkQuery = "select walkIdx, date_format(startAt, '%k:%i') as startTime, date_format(endAt, '%k:%i') as endTime, pathImageUrl\n" +
                         "from Walk W where W.walkIdx=?";
-                Walk walk = this.jdbcTemplate.queryForObject(getWalkQuery,
-                        (rs,rowNum)-> new Walk(
+                UserDateWalk userDateWalk = this.jdbcTemplate.queryForObject(getUserDateWalkQuery,
+                        (rs, rowNum)-> new UserDateWalk(
                                 rs.getInt("walkIdx"),
-                                rs.getString("walkTime"),
-                                rs.getString("pathImageUrl"),
-                                getTagList(walkIdx)
+                                rs.getString("startTime"),
+                                rs.getString("endTime"),
+                                rs.getString("pathImageUrl")
                         )
                         , walkIdx
                 );
+
+                SearchWalk walk = new SearchWalk(userDateWalk, getTagList(walkIdx));
                 walks.add(walk);
             }
 
