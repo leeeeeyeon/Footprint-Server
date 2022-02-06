@@ -26,7 +26,7 @@ public class UserService {
     }
 
 
-    public BadgeInfo patchRepBadge(int userIdx, int badgeIdx) throws BaseException {
+    public BadgeInfo modifyRepBadge(int userIdx, int badgeIdx) throws BaseException {
         try {
             BadgeInfo patchRepBadgeInfo = userDao.modifyRepBadge(userIdx, badgeIdx);
             return patchRepBadgeInfo;
