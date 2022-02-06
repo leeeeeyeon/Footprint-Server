@@ -92,16 +92,20 @@ public class UserProvider {
             }
 
             userExist = userDao.checkUser(userIdx, "Goal"); // Goal 테이블 validation
-            if (userExist == false) {
+            if (userExist == false) { //사용자가 목표를 지정하지 않은 경우
                 throw new BaseException(NOT_EXIST_USER_IN_GOAL);
             }
 
-            userExist = userDao.checkUser(userIdx, "Walk"); // Walk 테이블 validation
-            if (userExist == false) {
-                throw new BaseException(NOT_EXIST_USER_IN_WALK);
+            boolean userWalkExist = userDao.checkUser(userIdx, "Walk"); // Walk 테이블 validation
+
+            GetMonthInfoRes getMonthInfoRes;
+            if(userWalkExist == false) {
+                List<String> getGoalDays = userDao.getUserGoalDays(userIdx);
+                getMonthInfoRes = new GetMonthInfoRes(getGoalDays, null, null);
+            } else {
+                getMonthInfoRes = userDao.getMonthInfoRes(userIdx, year, month);
             }
 
-            GetMonthInfoRes getMonthInfoRes = userDao.getMonthInfoRes(userIdx, year, month);
             return getMonthInfoRes;
           } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);

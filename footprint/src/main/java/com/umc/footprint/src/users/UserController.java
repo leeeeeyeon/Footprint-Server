@@ -219,9 +219,6 @@ public class UserController {
     @GetMapping("/tmonth")
     public BaseResponse<GetMonthInfoRes> getMonthInfo() {
         // TO-DO-LIST
-        // jwt 확인?
-        // user테이블에 해당 userIdx가 존재하는지
-        // GoalDay 테이블에 해당 userIdx가 존재하는지
 
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
@@ -320,7 +317,7 @@ public class UserController {
     }
 
     /** yummy 13
-     * 사용자 전체 뱃지 조회 API
+     * 매달 뱃지 상태 조회 API
      * [GET] /users/badges
      */
     @ResponseBody

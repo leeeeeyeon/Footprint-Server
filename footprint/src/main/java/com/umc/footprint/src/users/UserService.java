@@ -30,6 +30,19 @@ public class UserService {
     @Transactional(rollbackFor = Exception.class)
     public BadgeInfo modifyRepBadge(int userIdx, int badgeIdx) throws BaseException {
         try {
+            /*boolean userExist = userDao.checkUser(userIdx, "User"); // User 테이블 validation
+            if (userExist == false) {
+                throw new BaseException(INVALID_USERIDX);
+            }
+
+            String status = userDao.getStatus(userIdx, "User"); // 사용자 status 확인
+            if (status.equals("INACTIVE")) {
+                throw new BaseException(INACTIVE_USER);
+            }
+            else if (status.equals("BLACK")) {
+                throw new BaseException(BLACK_USER);
+            }*/
+
             BadgeInfo patchRepBadgeInfo = userDao.modifyRepBadge(userIdx, badgeIdx);
             return patchRepBadgeInfo;
           } catch (Exception exception) {
