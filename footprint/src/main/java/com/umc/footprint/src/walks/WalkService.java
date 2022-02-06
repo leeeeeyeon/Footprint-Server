@@ -79,7 +79,7 @@ public class WalkService {
                 }
                 List<String> imgInputList = new ArrayList<String>(imgUrlList.subList(imgInputStartIndex, imgInputEndIndex));
                 SaveFootprint convertedFootprint = SaveFootprint.builder()
-                        .str_coordinate(convertedCoordinate)
+                        .strCoordinate(convertedCoordinate)
                         .write(request.getFootprintList().get(i).getWrite())
                         .recordAt(request.getFootprintList().get(i).getRecordAt())
                         .walkIdx(request.getFootprintList().get(i).getWalkIdx())
@@ -97,7 +97,7 @@ public class WalkService {
             // Footprint Table에 삽입 후 생성된 footprintIdx Footprint에 초기화
             System.out.println("6. Footprint 테이블에 삽입후 footprintIdx SaveFootprint 테이블에 삽입");
             for (SaveFootprint footprint : request.getFootprintList()) {
-                System.out.println("footprint.getFootprintIdx() = " + footprint.getWrite());
+                System.out.println("footprint.getWrite() = " + footprint.getWrite());
             }
             walkDao.addFootprint(request.getFootprintList(), walkIdx);
 
