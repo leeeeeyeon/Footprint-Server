@@ -68,13 +68,12 @@ public class UserController {
     @GetMapping("/today")
     public BaseResponse<GetUserTodayRes> getToday(){
         try{
-//            // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
-//            String userId = jwtService.getUserId();
-//            System.out.println("userId = " + userId);
-//            // userId로 userIdx 추출
-//            int userIdx = userProvider.getUserIdx(userId);
-            int userIdx = 44;
-
+            // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
+            String userId = jwtService.getUserId();
+            System.out.println("userId = " + userId);
+            // userId로 userIdx 추출
+            int userIdx = userProvider.getUserIdx(userId);
+            
             GetUserTodayRes userTodayRes = userProvider.getUserToday(userIdx);
 
             return new BaseResponse<>(userTodayRes);
