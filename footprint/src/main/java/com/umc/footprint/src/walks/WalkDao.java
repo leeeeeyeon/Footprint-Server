@@ -171,6 +171,7 @@ public class WalkDao {
 
     public List<Pair<Integer, Integer>> addHashtag(List<SaveFootprint> footprintList) {
         String hashtagInsertQuery = "insert into Hashtag(hashtag) values (?)";
+        System.out.println("footprintList.get(0).getHashtagList() = " + footprintList.get(0).getHashtagList());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -179,18 +180,20 @@ public class WalkDao {
 
         // footprint당 hashtag list 삽입
         for (SaveFootprint f : footprintList) {
-            for (String hashtag : f.getHashtagList()) {
-                this.jdbcTemplate.update(new PreparedStatementCreator() {
-                    @Override
-                    public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-                        PreparedStatement preparedStatement = con.prepareStatement(hashtagInsertQuery, Statement.RETURN_GENERATED_KEYS);
-                        preparedStatement.setString(1, hashtag);
-                        return preparedStatement;
-                    }
-                }, keyHolder);
+            if (f.getHashtagList().size() != 0){
+                for (String hashtag : f.getHashtagList()) {
+                    this.jdbcTemplate.update(new PreparedStatementCreator() {
+                        @Override
+                        public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                            PreparedStatement preparedStatement = con.prepareStatement(hashtagInsertQuery, Statement.RETURN_GENERATED_KEYS);
+                            preparedStatement.setString(1, hashtag);
+                            return preparedStatement;
+                        }
+                    }, keyHolder);
+                }
+                // tag list에 삽입
+                tagIdxList.add(Pair.of(keyHolder.getKey().intValue(), f.getFootprintIdx()));
             }
-            // tag list에 삽입
-            tagIdxList.add(Pair.of(keyHolder.getKey().intValue(), f.getFootprintIdx()));
         }
 
         return tagIdxList;

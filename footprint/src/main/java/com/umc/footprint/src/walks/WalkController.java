@@ -62,13 +62,15 @@ public class WalkController {
         System.out.println("walk.getCalorie() = " + walk.getCalorie());
 
         System.out.println("walk.getPhotoMatchNumList() = " + walk.getPhotoMatchNumList());
-        System.out.println("footprintList = " + footprintList.get(0).getWrite());
-        System.out.println("footprintList = " + footprintList.get(0).getCoordinates());
-        System.out.println("footprintList = " + footprintList.get(0).getHashtagList());
-        System.out.println("footprintList = " + footprintList.get(0).getRecordAt());
+//        System.out.println("footprintList = " + footprintList.get(0).getWrite());
+//        System.out.println("footprintList = " + footprintList.get(0).getCoordinates());
+//        System.out.println("footprintList = " + footprintList.get(0).getHashtagList());
+//        System.out.println("footprintList = " + footprintList.get(0).getRecordAt());
+//
+//        System.out.println("photos = " + photos.get(0).getOriginalFilename());
+//        System.out.println("photos.get(0).getContentType() = " + photos.get(0).getContentType());
 
-        System.out.println("photos = " + photos.get(0).getOriginalFilename());
-        System.out.println("photos.get(0).getContentType() = " + photos.get(0).getContentType());
+        System.out.println("Validation 1. ");
 
         try {
 

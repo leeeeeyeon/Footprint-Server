@@ -102,7 +102,7 @@ public class UserService {
                 } catch (Exception exception) {
                     throw new BaseException(DATABASE_ERROR);
                 }
-            case "DONE":
+            case "ACTIVE":
             case "ONGOING":
                 return result;
         }
