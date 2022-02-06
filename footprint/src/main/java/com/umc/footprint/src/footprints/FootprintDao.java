@@ -39,7 +39,7 @@ public class FootprintDao {
 
     // 산책 기록 내 전체 발자국 조회
     public List<GetFootprintRes> getFootprints(int walkIdx) {
-        String getFootprintsQuery = "select footprintIdx, `write`, recordAt, walkIdx\n" +
+        String getFootprintsQuery = "select footprintIdx, `write`, recordAt, walkIdx, onWalk\n" +
                 "from Footprint where walkIdx=? and status=?";
         return this.jdbcTemplate.query(getFootprintsQuery,
                 (rs, rowNum) -> new GetFootprintRes(
@@ -47,7 +47,8 @@ public class FootprintDao {
                         rs.getObject("recordAt", LocalDateTime.class),
                         rs.getString("write"),
                         getPhotoList(rs.getInt("footprintIdx")),
-                        getTagList(rs.getInt("footprintIdx"))
+                        getTagList(rs.getInt("footprintIdx")),
+                        rs.getInt("onWalk")
                 )
                 , walkIdx, "ACTIVE"
         );
