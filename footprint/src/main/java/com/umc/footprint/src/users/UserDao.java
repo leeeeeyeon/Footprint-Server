@@ -385,8 +385,10 @@ public class UserDao {
 
     // 해당 userIdx를 갖는 유저조회
     public GetUserRes getUser(int userIdx) {
-        String getUserQuery = "select `User.userIdx`, `User.nickname`, `User.username`, `User.email`, `User.status`, `User.badgeIdx`, `B.badgeUrl`, `User.birth`, `User.sex`, `User.height`, `User.weight`\n" +
-                "from `User` inner join `Badge` B on `User.badgeIdx` = B.badgeIdx where `User.userIdx`=?";
+        System.out.println("UserDao.getUser");
+        String getUserQuery = "select User.userIdx, User.nickname, User.username, User.email, User.status, User.badgeIdx, B.badgeUrl, User.birth, User.sex, User.height, User.weight " +
+                "from User inner join Badge B on User.badgeIdx = B.badgeIdx " +
+                "where User.userIdx=?";
         return this.jdbcTemplate.queryForObject(getUserQuery,
                 (rs, rowNum) -> new GetUserRes(
                         rs.getInt("userIdx"),
@@ -908,9 +910,10 @@ public class UserDao {
 
     // true = 유저 있다 & false = 유저 없다.
     public boolean checkUser(int userIdx, String tableName) throws BaseException {
-        int userCount = this.jdbcTemplate.queryForObject("SELECT count(*) FROM "+ tableName + " WHERE userIdx = ? ",int.class,userIdx);
+        System.out.println("UserDao.checkUser");
+        int userCount = this.jdbcTemplate.queryForObject("SELECT count(*) FROM " + tableName + " WHERE userIdx = ? ", int.class, userIdx);
 
-        if(userCount != 0)
+        if (userCount != 0)
             return true;
         return false;
     }
@@ -929,7 +932,8 @@ public class UserDao {
 
     // 유저 상태 조회 - validation에 사용
     public String getStatus(int userIdx, String tableName) {
-        String getStatusQuery = "select status from "+ tableName + " where userIdx=?";
+        System.out.println("UserDao.getStatus");
+        String getStatusQuery = "select status from " + tableName + " where userIdx=?";
         return this.jdbcTemplate.queryForObject(getStatusQuery, String.class, userIdx);
     }
 
