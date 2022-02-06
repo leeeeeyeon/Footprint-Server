@@ -14,6 +14,8 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Service
 public class UserService {
@@ -136,7 +138,8 @@ public class UserService {
 
                     // 이전에 로그인 했던 시간
                     LocalDateTime beforeLogAt = userDao.getUserLogAt(userIdx);
-                    LocalDateTime now = LocalDateTime.now();
+                    ZonedDateTime seoulDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+                    LocalDateTime now = seoulDateTime.toLocalDateTime();
                     // 달이 같은 경우
                     if (beforeLogAt.getMonth() == LocalDateTime.now().getMonth()) {
                         // 달이 바뀌지 않았다고 response에 저장
