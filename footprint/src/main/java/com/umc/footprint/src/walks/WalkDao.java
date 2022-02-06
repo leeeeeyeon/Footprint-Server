@@ -171,6 +171,7 @@ public class WalkDao {
 
     public List<Pair<Integer, Integer>> addHashtag(List<SaveFootprint> footprintList) {
         String hashtagInsertQuery = "insert into Hashtag(hashtag) values (?)";
+        System.out.println("footprintList.get(0).getHashtagList() = " + footprintList.get(0).getHashtagList());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -179,7 +180,7 @@ public class WalkDao {
 
         // footprint당 hashtag list 삽입
         for (SaveFootprint f : footprintList) {
-            if (f.getHashtagList() != null || f.getHashtagList().size() == 0){
+            if (f.getHashtagList().size() != 0){
                 for (String hashtag : f.getHashtagList()) {
                     this.jdbcTemplate.update(new PreparedStatementCreator() {
                         @Override
