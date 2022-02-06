@@ -14,12 +14,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.text.ParseException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import javax.transaction.Transactional;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
 
@@ -37,7 +34,7 @@ public class UserDao {
     *** [1] GET METHOD
     * */
 
-    //월별 발자국(일기) 갯수 조회
+    //월별 발자국(일기) 갯수 조회 - yummy 5
     public List<GetFootprintCount> getMonthFootprints(int userIdx, int year, int month) {
         String Query = "select day(recordAt) as day, count(footprintIdx) as footprintCount from footprint\n" +
                 "    where walkIdx in (select walkIdx from walk where userIdx=? && year(startAt)=? && month(startAt)=?)\n" +
@@ -51,10 +48,11 @@ public class UserDao {
     }
 
 
-    //월별 달성률 및 누적 정보 조회
+    //월별 달성률 및 누적 정보 조회 - yummy 4
     public GetMonthInfoRes getMonthInfoRes(int userIdx, int year, int month) {
         // 목표 요일 조회 (boolean)
-        String getGoalDaysQuery = "select G.sun, G.mon, G.tue, G.wed, G.thu, G.fri, G.sat from GoalDay as G where userIdx=?;";
+        String getGoalDaysQuery = "select G.sun, G.mon, G.tue, G.wed, G.thu, G.fri, G.sat from GoalDay as G " +
+                "where userIdx=? and MONTH(createAt)=MONTH(NOW());";
         GetGoalDays getGoalDays = this.jdbcTemplate.queryForObject(getGoalDaysQuery,
                 (rs,rowNum) -> new GetGoalDays(
                         rs.getBoolean("sun"),
@@ -68,7 +66,7 @@ public class UserDao {
         List<String> goalDayList = convertGoaldayBoolToString(getGoalDays);
 
         //이번달 일별 달성률 조회(List)
-        String getDayRateQuery = "select day(startAt) as day, sum(goalRate) as rate from walk where userIdx=? group by day(startAt);";
+        String getDayRateQuery = "select day(startAt) as day, sum(goalRate) as rate from Walk where userIdx=? group by day(startAt);";
         List<GetDayRateRes> getDayRatesRes = this.jdbcTemplate.query(getDayRateQuery,
                 (rs, rowNum) -> new GetDayRateRes(
                         rs.getInt("day"),
@@ -78,7 +76,7 @@ public class UserDao {
         //사용자의 이번 달 누적 시간, 거리, 평균 칼로리
         String getMonthInfoQuery = "select sum((timestampdiff(second,startAt, endAt))) as monthTotalMin,\n" +
                 "                sum(distance) as monthTotalDistance, sum(calorie) as monthPerCal\n" +
-                "                from walk where userIdx=? and year(startAt)=? and month(startAt)=?;";
+                "                from Walk where userIdx=? and year(startAt)=? and month(startAt)=?;";
         Object[] getMonthInfoParams = new Object[]{userIdx, year, month};
         GetMonthTotal getMonthTotal = this.jdbcTemplate.queryForObject(getMonthInfoQuery,
                 (rs, rowNum) -> new GetMonthTotal(
@@ -97,25 +95,217 @@ public class UserDao {
     }
 
 
-    public GetUserBadges getUserBadges(int userIdx) {
+    //yummy 13
+    // 사용자 전체 뱃지 조회 API
+    public BadgeInfo getRepBadgeInfo(int userIdx) {
+        //대표 뱃지 조회
         String getRepBadgeQuery = "select * from badge where badgeIdx=(select badgeIdx from user where userIdx=?);";
         BadgeInfo repBadgeInfo = this.jdbcTemplate.queryForObject(getRepBadgeQuery,
                 (rs,rowNum) -> new BadgeInfo(
                         rs.getInt("badgeIdx"),
                         rs.getString("badgeName"),
-                        rs.getString("badgeUrl")), userIdx);
+                        rs.getString("badgeUrl"),
+                        rs.getString("badgeDate")), userIdx);
 
+        return repBadgeInfo;
+    }
+
+    public List<BadgeInfo> getBadgeList(int userIdx) {
         String getUserBadgesQuery = "select * from badge where badgeIdx in " +
                 "(select badgeIdx from userbadge where userIdx=? and status='ACTIVE');";
         List<BadgeInfo> badgeInfoList = this.jdbcTemplate.query(getUserBadgesQuery,
                 (rs, rowNum) -> new BadgeInfo(
                         rs.getInt("badgeIdx"),
                         rs.getString("badgeName"),
-                        rs.getString("badgeUrl")),
+                        rs.getString("badgeUrl"),
+                        rs.getString("badgeDate")),
+                userIdx);
+
+        return badgeInfoList;
+    }
+    public GetUserBadges getUserBadges(int userIdx) {
+        //대표 뱃지 조회
+        String getRepBadgeQuery = "select * from footprintdb.Badge where badgeIdx=(select badgeIdx from footprintdb.User where userIdx=?);";
+        BadgeInfo repBadgeInfo = this.jdbcTemplate.queryForObject(getRepBadgeQuery,
+                (rs,rowNum) -> new BadgeInfo(
+                        rs.getInt("badgeIdx"),
+                        rs.getString("badgeName"),
+                        rs.getString("badgeUrl"),
+                        rs.getString("badgeDate")), userIdx);
+
+        //전체 뱃지 조회
+        String getUserBadgesQuery = "select * from footprintdb.Badge where badgeIdx in " +
+                "(select badgeIdx from footprintdb.UserBadge where userIdx=? and status='ACTIVE');";
+        List<BadgeOrder> badgeInfoList = this.jdbcTemplate.query(getUserBadgesQuery,
+                (rs, rowNum) -> new BadgeOrder(
+                        rs.getInt("badgeIdx"),
+                        rs.getString("badgeName"),
+                        rs.getString("badgeUrl"),
+                        rs.getString("badgeDate"),
+                        0),
                 userIdx);
 
         GetUserBadges getUserBadges = new GetUserBadges(repBadgeInfo, badgeInfoList);
         return getUserBadges;
+    }
+
+    // yummy 13
+    // 이번 달에 사용자가 얻은 뱃지 조회 (PRO, LOVER, MASTER)
+    public BadgeInfo getMonthlyBadgeStatus(int userIdx) {
+
+        //저번달 기준
+        LocalDate now = LocalDate.now();
+        int rate = calcMonthGoalRate(userIdx, 1); //이전달 달성률
+
+        //사용자 목표 요일 get
+        String getGoalDayQuery = "SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and " +
+                "MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 MONTH));";
+        GetGoalDays getGoalDays = this.jdbcTemplate.queryForObject(getGoalDayQuery,
+                (rs,rowNum) -> new GetGoalDays(
+                        rs.getBoolean("sun"),
+                        rs.getBoolean("mon"),
+                        rs.getBoolean("tue"),
+                        rs.getBoolean("wed"),
+                        rs.getBoolean("thu"),
+                        rs.getBoolean("fri"),
+                        rs.getBoolean("sat")), userIdx);
+
+        int count = 0; //목표요일 전체 횟수
+        int year = now.getYear();
+        int month = now.getMonthValue();
+
+        if(month == 1) { //지금이 1월이면 저번달은 작년 12월로 조회
+            year--;
+            month = 12;
+        }
+
+        String badgeDate = Integer.toString(year)+"-"+Integer.toString(month)+"-";
+
+        month--; //0-11월로 조회
+
+        Calendar cal = new GregorianCalendar(year, month, 1);
+        do {
+            int day = cal.get(Calendar.DAY_OF_WEEK);
+            if (day == Calendar.SUNDAY && getGoalDays.isSun()==true) {
+                count++;
+            }
+            if (day == Calendar.MONDAY && getGoalDays.isMon()==true) {
+                count++;
+            }
+            if (day == Calendar.TUESDAY && getGoalDays.isTue()==true) {
+                count++;
+            }
+            if (day == Calendar.WEDNESDAY && getGoalDays.isWed()==true) {
+                count++;
+            }
+            if (day == Calendar.THURSDAY && getGoalDays.isThu()==true) {
+                count++;
+            }
+            if (day == Calendar.FRIDAY && getGoalDays.isFri()==true) {
+                count++;
+            }
+            if (day == Calendar.SATURDAY && getGoalDays.isSat()==true) {
+                count++;
+            }
+            cal.add(Calendar.DAY_OF_YEAR, 1);
+        }  while (cal.get(Calendar.MONTH) == month);
+
+        // 이번달 산책 날짜의 요일을 받기
+        String walkCountQuery = "select dayofweek(startAt) as day from Walk where userIdx=? and " +
+                "MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 MONTH));";
+        List<Object> walkDays = this.jdbcTemplate.query(walkCountQuery,
+                (rs,rowNum) -> (rs.getInt("day")), userIdx);
+
+
+        // 목표 요일이랑 비교하기
+        // 산책 요일이 목표 요일이랑 같으면 count
+        int walkCount = 0;
+
+        for(int i=0;i<walkDays.size();i++) {
+            int walkday = (int) walkDays.get(i);
+            switch (walkday) {
+                case 1:
+                    if(getGoalDays.isSun()==true) {
+                        walkCount++;
+                    }
+                    break;
+                case 2:
+                    if(getGoalDays.isMon()==true) {
+                        walkCount++;
+                    }
+                    break;
+                case 3:
+                    if(getGoalDays.isTue()==true) {
+                        walkCount++;
+                    }
+                    break;
+                case 4:
+                    if(getGoalDays.isWed()==true) {
+                        walkCount++;
+                    }
+                    break;
+                case 5:
+                    if(getGoalDays.isThu()==true) {
+                        walkCount++;
+                    }
+                    break;
+                case 6:
+                    if(getGoalDays.isFri()==true) {
+                        walkCount++;
+                    }
+                    break;
+                case 7:
+                    if(getGoalDays.isSat()==true) {
+                        walkCount++;
+                    }
+                    break;
+            }
+        }
+
+        double walkRate = walkCount/count * 100;
+
+        /*
+         * MASTER - 목표 요일 중 80% 이상 / 달성률 90%
+         * PRO - 목표 요일 중 50% 이상 / 달성률 70%
+         * LOVER - 목표 요일 고려 안함 / 달성률 50%
+         * */
+        int badgeNum = -1;
+
+        if(rate >= 50) {
+            //LOVER - badgeIdx 0
+            badgeNum=0;
+        }
+        if(rate >= 70 && walkRate >= 50) {
+            //PRO - badgeIdx 1
+            badgeNum=1;
+        }
+        if(rate >= 90 && walkRate >= 80) {
+            //MASTER - badgeIdx 2
+            badgeNum=2;
+        }
+
+
+        if(badgeNum == -1) { //이번 달에 획득한 뱃지가 없는 경우
+            return null;
+        }
+
+        badgeDate += badgeNum;
+
+        //Badge 테이블에서 badgeIdx 얻어오기
+        String getBadgeInfoQuery = "select * from Badge where badgeDate=?;";
+        BadgeInfo badgeInfo = this.jdbcTemplate.queryForObject(getBadgeInfoQuery,
+                (rs,rowNum) -> new BadgeInfo(
+                        rs.getInt("badgeIdx"),
+                        rs.getString("badgeName"),
+                        rs.getString("badgeUrl"),
+                        rs.getString("badgeDate")), badgeDate);
+
+        //UserBadge 테이블에 얻은 뱃지 추가하기
+        String insertBadgeQuery = "INSERT INTO UserBadge (userIdx, badgeIdx,status) VALUES (?,?,'ACTIVE')";
+        Object[] insertBadgeParams = new Object[]{userIdx, badgeInfo.getBadgeIdx()};
+        this.jdbcTemplate.update(insertBadgeQuery,insertBadgeParams);
+
+        return badgeInfo;
     }
 
     // 해당 userIdx를 갖는 오늘 산책 관련 정보 조회
@@ -195,24 +385,26 @@ public class UserDao {
 
     // 해당 userIdx를 갖는 유저조회
     public GetUserRes getUser(int userIdx) {
-        String getUserQuery = "select userIdx, nickname, `name`, email, status, User.badgeIdx, badgeUrl, age, sex, height, weight\n" +
+        String getUserQuery = "select userIdx, nickname, username, email, status, User.badgeIdx, badgeUrl, birth, sex, height, weight,\n" +
+                "       (select count(*) from Walk where userIdx=?)+1 as walkNumber\n" +
                 "from User inner join Badge B on User.badgeIdx = B.badgeIdx where userIdx=?";
 
         return this.jdbcTemplate.queryForObject(getUserQuery,
                 (rs, rowNum) -> new GetUserRes(
                         rs.getInt("userIdx"),
                         rs.getString("nickname"),
-                        rs.getString("name"),
+                        rs.getString("username"),
                         rs.getString("email"),
                         rs.getString("status"),
                         rs.getInt("badgeIdx"),
                         rs.getString("badgeUrl"),
-                        rs.getInt("age"),
+                        rs.getTimestamp("birth"),
                         rs.getString("sex"),
                         rs.getInt("height"),
-                        rs.getInt("weight")
+                        rs.getInt("weight"),
+                        rs.getInt("walkNumber")
                 ),
-                userIdx);
+                userIdx, userIdx);
     }
 
     // 해당 userIdx를 갖는 유저의 달성정보 조회
@@ -496,9 +688,9 @@ public class UserDao {
                 "    inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
                 "    inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
                 "    where hashtag=?" +
-                "    ) and W.userIdx=?";
+                "    ) and W.userIdx=? and T.status=?";
 
-        List<String> walkAtList = jdbcTemplate.queryForList(getWalkAtQuery, String.class, tag, userIdx);
+        List<String> walkAtList = jdbcTemplate.queryForList(getWalkAtQuery, String.class, tag, userIdx, "ACTIVE");
 
         List<GetTagRes> result = new ArrayList<>(); // 최종 출력 값을 담을 리스트
 
@@ -522,23 +714,25 @@ public class UserDao {
                     "    inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
                     "    inner join Walk W on F.walkIdx = W.walkIdx\n" +
                     "    where hashtag=?\n" +
-                    "    and cast(date_format(endAt, '%Y.%m.%d') as char(10))=?";
-            List<Integer> walkIdxList = jdbcTemplate.queryForList(walkIdxQuery, int.class, tag, walkAt);
+                    "    and cast(date_format(endAt, '%Y.%m.%d') as char(10))=? and T.status=?";
+            List<Integer> walkIdxList = jdbcTemplate.queryForList(walkIdxQuery, int.class, tag, walkAt, "ACTIVE");
 
-            List<Walk> walks = new ArrayList<>(); // 해당 날짜 + 해당 해시태그를 가지는 산책 기록 리스트
+            List<SearchWalk> walks = new ArrayList<>(); // 해당 날짜 + 해당 해시태그를 가지는 산책 기록 리스트
             for(Integer walkIdx : walkIdxList) {
                 // 산책 기록 하나 조회
-                String getWalkQuery = "select walkIdx, CONCAT(date_format(startAt, '%k:%i'),'~', date_format(endAt, '%k:%i')) as walkTime, pathImageUrl\n" +
+                String getUserDateWalkQuery = "select walkIdx, date_format(startAt, '%k:%i') as startTime, date_format(endAt, '%k:%i') as endTime, pathImageUrl\n" +
                         "from Walk W where W.walkIdx=?";
-                Walk walk = this.jdbcTemplate.queryForObject(getWalkQuery,
-                        (rs,rowNum)-> new Walk(
+                UserDateWalk userDateWalk = this.jdbcTemplate.queryForObject(getUserDateWalkQuery,
+                        (rs, rowNum)-> new UserDateWalk(
                                 rs.getInt("walkIdx"),
-                                rs.getString("walkTime"),
-                                rs.getString("pathImageUrl"),
-                                getTagList(walkIdx)
+                                rs.getString("startTime"),
+                                rs.getString("endTime"),
+                                rs.getString("pathImageUrl")
                         )
                         , walkIdx
                 );
+
+                SearchWalk walk = new SearchWalk(userDateWalk, getTagList(walkIdx));
                 walks.add(walk);
             }
 
@@ -550,9 +744,8 @@ public class UserDao {
     }
 
 
-    /*
-     *** [2] POST METHOD
-     * */
+
+
 
     // 해당 userIdx를 갖는 Goal의 Time 정보 & GoalDay의 요일 정보 CREATE
     public int postGoal(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException {
@@ -634,7 +827,8 @@ public class UserDao {
                 (rs, rowNum) -> new BadgeInfo(
                         rs.getInt("badgeIdx"),
                         rs.getString("badgeName"),
-                        rs.getString("badgeUrl")
+                        rs.getString("badgeUrl"),
+                        rs.getString("badgeDate")
                 ), userIdx);
 
         return patchRepBadgeInfo;
@@ -675,9 +869,10 @@ public class UserDao {
     // 초기 유저 추가 정보를 User 테이블에 추가
     public int modifyUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) {
 
-        String patchUserInfoQuery = "UPDATE User SET nickname = ?, birth = ?, sex = ?, height = ?, weight = ? WHERE userIdx = ?";
+        System.out.println("userIdx = " + userIdx);
+        String patchUserInfoQuery = "UPDATE User SET nickname = ?, birth = ?, sex = ?, height = ?, weight = ?, status = ? WHERE userIdx = ?";
         Object[] patchUserInfoParams = new Object[]{patchUserInfoReq.getNickname(), patchUserInfoReq.getBirth(), patchUserInfoReq.getSex(),
-                patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), userIdx};
+                patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), "ACTIVE",userIdx};
 
         return this.jdbcTemplate.update(patchUserInfoQuery, patchUserInfoParams);
     }
@@ -757,6 +952,12 @@ public class UserDao {
 
     // 월 단위 달성률 계산
     public int calcMonthGoalRate(int userIdx, int beforeMonth){
+
+        // 0. 해당 달에 사용자 목표 기록이 있는지 확인
+        String checkGoalExistQuery = "SELECT count(*) FROM Goal WHERE userIdx = ? and MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
+        int checkGoalExist = this.jdbcTemplate.queryForObject(checkGoalExistQuery,int.class,userIdx,beforeMonth);
+        if(checkGoalExist == 0)
+            return 0;
 
         // 1. 사용자의 원하는 달 전체 산책 시간 확인 (초 단위)
         String getUserMonthWalkTimeQuery = "SELECT IFNULL(SUM(TIMESTAMPDIFF(second ,startAt,endAt)),0) as monthWalkTime FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
@@ -887,8 +1088,8 @@ public class UserDao {
                 "inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
                 "inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
                 "inner join Walk W on F.walkIdx = W.walkIdx\n" +
-                "where F.walkIdx = ?";
-        List<String> tagList = jdbcTemplate.queryForList(getTagQuery, String.class, walkIdx);
+                "where F.walkIdx = ? and T.status = ?";
+        List<String> tagList = jdbcTemplate.queryForList(getTagQuery, String.class, walkIdx, "ACTIVE");
 
         return tagList;
     }
@@ -901,6 +1102,39 @@ public class UserDao {
 
         return updateBool;
 
+    }
+
+    // 로그인 정보 입력
+    public void postUserLogin(PostLoginReq postLoginReq) {
+        String postLoginQuery = "insert into User(userId, username, email, providerType, status) values (?,?,?,?,?)";
+        System.out.println("UserDao.postUserLogin");
+        String status = "ONGOING";
+        Object[] postLoginParmas = new Object[]{postLoginReq.getUserId(), postLoginReq.getUsername(), postLoginReq.getEmail(), postLoginReq.getProviderType(), status};
+        this.jdbcTemplate.update(postLoginQuery,  postLoginParmas);
+    }
+
+    public PostLoginRes getUserIdAndStatus(String email) {
+        System.out.println("UserDao.getUserIdAndStatus");
+        String checkEmailQuery = "select userId, status from User where email = ?";
+        return this.jdbcTemplate.queryForObject(checkEmailQuery,
+                (rs, rowNum) -> new PostLoginRes(
+                        rs.getString("userId"),
+                        rs.getString("status")
+                ), email);
+    }
+
+    public int checkEmail(String email) {
+        System.out.println("UserDao.checkEmail");
+        String checkEmailQuery = "select exists(select email from User where email = ?)";
+        return this.jdbcTemplate.queryForObject(checkEmailQuery,
+                int.class,
+                email);
+    }
+
+    public int getUserIdx(String userId) {
+        System.out.println("UserDao.getUserIdx");
+        String getUserIdxQuery = "select userIdx from User where userId = ?";
+        return this.jdbcTemplate.queryForObject(getUserIdxQuery, int.class, userId);
     }
 
 }

@@ -2,22 +2,17 @@ package com.umc.footprint.src.users;
 
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.walks.WalkDao;
-import com.umc.footprint.src.walks.model.Walk;
-
-import java.time.Duration;
-
-import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
-import com.umc.footprint.config.BaseResponse;
 
 import com.umc.footprint.src.users.model.GetUserTodayRes;
+import com.umc.footprint.utils.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.users.model.*;
 
 import java.util.List;
+
 import static com.umc.footprint.config.BaseResponseStatus.*;
 
 @Service
@@ -25,11 +20,13 @@ public class UserProvider {
 
     private final WalkDao walkDao;
     private final UserDao userDao;
+    private final JwtService jwtService;
 
     @Autowired
-    public UserProvider(WalkDao walkDao,UserDao userDao) {
+    public UserProvider(WalkDao walkDao, UserDao userDao, JwtService jwtService) {
         this.walkDao = walkDao;
         this.userDao = userDao;
+        this.jwtService = jwtService;
     }
 
     // 해당 userIdx를 갖는 오늘 산책 관련 정보 조회
@@ -76,9 +73,32 @@ public class UserProvider {
     }
 
 
-    //월별 달성률 및 누적 정보 조회
+    //월별 달성률 및 누적 정보 조회 - yummy 4
     public GetMonthInfoRes getMonthInfoRes(int userIdx, int year, int month) throws BaseException {
         try {
+            boolean userExist = userDao.checkUser(userIdx, "User"); // User 테이블 validation
+            if (userExist == false) {
+                throw new BaseException(INVALID_USERIDX);
+            }
+
+            String status = userDao.getStatus(userIdx, "User"); // 사용자 status 확인
+            if (status.equals("INACTIVE")) {
+                throw new BaseException(INACTIVE_USER);
+            }
+            else if (status.equals("BLACK")) {
+                throw new BaseException(BLACK_USER);
+            }
+
+            userExist = userDao.checkUser(userIdx, "Goal"); // Goal 테이블 validation
+            if (userExist == false) {
+                throw new BaseException(NOT_EXIST_USER_IN_GOAL);
+            }
+
+            userExist = userDao.checkUser(userIdx, "Walk"); // Walk 테이블 validation
+            if (userExist == false) {
+                throw new BaseException(NOT_EXIST_USER_IN_WALK);
+            }
+
             GetMonthInfoRes getMonthInfoRes = userDao.getMonthInfoRes(userIdx, year, month);
             return getMonthInfoRes;
           } catch (Exception exception) {
@@ -105,18 +125,91 @@ public class UserProvider {
             GetUserRes getUserRes = userDao.getUser(userIdx);
             return getUserRes;
         } catch (Exception exception) {
+            exception.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
     }
 
 
+    // yummy11
+    // 사용자 전체 뱃지 조회 API
     public GetUserBadges getUserBadges(int userIdx) throws BaseException {
-        try {
+       // try {
             GetUserBadges getUserBadges = userDao.getUserBadges(userIdx);
+
+            for(BadgeOrder badge : getUserBadges.getBadgeList()) {
+                if(badge.getBadgeDate() == "0") {
+                    switch (badge.getBadgeIdx()) {
+                        case 1 :
+                            badge.setBadgeOrder(0);
+                            break;
+                        case 2 :
+                            badge.setBadgeOrder(1);
+                            break;
+                        case 3 :
+                            badge.setBadgeOrder(2);
+                            break;
+                        case 4 :
+                            badge.setBadgeOrder(3);
+                            break;
+                        case 5 :
+                            badge.setBadgeOrder(4);
+                            break;
+                        case 6 :
+                            badge.setBadgeOrder(5);
+                            break;
+                        case 7 :
+                            badge.setBadgeOrder(6);
+                            break;
+                        case 8 :
+                            badge.setBadgeOrder(7);
+                            break;
+                        default:
+                            if(badge.getBadgeDate().charAt(5)=='1') {
+                                if(badge.getBadgeDate().charAt(6)=='-') { //1월
+                                    badge.setBadgeOrder(8);
+                                }
+                                if(badge.getBadgeDate().charAt(6)=='0') { //10월
+                                    badge.setBadgeOrder(17);
+                                }
+                                if(badge.getBadgeDate().charAt(6)=='1') { //11월
+                                    badge.setBadgeOrder(18);
+                                }
+                                if(badge.getBadgeDate().charAt(6)=='2') { //12월
+                                    badge.setBadgeOrder(19);
+                                }
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='2') {
+                                badge.setBadgeOrder(9);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='3') {
+                                badge.setBadgeOrder(10);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='4') {
+                                badge.setBadgeOrder(11);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='5') {
+                                badge.setBadgeOrder(12);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='6') {
+                                badge.setBadgeOrder(13);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='7') {
+                                badge.setBadgeOrder(14);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='8') {
+                                badge.setBadgeOrder(15);
+                            }
+                            if(badge.getBadgeDate().charAt(5)=='9') {
+                                badge.setBadgeOrder(16);
+                            }
+                    }
+                }
+            }
             return getUserBadges;
-          } catch (Exception exception) {
-            throw new BaseException(DATABASE_ERROR);
-        }
+          //} catch (Exception exception) {
+          //  throw new BaseException(DATABASE_ERROR);
+        //}
     }
 
 
@@ -165,6 +258,51 @@ public class UserProvider {
                 throw new BaseException(NO_EXIST_RESULT);
             }
             return getTagResult;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    //yummy 13
+    // 이번달 사용자가 얻은 뱃지 조회 (PRO, LOVER, MASTER)
+    public BadgeInfo getMonthlyBadgeStatus(int userIdx) throws BaseException {
+        try {
+            BadgeInfo getBadgeInfo = userDao.getMonthlyBadgeStatus(userIdx);
+            if(getBadgeInfo==null) {
+                throw new BaseException(NO_MONTHLY_BADGE);
+            }
+            return getBadgeInfo;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // email을 통해 유저 중복 검사
+    public PostLoginRes checkEmail(String email) throws BaseException {
+        System.out.println("UserProvider.checkEmail1");
+        try {
+            if (userDao.checkEmail(email) == 1) {
+                System.out.println("UserProvider.checkEmail2");
+                // email로 userId랑 상태 추출
+                PostLoginRes postLoginRes = userDao.getUserIdAndStatus(email);
+                // userId 암호화
+                String jwtId = jwtService.createJwt(postLoginRes.getJwtId());
+                // response에 저장
+                postLoginRes.setJwtId(jwtId);
+                return postLoginRes;
+            } else {
+                return new PostLoginRes("", "NONE");
+            }
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // userId로 userIdx 추출
+    public int getUserIdx(String userId) throws BaseException {
+        try {
+            System.out.println("UserProvider.getUserIdx");
+            return userDao.getUserIdx(userId);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
