@@ -51,20 +51,8 @@ public class UserDao {
 
     //월별 달성률 및 누적 정보 조회 - yummy 4
     public GetMonthInfoRes getMonthInfoRes(int userIdx, int year, int month) {
-        // 목표 요일 조회 (boolean)
-        String getGoalDaysQuery = "select G.sun, G.mon, G.tue, G.wed, G.thu, G.fri, G.sat from GoalDay as G " +
-                "where userIdx=? and MONTH(createAt)=MONTH(NOW());";
-        GetGoalDays getGoalDays = this.jdbcTemplate.queryForObject(getGoalDaysQuery,
-                (rs,rowNum) -> new GetGoalDays(
-                        rs.getBoolean("sun"),
-                        rs.getBoolean("mon"),
-                        rs.getBoolean("tue"),
-                        rs.getBoolean("wed"),
-                        rs.getBoolean("thu"),
-                        rs.getBoolean("fri"),
-                        rs.getBoolean("sat")), userIdx);
-
-        List<String> goalDayList = convertGoaldayBoolToString(getGoalDays);
+        // 사용자 목표 요일 조회
+        List<String> goalDayList = getUserGoalDays(userIdx);
 
         //이번달 일별 달성률 조회(List)
         String getDayRateQuery = "select day(startAt) as day, sum(goalRate) as rate from Walk where userIdx=? group by day(startAt);";
@@ -824,8 +812,10 @@ public class UserDao {
      * */
 
     //yummy 12
+    //대표 뱃지 수정
     public BadgeInfo modifyRepBadge(int userIdx, int badgeIdx) {
         //TO DO : badgeIdx의 뱃지가 ACTIVE인지 validation 검사하기
+
         String patchRepBadgeQuery = "update User set badgeIdx=? where userIdx=?;";
         Object[] patchRepBadgeParams = new Object[]{badgeIdx, userIdx};
         this.jdbcTemplate.update(patchRepBadgeQuery, patchRepBadgeParams);
@@ -888,6 +878,26 @@ public class UserDao {
     /*
      *** [4] TOOL METHOD
      * */
+
+    // 사용자의 목표 요일을 조회하는 Method
+    public List<String> getUserGoalDays (int userIdx) {
+        // 목표 요일 조회 (boolean)
+        String getGoalDaysQuery = "select G.sun, G.mon, G.tue, G.wed, G.thu, G.fri, G.sat from GoalDay as G " +
+                "where userIdx=? and MONTH(createAt)=MONTH(NOW());";
+        GetGoalDays getGoalDays = this.jdbcTemplate.queryForObject(getGoalDaysQuery,
+                (rs, rowNum) -> new GetGoalDays(
+                        rs.getBoolean("sun"),
+                        rs.getBoolean("mon"),
+                        rs.getBoolean("tue"),
+                        rs.getBoolean("wed"),
+                        rs.getBoolean("thu"),
+                        rs.getBoolean("fri"),
+                        rs.getBoolean("sat")), userIdx);
+
+        List<String> goalDayList = convertGoaldayBoolToString(getGoalDays);
+        return goalDayList;
+    }
+
 
     // GoalDay Table의 true인 요일 List<String>으로 return
     public List<String> convertGoaldayBoolToString(GetGoalDays getGoalDays) {

@@ -23,4 +23,4 @@ sudo ./gradlew clean build
 echo "> BUILD FINISH" 
 
 echo "> $JAR_PATH 배포" 
-# nohup java -jar $JAR_PATH #/var/www/dev/deploy/footprint/build/libs/footprint-0.0.1-SNAPSHOT.jar
+java -jar $JAR_PATH 
