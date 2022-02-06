@@ -682,7 +682,7 @@ public class UserDao {
                     "    and cast(date_format(endAt, '%Y.%m.%d') as char(10))=? and T.status=?";
             List<Integer> walkIdxList = jdbcTemplate.queryForList(walkIdxQuery, int.class, tag, walkAt, "ACTIVE");
 
-            List<Walk> walks = new ArrayList<>(); // 해당 날짜 + 해당 해시태그를 가지는 산책 기록 리스트
+            List<SearchWalk> walks = new ArrayList<>(); // 해당 날짜 + 해당 해시태그를 가지는 산책 기록 리스트
             for(Integer walkIdx : walkIdxList) {
                 // 산책 기록 하나 조회
                 String getUserDateWalkQuery = "select walkIdx, date_format(startAt, '%k:%i') as startTime, date_format(endAt, '%k:%i') as endTime, pathImageUrl\n" +
@@ -697,7 +697,7 @@ public class UserDao {
                         , walkIdx
                 );
 
-                Walk walk = new Walk(userDateWalk, getTagList(walkIdx));
+                SearchWalk walk = new SearchWalk(userDateWalk, getTagList(walkIdx));
                 walks.add(walk);
             }
 
