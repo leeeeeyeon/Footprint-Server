@@ -63,66 +63,68 @@ public class WalkService {
 
             System.out.println("walkIdx = " + walkIdx);
 
-            System.out.println("4. 발자국 기록 사진들 List<MultipartFile> -> List<String> 으로 변환");
-            List<String> imgUrlList = awsS3Service.uploadFile(request.getPhotos());
+            if (!request.getFootprintList().isEmpty()){
+                System.out.println("4. 발자국 기록 사진들 List<MultipartFile> -> List<String> 으로 변환");
+                List<String> imgUrlList = awsS3Service.uploadFile(request.getPhotos());
 
-            //  발자국 Photo 이미지 URL 생성 및 S3 업로드
-            System.out.println("5. 발자국 좌표 List<Double> -> String 으로 변환 후 SaveFootprint 객체에 저장");
-            ArrayList<SaveFootprint> convertedFootprints = new ArrayList<>();
-            int imgInputStartIndex = 1;
-            for (int i = 0; i < request.getWalk().getPhotoMatchNumList().size(); i++) {
-                String convertedCoordinate = convertListToString(request.getFootprintList().get(i).getCoordinates());
-                System.out.println("convertedCoordinate = " + convertedCoordinate);
-                int imgInputEndIndex = imgInputStartIndex + request.getWalk().getPhotoMatchNumList().get(i);
-                System.out.println("imgInputEndIndex = " + imgInputEndIndex);
-                if (imgInputEndIndex > request.getPhotos().size()) {
-                    throw new BaseException(EXCEED_FOOTPRINT_SIZE);
+                //  발자국 Photo 이미지 URL 생성 및 S3 업로드
+                System.out.println("5. 발자국 좌표 List<Double> -> String 으로 변환 후 SaveFootprint 객체에 저장");
+                ArrayList<SaveFootprint> convertedFootprints = new ArrayList<>();
+                int imgInputStartIndex = 1;
+                for (int i = 0; i < request.getWalk().getPhotoMatchNumList().size(); i++) {
+                    String convertedCoordinate = convertListToString(request.getFootprintList().get(i).getCoordinates());
+                    System.out.println("convertedCoordinate = " + convertedCoordinate);
+                    int imgInputEndIndex = imgInputStartIndex + request.getWalk().getPhotoMatchNumList().get(i);
+                    System.out.println("imgInputEndIndex = " + imgInputEndIndex);
+                    if (imgInputEndIndex > request.getPhotos().size()) {
+                        throw new BaseException(EXCEED_FOOTPRINT_SIZE);
+                    }
+                    List<String> imgInputList = new ArrayList<String>(imgUrlList.subList(imgInputStartIndex, imgInputEndIndex));
+                    SaveFootprint convertedFootprint = SaveFootprint.builder()
+                            .strCoordinate(convertedCoordinate)
+                            .write(request.getFootprintList().get(i).getWrite())
+                            .recordAt(request.getFootprintList().get(i).getRecordAt())
+                            .walkIdx(request.getFootprintList().get(i).getWalkIdx())
+                            .hashtagList(request.getFootprintList().get(i).getHashtagList())
+                            .imgUrlList(imgInputList)
+                            .build();
+
+                    convertedFootprints.add(convertedFootprint);
+                    imgInputStartIndex = imgInputEndIndex;
                 }
-                List<String> imgInputList = new ArrayList<String>(imgUrlList.subList(imgInputStartIndex, imgInputEndIndex));
-                SaveFootprint convertedFootprint = SaveFootprint.builder()
-                        .strCoordinate(convertedCoordinate)
-                        .write(request.getFootprintList().get(i).getWrite())
-                        .recordAt(request.getFootprintList().get(i).getRecordAt())
-                        .walkIdx(request.getFootprintList().get(i).getWalkIdx())
-                        .hashtagList(request.getFootprintList().get(i).getHashtagList())
-                        .imgUrlList(imgInputList)
-                        .build();
+                System.out.println("WalkService.saveRecord1");
+                request.setConvertedFootprints(convertedFootprints);
+                System.out.println("WalkService.saveRecord2");
 
-                convertedFootprints.add(convertedFootprint);
-                imgInputStartIndex = imgInputEndIndex;
+                // Footprint Table에 삽입 후 생성된 footprintIdx Footprint에 초기화
+                System.out.println("6. Footprint 테이블에 삽입후 footprintIdx SaveFootprint 테이블에 삽입");
+                for (SaveFootprint footprint : request.getFootprintList()) {
+                    System.out.println("footprint.getWrite() = " + footprint.getWrite());
+                }
+                walkDao.addFootprint(request.getFootprintList(), walkIdx);
+
+                for (SaveFootprint footprint : request.getFootprintList()) {
+                    System.out.println("footprint.getFootprintIdx() = " + footprint.getFootprintIdx());
+                }
+
+
+                // Photo Table에 삽입
+                System.out.println("7. Photo 테이블에 삽입");
+                walkDao.addPhoto(request.getWalk().getUserIdx(), request.getFootprintList());
+
+                // Hashtag Table에 삽입 후 tagIdx(hashtagIdx, footprintIdx) mapping pair 반환
+                System.out.println("8. Hashtag 테이블에 삽입 후 매핑된 Idx 반환 ");
+                List<Pair<Integer, Integer>> tagIdxList = walkDao.addHashtag(request.getFootprintList());
+
+                for (Pair<Integer, Integer> tag : tagIdxList) {
+                    System.out.println("tag.getFirst() = " + tag.getFirst());
+                    System.out.println("tag.getSecond() = " + tag.getSecond());
+                }
+
+                // Tag Table에 삽입
+                System.out.println("9. Tag 테이블에 삽입");
+                walkDao.addTag(tagIdxList, request.getWalk().getUserIdx());
             }
-            System.out.println("WalkService.saveRecord1");
-            request.setConvertedFootprints(convertedFootprints);
-            System.out.println("WalkService.saveRecord2");
-
-            // Footprint Table에 삽입 후 생성된 footprintIdx Footprint에 초기화
-            System.out.println("6. Footprint 테이블에 삽입후 footprintIdx SaveFootprint 테이블에 삽입");
-            for (SaveFootprint footprint : request.getFootprintList()) {
-                System.out.println("footprint.getWrite() = " + footprint.getWrite());
-            }
-            walkDao.addFootprint(request.getFootprintList(), walkIdx);
-
-            for (SaveFootprint footprint : request.getFootprintList()) {
-                System.out.println("footprint.getFootprintIdx() = " + footprint.getFootprintIdx());
-            }
-
-
-            // Photo Table에 삽입
-            System.out.println("7. Photo 테이블에 삽입");
-            walkDao.addPhoto(request.getWalk().getUserIdx(), request.getFootprintList());
-
-            // Hashtag Table에 삽입 후 tagIdx(hashtagIdx, footprintIdx) mapping pair 반환
-            System.out.println("8. Hashtag 테이블에 삽입 후 매핑된 Idx 반환 ");
-            List<Pair<Integer, Integer>> tagIdxList = walkDao.addHashtag(request.getFootprintList());
-
-            for (Pair<Integer, Integer> tag : tagIdxList) {
-                System.out.println("tag.getFirst() = " + tag.getFirst());
-                System.out.println("tag.getSecond() = " + tag.getSecond());
-            }
-
-            // Tag Table에 삽입
-            System.out.println("9. Tag 테이블에 삽입");
-            walkDao.addTag(tagIdxList, request.getWalk().getUserIdx());
 
             // badge 획득 여부 확인 및 id 반환
             System.out.println("10. badge 획득 여부 확인 후 얻은 badgeIdxList 반환");
