@@ -812,7 +812,7 @@ public class UserDao {
      *** [3] PATCH METHOD
      * */
 
-    public BadgeInfo patchRepBadge(int userIdx, int badgeIdx) {
+    public BadgeInfo modifyRepBadge(int userIdx, int badgeIdx) {
         //TO DO : badgeIdx의 뱃지가 ACTIVE인지 validation 검사하기
         String patchRepBadgeQuery = "update user set badgeIdx=? where userIdx=?;";
         Object[] patchRepBadgeParams = new Object[]{badgeIdx, userIdx};
