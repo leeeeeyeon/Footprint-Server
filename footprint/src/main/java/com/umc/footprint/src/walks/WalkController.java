@@ -70,6 +70,8 @@ public class WalkController {
         System.out.println("photos = " + photos.get(0).getOriginalFilename());
         System.out.println("photos.get(0).getContentType() = " + photos.get(0).getContentType());
 
+        System.out.println("Validation 1. ");
+
         try {
 
             if (walk.getPhotoMatchNumList().size() != footprintList.size()) {

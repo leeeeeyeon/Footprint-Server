@@ -180,14 +180,16 @@ public class WalkDao {
         // footprint당 hashtag list 삽입
         for (SaveFootprint f : footprintList) {
             for (String hashtag : f.getHashtagList()) {
-                this.jdbcTemplate.update(new PreparedStatementCreator() {
-                    @Override
-                    public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-                        PreparedStatement preparedStatement = con.prepareStatement(hashtagInsertQuery, Statement.RETURN_GENERATED_KEYS);
-                        preparedStatement.setString(1, hashtag);
-                        return preparedStatement;
-                    }
-                }, keyHolder);
+                if (!hashtag.isEmpty()) {
+                    this.jdbcTemplate.update(new PreparedStatementCreator() {
+                        @Override
+                        public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                            PreparedStatement preparedStatement = con.prepareStatement(hashtagInsertQuery, Statement.RETURN_GENERATED_KEYS);
+                            preparedStatement.setString(1, hashtag);
+                            return preparedStatement;
+                        }
+                    }, keyHolder);
+                }
             }
             // tag list에 삽입
             tagIdxList.add(Pair.of(keyHolder.getKey().intValue(), f.getFootprintIdx()));
