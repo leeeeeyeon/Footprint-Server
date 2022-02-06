@@ -409,8 +409,8 @@ public class UserDao {
 
     // 해당 userIdx를 갖는 유저조회
     public GetUserRes getUser(int userIdx) {
-        String getUserQuery = "select userIdx, nickname, `username`, email, status, User.badgeIdx, badgeUrl, birth, sex, height, weight\n" +
-                "from User inner join Badge B on User.badgeIdx = B.badgeIdx where userIdx=?";
+        String getUserQuery = "select `User.userIdx`, `User.nickname`, `User.username`, `User.email`, `User.status`, `User.badgeIdx`, `B.badgeUrl`, `User.birth`, `User.sex`, `User.height`, `User.weight`\n" +
+                "from `User` inner join `Badge` B on `User.badgeIdx` = B.badgeIdx where `User.userIdx`=?";
         return this.jdbcTemplate.queryForObject(getUserQuery,
                 (rs, rowNum) -> new GetUserRes(
                         rs.getInt("userIdx"),
