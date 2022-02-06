@@ -97,7 +97,35 @@ public class UserDao {
     }
 
 
-    public GetUserBadges getUserBadges(int userIdx) {
+    //yammy 13
+    // 사용자 전체 뱃지 조회 API
+    // TO-DO-List : 화면에 표시되는 뱃지 순서 포함해서 보내주기!!
+    /*
+    * 뱃지 순서
+0 - 발자국 스타터
+1 - 누적 10km
+2 - 누적 30km
+3 - 누적 50km
+4 - 누적 100km
+5 - 누적 기록 10회
+6 - 누적 기록 30회
+7 - 누적 기록 50회
+8 - 1월
+9 - 2월
+10 - 3월
+11 - 4월
+12 - 5월
+13 - 6월
+14 - 7월
+15 - 8월
+16 - 9월
+17 - 10월
+18 - 11월
+19 - 12월
+20 - 년도 뱃지(미정)*/
+    //대표 뱃지 조회
+    public BadgeInfo getRepBadgeInfo(int userIdx) {
+        //대표 뱃지 조회
         String getRepBadgeQuery = "select * from badge where badgeIdx=(select badgeIdx from user where userIdx=?);";
         BadgeInfo repBadgeInfo = this.jdbcTemplate.queryForObject(getRepBadgeQuery,
                 (rs,rowNum) -> new BadgeInfo(
@@ -106,6 +134,10 @@ public class UserDao {
                         rs.getString("badgeUrl"),
                         rs.getString("badgeDate")), userIdx);
 
+        return repBadgeInfo;
+    }
+
+    public List<BadgeInfo> getBadgeList(int userIdx) {
         String getUserBadgesQuery = "select * from badge where badgeIdx in " +
                 "(select badgeIdx from userbadge where userIdx=? and status='ACTIVE');";
         List<BadgeInfo> badgeInfoList = this.jdbcTemplate.query(getUserBadgesQuery,
@@ -114,6 +146,30 @@ public class UserDao {
                         rs.getString("badgeName"),
                         rs.getString("badgeUrl"),
                         rs.getString("badgeDate")),
+                userIdx);
+
+        return badgeInfoList;
+    }
+    public GetUserBadges getUserBadges(int userIdx) {
+        //대표 뱃지 조회
+        String getRepBadgeQuery = "select * from footprintdb.Badge where badgeIdx=(select badgeIdx from footprintdb.User where userIdx=?);";
+        BadgeInfo repBadgeInfo = this.jdbcTemplate.queryForObject(getRepBadgeQuery,
+                (rs,rowNum) -> new BadgeInfo(
+                        rs.getInt("badgeIdx"),
+                        rs.getString("badgeName"),
+                        rs.getString("badgeUrl"),
+                        rs.getString("badgeDate")), userIdx);
+
+        //전체 뱃지 조회
+        String getUserBadgesQuery = "select * from footprintdb.Badge where badgeIdx in " +
+                "(select badgeIdx from footprintdb.UserBadge where userIdx=? and status='ACTIVE');";
+        List<BadgeOrder> badgeInfoList = this.jdbcTemplate.query(getUserBadgesQuery,
+                (rs, rowNum) -> new BadgeOrder(
+                        rs.getInt("badgeIdx"),
+                        rs.getString("badgeName"),
+                        rs.getString("badgeUrl"),
+                        rs.getString("badgeDate"),
+                        0),
                 userIdx);
 
         GetUserBadges getUserBadges = new GetUserBadges(repBadgeInfo, badgeInfoList);
