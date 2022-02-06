@@ -17,7 +17,7 @@ import java.sql.Timestamp;
 public class GetUserRes {
     private int userIdx;
     private String nickname;
-    private String name;
+    private String username;
     private String email;
     private String status;
     private int badgeIdx;

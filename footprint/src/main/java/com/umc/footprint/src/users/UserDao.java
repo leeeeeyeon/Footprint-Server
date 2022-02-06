@@ -34,7 +34,7 @@ public class UserDao {
     *** [1] GET METHOD
     * */
 
-    //월별 발자국(일기) 갯수 조회
+    //월별 발자국(일기) 갯수 조회 - yummy 5
     public List<GetFootprintCount> getMonthFootprints(int userIdx, int year, int month) {
         String Query = "select day(recordAt) as day, count(footprintIdx) as footprintCount from footprint\n" +
                 "    where walkIdx in (select walkIdx from walk where userIdx=? && year(startAt)=? && month(startAt)=?)\n" +
@@ -48,10 +48,11 @@ public class UserDao {
     }
 
 
-    //월별 달성률 및 누적 정보 조회
+    //월별 달성률 및 누적 정보 조회 - yummy 4
     public GetMonthInfoRes getMonthInfoRes(int userIdx, int year, int month) {
         // 목표 요일 조회 (boolean)
-        String getGoalDaysQuery = "select G.sun, G.mon, G.tue, G.wed, G.thu, G.fri, G.sat from GoalDay as G where userIdx=?;";
+        String getGoalDaysQuery = "select G.sun, G.mon, G.tue, G.wed, G.thu, G.fri, G.sat from GoalDay as G " +
+                "where userIdx=? and MONTH(createAt)=MONTH(NOW());";
         GetGoalDays getGoalDays = this.jdbcTemplate.queryForObject(getGoalDaysQuery,
                 (rs,rowNum) -> new GetGoalDays(
                         rs.getBoolean("sun"),
@@ -65,7 +66,7 @@ public class UserDao {
         List<String> goalDayList = convertGoaldayBoolToString(getGoalDays);
 
         //이번달 일별 달성률 조회(List)
-        String getDayRateQuery = "select day(startAt) as day, sum(goalRate) as rate from walk where userIdx=? group by day(startAt);";
+        String getDayRateQuery = "select day(startAt) as day, sum(goalRate) as rate from Walk where userIdx=? group by day(startAt);";
         List<GetDayRateRes> getDayRatesRes = this.jdbcTemplate.query(getDayRateQuery,
                 (rs, rowNum) -> new GetDayRateRes(
                         rs.getInt("day"),
@@ -75,7 +76,7 @@ public class UserDao {
         //사용자의 이번 달 누적 시간, 거리, 평균 칼로리
         String getMonthInfoQuery = "select sum((timestampdiff(second,startAt, endAt))) as monthTotalMin,\n" +
                 "                sum(distance) as monthTotalDistance, sum(calorie) as monthPerCal\n" +
-                "                from walk where userIdx=? and year(startAt)=? and month(startAt)=?;";
+                "                from Walk where userIdx=? and year(startAt)=? and month(startAt)=?;";
         Object[] getMonthInfoParams = new Object[]{userIdx, year, month};
         GetMonthTotal getMonthTotal = this.jdbcTemplate.queryForObject(getMonthInfoQuery,
                 (rs, rowNum) -> new GetMonthTotal(
@@ -94,33 +95,8 @@ public class UserDao {
     }
 
 
-    //yammy 13
+    //yummy 13
     // 사용자 전체 뱃지 조회 API
-    // TO-DO-List : 화면에 표시되는 뱃지 순서 포함해서 보내주기!!
-    /*
-    * 뱃지 순서
-0 - 발자국 스타터
-1 - 누적 10km
-2 - 누적 30km
-3 - 누적 50km
-4 - 누적 100km
-5 - 누적 기록 10회
-6 - 누적 기록 30회
-7 - 누적 기록 50회
-8 - 1월
-9 - 2월
-10 - 3월
-11 - 4월
-12 - 5월
-13 - 6월
-14 - 7월
-15 - 8월
-16 - 9월
-17 - 10월
-18 - 11월
-19 - 12월
-20 - 년도 뱃지(미정)*/
-    //대표 뱃지 조회
     public BadgeInfo getRepBadgeInfo(int userIdx) {
         //대표 뱃지 조회
         String getRepBadgeQuery = "select * from badge where badgeIdx=(select badgeIdx from user where userIdx=?);";
