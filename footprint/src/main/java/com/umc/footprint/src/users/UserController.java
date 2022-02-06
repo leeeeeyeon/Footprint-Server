@@ -221,12 +221,11 @@ public class UserController {
 
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
-            //String userId = jwtService.getUserId();
-            //System.out.println("userId = " + userId);
+            String userId = jwtService.getUserId();
+            System.out.println("userId = " + userId);
             // userId로 userIdx 추출
-            //int userIdx = userProvider.getUserIdx(userId);
+            int userIdx = userProvider.getUserIdx(userId);
 
-            int userIdx=30;
             LocalDate now = LocalDate.now();
             int nowYear = now.getYear();
             int nowMonth = now.getMonthValue();
