@@ -38,6 +38,7 @@ public enum BaseResponseStatus {
     INVALID_JWT(false, 2002, "유효하지 않은 JWT입니다."),
     INVALID_USER_JWT(false,2003,"권한이 없는 유저의 접근입니다."),
     INVALID_USERIDX(false,2100,"잘못된 유저 인덱스입니다."),
+    NOT_EXIST_USER_IN_GOAL(false,2119, "아직 목표 설정을 하지 않은 사용자입니다."),
     NOT_EXIST_USER_IN_WALK(false,2120, "아직 산책 기록이 없는 사용자입니다."),
     NO_EXIST_WALK(false,2121, "해당 날짜에는 산책을 하지 않았습니다."),
     INACTIVE_USER(false, 2122, "비활성화된 유저입니다."),
@@ -58,9 +59,6 @@ public enum BaseResponseStatus {
 
     INVALID_WALKIDX(false, 2200, "잘못된 산책 인덱스입니다."),
     NO_FOOTPRINT_IN_WALK(false, 2221, "해당 산책 기록에는 발자국이 존재하지 않습니다."),
-
-    NOT_MATCH_IMAGE_COUNT(false, 2140, "Footprint 개수와 FootprintImg의 개수가 다릅니다."),
-    EXCEED_FOOTPRINT_SIZE(false, 2241, "photoMatchNumList를 확인해주십시요."),
 
     DELETED_FOOTPRINT(false, 2260, "이미 삭제된 발자국입니다."),
     NO_EXIST_FOOTPRINT(false, 2261, "존재하지 않는 발자국입니다."),
