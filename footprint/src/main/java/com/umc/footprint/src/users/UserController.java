@@ -130,6 +130,7 @@ public class UserController {
             GetUserRes getUserRes = userProvider.getUser(userIdx);
             return new BaseResponse<>(getUserRes);
         } catch (BaseException exception) {
+            exception.printStackTrace();
             return new BaseResponse<>((exception.getStatus()));
         }
 
