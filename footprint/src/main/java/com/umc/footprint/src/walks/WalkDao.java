@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,30 +114,35 @@ public class WalkDao {
     public void addFootprint(List<SaveFootprint> footprintList, int walkIdx) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        String footprintInsertQuery = "insert into `Footprint`(`coordinate`, `write`, `recordAt`, `walkIdx`)" +
-                "values (ST_GeomFromText(?),?,?,?)";
+        String footprintInsertQuery = "insert into `Footprint`(`coordinate`, `write`, `recordAt`, `walkIdx`, `updateAt`)" +
+                "values (ST_GeomFromText(?),?,?,?,?)";
 
-        System.out.println("footprintList.get(i).getCoordinates() = " + footprintList.get(0).getCoordinates());
+        System.out.println("footprintList.get(i).getStrCoordinate() = " + footprintList.get(0).getStrCoordinate());
         System.out.println("footprintList.get(i).getWrite() = " + footprintList.get(0).getWrite());
         System.out.println("footprintList.get(i).getRecordAt() = " + footprintList.get(0).getRecordAt());
         System.out.println("footprintList.get(i).getWalkIdx() = " + walkIdx);
 
-        for (SaveFootprint f : footprintList){
+        for (SaveFootprint footprint : footprintList){
             this.jdbcTemplate.update(new PreparedStatementCreator() {
                 @Override
                 public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
                     PreparedStatement preparedStatement = con.prepareStatement(footprintInsertQuery, Statement.RETURN_GENERATED_KEYS);
-                    preparedStatement.setString(1, f.getStr_coordinate());
-                    preparedStatement.setString(2, f.getWrite());
-                    preparedStatement.setTimestamp(3, Timestamp.valueOf(f.getRecordAt()));
+                    preparedStatement.setString(1, footprint.getStrCoordinate());
+                    preparedStatement.setString(2, footprint.getWrite());
+                    preparedStatement.setTimestamp(3, Timestamp.valueOf(footprint.getRecordAt()));
                     preparedStatement.setInt(4, walkIdx);
+                    preparedStatement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
                     return preparedStatement;
                 }
             }, keyHolder);
             // 자동 생성되는 인덱스 리스트에 추가
-            f.setWalkIdxOfFootprint(keyHolder.getKey().intValue());
+            footprint.setFootprintIdx(keyHolder.getKey().intValue());
 
-            System.out.println("f.getFootprintIdx() = " + f.getFootprintIdx());
+            System.out.println("footprint.getFootprintIdx() = " + footprint.getFootprintIdx());
+            System.out.println("footprint.getWrite() = " + footprint.getWrite());
+            System.out.println("footprint.getStrCoordinate() = " + footprint.getStrCoordinate());
+            System.out.println("footprint.getWalkIdx() = " + footprint.getWalkIdx());
+            System.out.println("footprint.getRecordAt() = " + footprint.getRecordAt());
         }
     }
 
@@ -242,27 +248,32 @@ public class WalkDao {
         System.out.println("WalkDao.getAcquiredBadgeIdxList");
         String getDisRecBadgeQuery = "SELECT \n" +
                 "       CASE\n" +
-                "            WHEN (sum(walk.distance) between 10 and 30) then 2\n" +
-                "            when (sum(walk.distance) between 30 and 50) then 3\n" +
-                "            WHEN (sum(walk.distance) between 50 and 100) then 4\n" +
-                "            WHEN (sum(walk.distance) > 100) then 5\n" +
+                "            WHEN (sum(Walk.distance) between 10 and 30) then 2\n" +
+                "            when (sum(Walk.distance) between 30 and 50) then 3\n" +
+                "            WHEN (sum(Walk.distance) between 50 and 100) then 4\n" +
+                "            WHEN (sum(Walk.distance) > 100) then 5\n" +
                 "        else 0\n" +
                 "        end as distanceBadgeIdx,\n" +
                 "       CASE\n" +
-                "            when (count(walk.walkIdx) between 10 and 30) then 6\n" +
-                "            when (count(walk.walkIdx) between 30 and 50) then 7\n" +
-                "            when (count(walk.walkIdx) > 50) then 8\n" +
+                "            when (count(Walk.walkIdx) between 10 and 30) then 6\n" +
+                "            when (count(Walk.walkIdx) between 30 and 50) then 7\n" +
+                "            when (count(Walk.walkIdx) > 50) then 8\n" +
                 "        else 0\n" +
                 "        end as recordBadgeIdx\n" +
-                "From walk\n" +
+                "From Walk\n" +
                 "Where userIdx = ?\n" +
-                "group by walk.userIdx";
+                "group by Walk.userIdx";
 
-        return this.jdbcTemplate.queryForObject(getDisRecBadgeQuery,
-                (rs, rowNum) -> new GetBadgeIdx(
-                        rs.getInt("distanceBadgeIdx"),
-                        rs.getInt("recordBadgeIdx")
-                ), userIdx);
+        System.out.println("before query");
+        GetBadgeIdx getBadgeIdx = this.jdbcTemplate.queryForObject(getDisRecBadgeQuery,
+                (rs, rowNum) -> GetBadgeIdx.builder()
+                        .distanceBadgeIdx(rs.getInt("distanceBadgeIdx"))
+                        .recordBadgeIdx(rs.getInt("recordBadgeIdx"))
+                        .build()
+                , userIdx);
+        System.out.println("getBadgeIdx.getRecordBadgeIdx() = " + getBadgeIdx.getRecordBadgeIdx());
+        System.out.println("getBadgeIdx.getDistanceBadgeIdx() = " + getBadgeIdx.getDistanceBadgeIdx());
+        return getBadgeIdx;
     }
 
     // 원래 가지고 있던 뱃지 조회

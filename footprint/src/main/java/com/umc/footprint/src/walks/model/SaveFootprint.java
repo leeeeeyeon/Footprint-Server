@@ -12,7 +12,7 @@ public class SaveFootprint {
     private int footprintIdx;
     // coordinate 형식에 따라 string으로 받을 지 point로 받을 지 정함
     private List<Double> coordinates;
-    private String str_coordinate;
+    private String strCoordinate;
     private String write;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime recordAt;
@@ -23,10 +23,10 @@ public class SaveFootprint {
     // Url 저장
     private List<String> imgUrlList;
     @Builder
-    public SaveFootprint(int footprintIdx, List<Double> coordinates, String str_coordinate, String write, LocalDateTime recordAt, int walkIdx, List<String> hashtagList, List<String> imgUrlList) {
+    public SaveFootprint(int footprintIdx, List<Double> coordinates, String strCoordinate, String write, LocalDateTime recordAt, int walkIdx, List<String> hashtagList, List<String> imgUrlList) {
         this.footprintIdx = footprintIdx;
         this.coordinates = coordinates;
-        this.str_coordinate = str_coordinate;
+        this.strCoordinate = strCoordinate;
         this.write = write;
         this.recordAt = recordAt;
         this.walkIdx = walkIdx;
@@ -38,5 +38,9 @@ public class SaveFootprint {
 
     public void setWalkIdxOfFootprint(int walkIdx) {
         this.walkIdx = walkIdx;
+    }
+
+    public void setFootprintIdx(int footprintIdx) {
+        this.footprintIdx = footprintIdx;
     }
 }
