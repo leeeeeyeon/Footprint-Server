@@ -868,7 +868,7 @@ public class UserDao {
         System.out.println("userIdx = " + userIdx);
         String patchUserInfoQuery = "UPDATE User SET nickname = ?, birth = ?, sex = ?, height = ?, weight = ?, status = ? WHERE userIdx = ?";
         Object[] patchUserInfoParams = new Object[]{patchUserInfoReq.getNickname(), patchUserInfoReq.getBirth(), patchUserInfoReq.getSex(),
-                patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), "DONE",userIdx};
+                patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), "ACTIVE",userIdx};
 
         return this.jdbcTemplate.update(patchUserInfoQuery, patchUserInfoParams);
     }
