@@ -110,7 +110,6 @@ public class UserProvider {
     // 해당 userIdx를 갖는 User의 정보 조회
     public GetUserRes getUser(int userIdx) throws BaseException {
         try {
-            System.out.println("UserProvider.getUser");
             boolean userExist = userDao.checkUser(userIdx, "User");
             if (userExist == false) {
                 throw new BaseException(INVALID_USERIDX);
@@ -124,9 +123,9 @@ public class UserProvider {
                 throw new BaseException(BLACK_USER);
             }
             GetUserRes getUserRes = userDao.getUser(userIdx);
-            System.out.println("getUserRes.getNickname() = " + getUserRes.getNickname());
             return getUserRes;
         } catch (Exception exception) {
+            exception.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
     }

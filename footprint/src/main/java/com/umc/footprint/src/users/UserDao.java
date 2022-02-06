@@ -385,10 +385,9 @@ public class UserDao {
 
     // 해당 userIdx를 갖는 유저조회
     public GetUserRes getUser(int userIdx) {
-        System.out.println("UserDao.getUser");
-        String getUserQuery = "select User.userIdx, User.nickname, User.username, User.email, User.status, User.badgeIdx, B.badgeUrl, User.birth, User.sex, User.height, User.weight " +
-                "from User inner join Badge B on User.badgeIdx = B.badgeIdx " +
-                "where User.userIdx=?";
+        String getUserQuery = "select userIdx, nickname, username, email, status, User.badgeIdx, badgeUrl, birth, sex, height, weight,\n" +
+                "       (select count(*) from Walk where userIdx=?)+1 as walkNumber\n" +
+                "from User inner join Badge B on User.badgeIdx = B.badgeIdx where userIdx=?";
         return this.jdbcTemplate.queryForObject(getUserQuery,
                 (rs, rowNum) -> new GetUserRes(
                         rs.getInt("userIdx"),
@@ -401,9 +400,10 @@ public class UserDao {
                         rs.getTimestamp("birth"),
                         rs.getString("sex"),
                         rs.getInt("height"),
-                        rs.getInt("weight")
+                        rs.getInt("weight"),
+                        rs.getInt("walkNumber")
                 ),
-                userIdx);
+                userIdx, userIdx);
     }
 
     // 해당 userIdx를 갖는 유저의 달성정보 조회
