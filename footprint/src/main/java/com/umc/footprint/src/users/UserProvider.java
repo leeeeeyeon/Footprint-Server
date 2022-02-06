@@ -73,9 +73,32 @@ public class UserProvider {
     }
 
 
-    //월별 달성률 및 누적 정보 조회
+    //월별 달성률 및 누적 정보 조회 - yummy 4
     public GetMonthInfoRes getMonthInfoRes(int userIdx, int year, int month) throws BaseException {
         try {
+            boolean userExist = userDao.checkUser(userIdx, "User"); // User 테이블 validation
+            if (userExist == false) {
+                throw new BaseException(INVALID_USERIDX);
+            }
+
+            String status = userDao.getStatus(userIdx, "User"); // 사용자 status 확인
+            if (status.equals("INACTIVE")) {
+                throw new BaseException(INACTIVE_USER);
+            }
+            else if (status.equals("BLACK")) {
+                throw new BaseException(BLACK_USER);
+            }
+
+            userExist = userDao.checkUser(userIdx, "Goal"); // Goal 테이블 validation
+            if (userExist == false) {
+                throw new BaseException(NOT_EXIST_USER_IN_GOAL);
+            }
+
+            userExist = userDao.checkUser(userIdx, "Walk"); // Walk 테이블 validation
+            if (userExist == false) {
+                throw new BaseException(NOT_EXIST_USER_IN_WALK);
+            }
+
             GetMonthInfoRes getMonthInfoRes = userDao.getMonthInfoRes(userIdx, year, month);
             return getMonthInfoRes;
           } catch (Exception exception) {
