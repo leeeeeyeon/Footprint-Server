@@ -27,5 +27,6 @@ public class GetUserRes {
     private String sex;
     private int height;
     private int weight;
+    private int walkNumber;
 }
 
