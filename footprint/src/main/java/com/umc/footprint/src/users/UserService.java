@@ -26,6 +26,8 @@ public class UserService {
     }
 
 
+    // yummy 12
+    @Transactional(rollbackFor = Exception.class)
     public BadgeInfo modifyRepBadge(int userIdx, int badgeIdx) throws BaseException {
         try {
             BadgeInfo patchRepBadgeInfo = userDao.modifyRepBadge(userIdx, badgeIdx);

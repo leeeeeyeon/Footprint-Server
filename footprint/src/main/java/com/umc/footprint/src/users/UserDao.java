@@ -814,13 +814,14 @@ public class UserDao {
      *** [3] PATCH METHOD
      * */
 
+    //yummy 12
     public BadgeInfo modifyRepBadge(int userIdx, int badgeIdx) {
         //TO DO : badgeIdx의 뱃지가 ACTIVE인지 validation 검사하기
-        String patchRepBadgeQuery = "update user set badgeIdx=? where userIdx=?;";
+        String patchRepBadgeQuery = "update User set badgeIdx=? where userIdx=?;";
         Object[] patchRepBadgeParams = new Object[]{badgeIdx, userIdx};
         this.jdbcTemplate.update(patchRepBadgeQuery, patchRepBadgeParams);
 
-        String repBadgeInfoQuery = "select * from badge where badgeIdx=(select badgeIdx from user where userIdx=?);";
+        String repBadgeInfoQuery = "select * from Badge where badgeIdx=(select badgeIdx from User where userIdx=?);";
         BadgeInfo patchRepBadgeInfo = this.jdbcTemplate.queryForObject(repBadgeInfoQuery,
                 (rs, rowNum) -> new BadgeInfo(
                         rs.getInt("badgeIdx"),
