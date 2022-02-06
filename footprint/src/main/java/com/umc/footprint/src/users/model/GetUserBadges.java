@@ -11,5 +11,5 @@ import java.util.List;
 @AllArgsConstructor
 public class GetUserBadges {
     private BadgeInfo repBadgeInfo;
-    private List<BadgeInfo> badgeInfoList;
+    private List<BadgeOrder> badgeList;
 }
