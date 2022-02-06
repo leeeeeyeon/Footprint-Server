@@ -22,12 +22,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.testng:testng:7.1.0'
-
-    // Spring Boot Starter
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude module: 'junit'
-	}
+	// Spring Boot Starter
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
@@ -55,11 +51,6 @@ dependencies {
 
 	// AWS S3
 	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-aws', version: '2.2.6.RELEASE'
-
-	// JUnit5
-	testImplementation('org.junit.jupiter:junit-jupiter-api')
-	testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine')
-	testImplementation 'junit:junit:4.13'
 }
 
 test {
