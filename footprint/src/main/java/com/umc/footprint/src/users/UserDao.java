@@ -511,7 +511,10 @@ public class UserDao {
         // 1-4. 요일별 비율 구하기
         // *** 순서 : 일 월 화 수 목 금 토 ***
         for(Integer dayCount : userWeekDayCount){
-            userWeekDayRate.add(dayCount/(double)entireCount*100);
+            if (entireCount == 0)
+                userWeekDayRate.add(0.0);
+            else
+                userWeekDayRate.add(dayCount/(double)entireCount*100);
         }
 
         // [ 2. 이전 6달 범위 월별 산책 횟수 ] = thisMonthWalkCount + List<Integer> monthlyWalkCount
