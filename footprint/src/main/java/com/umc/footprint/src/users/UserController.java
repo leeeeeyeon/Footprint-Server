@@ -239,10 +239,21 @@ public class UserController {
     }
 
     @ResponseBody
-    @PatchMapping("/{userIdx}/badges/title/{badgeIdx}")
-    public BaseResponse<BadgeInfo> patchRepBadge(@PathVariable("userIdx") int userIdx, @PathVariable("badgeIdx") int badgeIdx) throws BaseException {
-        BadgeInfo patchRepBadgeInfo = userService.patchRepBadge(userIdx, badgeIdx);
-        return new BaseResponse<>(patchRepBadgeInfo);
+    @PatchMapping("/badges/title/{badgeIdx}")
+    public BaseResponse<BadgeInfo> modifyRepBadge(@PathVariable("badgeIdx") int badgeIdx) throws BaseException {
+        try {
+            // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
+            String userId = jwtService.getUserId();
+            System.out.println("userId = " + userId);
+            // userId로 userIdx 추출
+            int userIdx = userProvider.getUserIdx(userId);
+
+            BadgeInfo patchRepBadgeInfo = userService.modifyRepBadge(userIdx, badgeIdx);
+            return new BaseResponse<>(patchRepBadgeInfo);
+        }
+        catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
     }
 
 
