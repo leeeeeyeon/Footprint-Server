@@ -23,4 +23,4 @@ sudo ./gradlew clean build
 echo "> BUILD FINISH" 
 
 echo "> $JAR_PATH 배포" 
-java -jar $JAR_PATH 
+sudo nohup java -jar $JAR_PATH > footprintServerLog.out
