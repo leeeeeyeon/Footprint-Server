@@ -13,6 +13,7 @@ import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
 import static com.umc.footprint.config.BaseResponseStatus.EXCEED_FOOTPRINT_SIZE;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -143,6 +144,7 @@ public class WalkService {
             return postWalkResList;
 
         } catch (Exception exception) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             throw new BaseException(DATABASE_ERROR);
         }
     }

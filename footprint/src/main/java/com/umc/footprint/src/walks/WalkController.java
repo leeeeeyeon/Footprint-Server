@@ -36,20 +36,6 @@ public class WalkController {
         this.jwtService = jwtService;
     }
 
-//    /**
-//     *  실시간 처리 API
-//     *  [Post] /walks
-//     */
-//    @PostMapping("") // (POST) 127.0.0.1:3000/walks/
-//    public BaseResponse<List<PostWalkRes>> saveRecord(@ModelAttribute PostWalkReq request) throws BaseException {
-//        try {
-//            List<PostWalkRes> postWalkResList = walkService.saveRecord(request);
-//            return new BaseResponse<>(postWalkResList);
-//        } catch (BaseException exception) {
-//            return new BaseResponse<>(exception.getStatus());
-//        }
-//    }
-
     /**
      *  실시간 처리 API
      *  [Post] /walks
