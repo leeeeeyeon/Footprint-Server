@@ -385,13 +385,13 @@ public class UserDao {
 
     // 해당 userIdx를 갖는 유저조회
     public GetUserRes getUser(int userIdx) {
-        String getUserQuery = "select userIdx, nickname, `name`, email, status, User.badgeIdx, badgeUrl, birth, sex, height, weight\n" +
+        String getUserQuery = "select userIdx, nickname, `username`, email, status, User.badgeIdx, badgeUrl, birth, sex, height, weight\n" +
                 "from User inner join Badge B on User.badgeIdx = B.badgeIdx where userIdx=?";
         return this.jdbcTemplate.queryForObject(getUserQuery,
                 (rs, rowNum) -> new GetUserRes(
                         rs.getInt("userIdx"),
                         rs.getString("nickname"),
-                        rs.getString("name"),
+                        rs.getString("username"),
                         rs.getString("email"),
                         rs.getString("status"),
                         rs.getInt("badgeIdx"),
