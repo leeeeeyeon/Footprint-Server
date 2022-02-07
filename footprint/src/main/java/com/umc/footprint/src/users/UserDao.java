@@ -86,21 +86,6 @@ public class UserDao {
     }
 
 
-    //yummy 13
-    // 사용자 전체 뱃지 조회 API
-    public BadgeInfo getRepBadgeInfo(int userIdx) {
-        //대표 뱃지 조회
-        String getRepBadgeQuery = "select * from badge where badgeIdx=(select badgeIdx from user where userIdx=?);";
-        BadgeInfo repBadgeInfo = this.jdbcTemplate.queryForObject(getRepBadgeQuery,
-                (rs,rowNum) -> new BadgeInfo(
-                        rs.getInt("badgeIdx"),
-                        rs.getString("badgeName"),
-                        rs.getString("badgeUrl"),
-                        rs.getString("badgeDate")), userIdx);
-
-        return repBadgeInfo;
-    }
-
     public List<BadgeInfo> getBadgeList(int userIdx) {
         String getUserBadgesQuery = "select * from badge where badgeIdx in " +
                 "(select badgeIdx from userbadge where userIdx=? and status='ACTIVE');";
@@ -1200,6 +1185,16 @@ public class UserDao {
         boolean result = this.jdbcTemplate.queryForObject(checkQuery,
                 (rs,rowNum)->rs.getBoolean("success"),
                 checkParams);
+        return result;
+    }
+
+    //Badge 테이블에 존재하는 뱃지인지 검사하는 메소드
+    public boolean checkPrevGoalDay(int userIdx) {
+        String checkQuery = "select EXISTS(SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and\n" +
+                "        MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 0 MONTH))) as success;";
+        boolean result = this.jdbcTemplate.queryForObject(checkQuery,
+                (rs,rowNum)->rs.getBoolean("success"),
+                userIdx);
         return result;
     }
 }
