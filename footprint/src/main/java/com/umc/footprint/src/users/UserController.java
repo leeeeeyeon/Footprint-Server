@@ -502,4 +502,27 @@ public class UserController {
 
     }
 
+    /** yummy 25
+     * 사용자 탈퇴 API
+     * [GET] /users/unregister
+     */
+    @ResponseBody
+    @DeleteMapping("/unregister")
+    public BaseResponse<String> deleteUser() throws BaseException {
+        try {
+            // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
+            String userId = jwtService.getUserId();
+            System.out.println("userId = " + userId);
+            // userId로 userIdx 추출
+            int userIdx = userProvider.getUserIdx(userId);
+
+
+
+            return new BaseResponse<>("Bye~");
+        }
+        catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
+
 }
