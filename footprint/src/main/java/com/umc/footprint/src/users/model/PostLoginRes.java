@@ -2,6 +2,8 @@ package com.umc.footprint.src.users.model;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @NoArgsConstructor
 public class PostLoginRes {

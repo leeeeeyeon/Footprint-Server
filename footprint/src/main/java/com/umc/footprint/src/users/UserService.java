@@ -109,56 +109,60 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     public PostLoginRes postUserLogin(PostLoginReq postLoginReq) throws BaseException {
-        // email 중복 확인 있으면 status에 Done 넣고 return
-        System.out.println("UserService.postUserLogin1");
-        PostLoginRes result = userProvider.checkEmail(postLoginReq.getEmail());
-        System.out.println("result.getStatus() = " + result.getStatus());
-        switch (result.getStatus()) {
-            case "NONE":
-                try {
-                    System.out.println("UserService.postUserLogin2");
-                    // 암호화
-                    String jwt = jwtService.createJwt(postLoginReq.getUserId());
-                    userDao.postUserLogin(postLoginReq);
+        { // email 중복 확인 있으면 status에 Done 넣고 return
+            System.out.println("UserService.postUserLogin1");
+            PostLoginRes result = userProvider.checkEmail(postLoginReq.getEmail());
+            System.out.println("result.getStatus() = " + result.getStatus());
+            switch (result.getStatus()) {
+                case "NONE":
+                    try {
+                        System.out.println("UserService.postUserLogin2");
+                        // 암호화
+                        String jwt = jwtService.createJwt(postLoginReq.getUserId());
+                        userDao.postUserLogin(postLoginReq);
 
-                    return PostLoginRes.builder()
-                            .jwtId(jwt)
-                            .status("ONGOING").build();
-                } catch (Exception exception) {
-                    throw new BaseException(DATABASE_ERROR);
-                }
-            case "ACTIVE":
-                try {
-                    System.out.println("UserService.postUserLogin ACTIVE USER");
-                    // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
-                    String userId = jwtService.getUserId();
-                    System.out.println("userId = " + userId);
-                    // userId로 userIdx 추출
-                    int userIdx = userProvider.getUserIdx(userId);
-
-                    // 이전에 로그인 했던 시간
-                    LocalDateTime beforeLogAt = userDao.getUserLogAt(userIdx);
-                    ZonedDateTime seoulDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
-                    LocalDateTime now = seoulDateTime.toLocalDateTime();
-                    // 달이 같은 경우
-                    if (beforeLogAt.getMonth() == LocalDateTime.now().getMonth()) {
-                        // 달이 바뀌지 않았다고 response에 저장
-                        result.setCheckMonthChanged(false);
-                    } else {
-                        // 달이 바뀌었다고 response에 저장
-                        result.setCheckMonthChanged(true);
+                        return PostLoginRes.builder()
+                                .jwtId(jwt)
+                                .status("ONGOING").build();
+                    } catch (Exception exception) {
+                        throw new BaseException(DATABASE_ERROR);
                     }
-                    // 현재 로그인하는 시간 logAt에 저장
-                    System.out.println("now = " + now);
-                    userDao.modifyUserLogAt(now, userIdx);
-
+                case "ACTIVE":
+                case "ONGOING":
                     return result;
-                } catch (Exception exception) {
-                    throw new BaseException(DATABASE_ERROR);
-                }
-            case "ONGOING":
-                return result;
+            }
+            return null;
         }
-        return null;
+    }
+
+    public PostLoginRes modifyUserLogAt(int userIdx) throws BaseException {
+        try {
+            boolean result = true;
+
+            // 이전에 로그인 했던 시간
+            AutoLoginUser autoLoginUser = userDao.getUserLogAt(userIdx);
+            PostLoginRes postLoginRes = PostLoginRes.builder()
+                    .status(autoLoginUser.getStatus())
+                    .build();
+            LocalDateTime beforeLogAt = autoLoginUser.getLogAt();
+            ZonedDateTime seoulDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+            LocalDateTime now = seoulDateTime.toLocalDateTime();
+            // 달이 같은 경우
+            if (beforeLogAt.getMonth() == LocalDateTime.now().getMonth()) {
+                // 달이 바뀌지 않았다고 response에 저장
+                postLoginRes.setCheckMonthChanged(false);
+            } else {
+                // 달이 바뀌었다고 response에 저장
+                postLoginRes.setCheckMonthChanged(true);
+            }
+
+            // 현재 로그인하는 시간 logAt에 저장
+            System.out.println("now = " + now);
+            userDao.modifyUserLogAt(now, userIdx);
+
+            return postLoginRes;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
 }
