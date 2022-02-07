@@ -345,38 +345,59 @@ public class UserDao {
         ),userIdx,date);
 
         // 2-1. Hashtag 정보 가져오기
-        String getHashtagQuery = "SELECT F.walkIdx ,H.hashtag " +
-                "FROM Hashtag H " +
-                "    INNER JOIN Tag T ON H.hashtagIdx = T.hashtagIdx " +
-                "    INNER JOIN Footprint F on T.footprintIdx = F.footprintIdx ";
+        String getHashtagQuery = "SELECT SF.walkIdx, H.hashtag " +
+                "FROM Tag T " +
+                "    INNER JOIN (SELECT F.walkIdx, F.footprintIdx " +
+                "                FROM Footprint F " +
+                "                INNER JOIN (SELECT walkIdx FROM Walk W WHERE DATE (startAt) = DATE (?) and userIdx = ?) as W " +
+                "                ON F.walkIdx = W.walkIdx) as SF " +
+                "        ON T.footprintIdx = SF.footprintIdx " +
+                "    INNER JOIN Hashtag H " +
+                "        ON T.hashtagIdx = H.hashtagIdx ";
 
         List<Hashtag> entireHashtag = this.jdbcTemplate.query(getHashtagQuery, (rs, rowNum) -> new Hashtag(
                 rs.getInt("walkIdx"),
                 rs.getString("hashtag")
-        ));
+        ),date,userIdx);
 
+        List<GetUserDateRes> getUserDateRes = new ArrayList<>();
+        List<ArrayList<String>> hashtagList = new ArrayList<>();
 
-        // 2-2. entireHashtag 를 WalkIdx 단위로 묶어주기(entireHashtag -> hashtagList)
-        List<ArrayList<String>> hashtagList = new ArrayList<ArrayList<String>>(); // 2차원 Arraylist 생성
-        int count = 0;  // 1차원단 count 값
-        for (int i=0 ; i<entireHashtag.size() ; i++){
-            if(i == 0)  // 초기 i=0 일때 1차원단에 ArrayList 하나 생성
-                hashtagList.add(new ArrayList<String>());
-
-            hashtagList.get(count).add(entireHashtag.get(i).getHashtag());  // entireHashtag의 hashtag값을 순서대로 2차원단 ArrayList에 추가
-
-            // i 가 마지막 loop일때 && 다음 나올 entireHashTag의 값이 다른 값일 때, 1차원단 ArrayList 하나 추가 AND count++
-            if(i != (entireHashtag.size()-1) && entireHashtag.get(i).getWalkIdx() != entireHashtag.get(i+1).getWalkIdx()) {
-                hashtagList.add(new ArrayList<String>());
-                count++;
+        for(UserDateWalk walk : userDateWalkInfo){
+            hashtagList.add(new ArrayList<>());
+            for(Hashtag tag : entireHashtag){
+                if(walk.getWalkIdx() == tag.getWalkIdx())
+                    hashtagList.get(hashtagList.size()-1).add(tag.getHashtag());
             }
+            getUserDateRes.add(new GetUserDateRes(walk,hashtagList.get(hashtagList.size()-1)));
         }
 
-        // 3. Walk 와 HashTag 정보 묶어 처리하기
-        List<GetUserDateRes> getUserDateRes = new ArrayList<GetUserDateRes>();
-        for(int i=0; i<userDateWalkInfo.size(); i++){   // userDateWalkInfo.size() == hashtagList.size() 이므로 userDateWalkInfo.size() 만큼 loop
-            getUserDateRes.add(new GetUserDateRes(userDateWalkInfo.get(i),hashtagList.get(i)));
-        }
+
+
+//        // 2-2. entireHashtag 를 WalkIdx 단위로 묶어주기(entireHashtag -> hashtagList)
+//        List<ArrayList<String>> hashtagList = new ArrayList<ArrayList<String>>(); // 2차원 Arraylist 생성
+//        int count = 0;  // 1차원단 count 값
+//        for (int i=0 ; i<entireHashtag.size() ; i++){
+//            if(i == 0)  // 초기 i=0 일때 1차원단에 ArrayList 하나 생성
+//                hashtagList.add(new ArrayList<String>());
+//
+//            hashtagList.get(count).add(entireHashtag.get(i).getHashtag());  // entireHashtag의 hashtag값을 순서대로 2차원단 ArrayList에 추가
+//
+//            // i 가 마지막 loop일때 && 다음 나올 entireHashTag의 값이 다른 값일 때, 1차원단 ArrayList 하나 추가 AND count++
+//            if(i != (entireHashtag.size()-1) && entireHashtag.get(i).getWalkIdx() != entireHashtag.get(i+1).getWalkIdx()) {
+//                hashtagList.add(new ArrayList<String>());
+//                count++;
+//            }
+//        }
+//
+//        System.out.println("check point 6");
+//
+//        // 3. Walk 와 HashTag 정보 묶어 처리하기
+//        List<GetUserDateRes> getUserDateRes = new ArrayList<>();
+//        for(int i=0; i<userDateWalkInfo.size(); i++){   // userDateWalkInfo.size() == hashtagList.size() 이므로 userDateWalkInfo.size() 만큼 loop
+//            System.out.println("userDateWalkInfo.get(i)"+userDateWalkInfo.get(i)+"  hashtagList.get(i)"+hashtagList.get(i));
+//            getUserDateRes.add(new GetUserDateRes(userDateWalkInfo.get(i),hashtagList.get(i)));
+//        }
 
         return getUserDateRes;
     }
