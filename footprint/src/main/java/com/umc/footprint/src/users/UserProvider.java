@@ -101,7 +101,8 @@ public class UserProvider {
             GetMonthInfoRes getMonthInfoRes;
             if(userWalkExist == false) {
                 List<String> getGoalDays = userDao.getUserGoalDays(userIdx);
-                getMonthInfoRes = new GetMonthInfoRes(getGoalDays, null, null);
+                GetMonthTotal getMonthTotal =new GetMonthTotal(0,0,0);
+                getMonthInfoRes = new GetMonthInfoRes(getGoalDays, null, getMonthTotal);
             } else {
                 getMonthInfoRes = userDao.getMonthInfoRes(userIdx, year, month);
             }
