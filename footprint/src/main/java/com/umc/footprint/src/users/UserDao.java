@@ -39,14 +39,14 @@ public class UserDao {
 
     //월별 발자국(일기) 갯수 조회 - yummy 5
     public List<GetFootprintCount> getMonthFootprints(int userIdx, int year, int month) {
-        String Query = "select day(recordAt) as day, count(footprintIdx) as footprintCount from footprint\n" +
-                "    where walkIdx in (select walkIdx from walk where userIdx=? && year(startAt)=? && month(startAt)=?)\n" +
+        String Query = "select day(recordAt) as day, count(footprintIdx) as walkCount from Footprint\n" +
+                "    where walkIdx in (select walkIdx from Walk where userIdx=? && year(startAt)=? && month(startAt)=?)\n" +
                 "    group by day(recordAt);";
         Object[] getMonthResParams = new Object[]{userIdx, year, month};
         return this.jdbcTemplate.query(Query,
                 (rs, rowNum) -> new GetFootprintCount(
                         rs.getInt("day"),
-                        rs.getInt("footprintCount")), // RowMapper(위의 링크 참조): 원하는 결과값 형태로 받기
+                        rs.getInt("walkCount")), // RowMapper(위의 링크 참조): 원하는 결과값 형태로 받기
                 getMonthResParams);
     }
 
