@@ -35,9 +35,15 @@ public class UserService {
     @Transactional(rollbackFor = Exception.class)
     public BadgeInfo modifyRepBadge(int userIdx, int badgeIdx) throws BaseException {
         try {
-            //todo
             // 해당 뱃지가 Badge 테이블에 존재하는 뱃지인지?
+            if(!userDao.badgeCheck(badgeIdx)) {
+                throw new BaseException(INVALID_BADGEIDX);
+            }
+
             // 유저가 해당 뱃지를 갖고 있고, ACTIVE 뱃지인지?
+            if(!userDao.userBadgeCheck(userIdx, badgeIdx)) {
+                throw new BaseException(NOT_EXIST_USER_BADGE);
+            }
 
             BadgeInfo patchRepBadgeInfo = userDao.modifyRepBadge(userIdx, badgeIdx);
             return patchRepBadgeInfo;
