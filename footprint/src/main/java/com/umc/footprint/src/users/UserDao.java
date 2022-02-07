@@ -140,6 +140,18 @@ public class UserDao {
         return getUserBadges;
     }
 
+    //yummy
+    // 사용자가 얻은 뱃지 등록
+    public int postUserBadge(int userIdx, int badgeIdx) {
+        //UserBadge 테이블에 얻은 뱃지 추가하기
+        String insertBadgeQuery = "INSERT INTO UserBadge (userIdx, badgeIdx, status) VALUES (?,?,'ACTIVE')";
+        Object[] insertBadgeParams = new Object[]{userIdx, badgeIdx};
+        int result = this.jdbcTemplate.update(insertBadgeQuery,insertBadgeParams);
+
+        return result;
+    }
+
+
     // yummy 13
     // 이번 달에 사용자가 얻은 뱃지 조회 (PRO, LOVER, MASTER)
     public BadgeInfo getMonthlyBadgeStatus(int userIdx) {
@@ -292,9 +304,10 @@ public class UserDao {
                         rs.getString("badgeDate")), badgeDate);
 
         //UserBadge 테이블에 얻은 뱃지 추가하기
-        String insertBadgeQuery = "INSERT INTO UserBadge (userIdx, badgeIdx,status) VALUES (?,?,'ACTIVE')";
+        /*String insertBadgeQuery = "INSERT INTO UserBadge (userIdx, badgeIdx,status) VALUES (?,?,'ACTIVE')";
         Object[] insertBadgeParams = new Object[]{userIdx, badgeInfo.getBadgeIdx()};
-        this.jdbcTemplate.update(insertBadgeQuery,insertBadgeParams);
+        this.jdbcTemplate.update(insertBadgeQuery,insertBadgeParams);*/
+        int result = postUserBadge(userIdx, badgeInfo.getBadgeIdx());
 
         return badgeInfo;
     }
@@ -839,6 +852,7 @@ public class UserDao {
 
     //yummy 12
     //대표 뱃지 수정
+
     public BadgeInfo modifyRepBadge(int userIdx, int badgeIdx) {
         //TO DO : badgeIdx의 뱃지가 ACTIVE인지 validation 검사하기
 
@@ -1195,5 +1209,24 @@ public class UserDao {
         Object[] modifyUserLogAtParams = new Object[]{now, userIdx};
 
         this.jdbcTemplate.update(modifyUserLogAtQuery,modifyUserLogAtParams);
+    }
+
+    //Badge 테이블에 존재하는 뱃지인지 검사하는 메소드
+    public boolean badgeCheck(int badgeIdx) {
+        String checkQuery = "select EXISTS (select badgeIdx from Badge where badgeIdx=? limit 1) as success;";
+        boolean result = this.jdbcTemplate.queryForObject(checkQuery,
+                (rs,rowNum)->rs.getBoolean("success"),
+                badgeIdx);
+        return result;
+    }
+
+    // 해당 뱃지를 사용자가 갖고 있는지 검사하는 메소드
+    public boolean userBadgeCheck(int userIdx, int badgeIdx) {
+        String checkQuery = "select EXISTS (select badgeIdx from UserBadge where userIdx=? and badgeIdx=? and status='ACTIVE' limit 1) as success;";
+        Object[] checkParams = new Object[]{userIdx, badgeIdx};
+        boolean result = this.jdbcTemplate.queryForObject(checkQuery,
+                (rs,rowNum)->rs.getBoolean("success"),
+                checkParams);
+        return result;
     }
 }
