@@ -30,9 +30,11 @@ public class UserProvider {
     }
 
     // 해당 userIdx를 갖는 오늘 산책 관련 정보 조회
-    public List<GetUserTodayRes> getUserToday(int userIdx) throws BaseException {
+    public GetUserTodayRes getUserToday(int userIdx) throws BaseException {
 
-        List<GetUserTodayRes> userTodayRes = userDao.getUserToday(userIdx);
+        GetUserTodayRes userTodayRes = userDao.getUserToday(userIdx);
+
+        System.out.println("userTodayRes : " + userTodayRes);
 
         return userTodayRes;
     }
@@ -90,16 +92,21 @@ public class UserProvider {
             }
 
             userExist = userDao.checkUser(userIdx, "Goal"); // Goal 테이블 validation
-            if (userExist == false) {
+            if (userExist == false) { //사용자가 목표를 지정하지 않은 경우
                 throw new BaseException(NOT_EXIST_USER_IN_GOAL);
             }
 
-            userExist = userDao.checkUser(userIdx, "Walk"); // Walk 테이블 validation
-            if (userExist == false) {
-                throw new BaseException(NOT_EXIST_USER_IN_WALK);
+            boolean userWalkExist = userDao.checkUser(userIdx, "Walk"); // Walk 테이블 validation
+
+            GetMonthInfoRes getMonthInfoRes;
+            if(userWalkExist == false) {
+                List<String> getGoalDays = userDao.getUserGoalDays(userIdx);
+                GetMonthTotal getMonthTotal =new GetMonthTotal(0,0,0);
+                getMonthInfoRes = new GetMonthInfoRes(getGoalDays, null, getMonthTotal);
+            } else {
+                getMonthInfoRes = userDao.getMonthInfoRes(userIdx, year, month);
             }
 
-            GetMonthInfoRes getMonthInfoRes = userDao.getMonthInfoRes(userIdx, year, month);
             return getMonthInfoRes;
           } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
@@ -267,10 +274,14 @@ public class UserProvider {
     // 이번달 사용자가 얻은 뱃지 조회 (PRO, LOVER, MASTER)
     public BadgeInfo getMonthlyBadgeStatus(int userIdx) throws BaseException {
         try {
+            // 이전달 산책 기록 및 목표 설정 여부 확인
+            if(!userDao.checkPrevGoalDay(userIdx)) {
+                throw new BaseException(NOT_EXIST_USER_IN_PREV_GOAL);
+            }
             BadgeInfo getBadgeInfo = userDao.getMonthlyBadgeStatus(userIdx);
             if(getBadgeInfo==null) {
                 throw new BaseException(NO_MONTHLY_BADGE);
-            }
+           }
             return getBadgeInfo;
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
@@ -291,7 +302,10 @@ public class UserProvider {
                 postLoginRes.setJwtId(jwtId);
                 return postLoginRes;
             } else {
-                return new PostLoginRes("", "NONE");
+                return PostLoginRes.builder()
+                        .jwtId("")
+                        .status("NONE")
+                        .build();
             }
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
