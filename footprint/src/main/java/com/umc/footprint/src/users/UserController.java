@@ -59,10 +59,31 @@ public class UserController {
         }
     }
 
-    /**
-     * 유저 오늘 산책관련 정보 조회 API
-     * [GET] /users/today
-     */
+    @ResponseBody
+    @GetMapping("/autologin")
+    public BaseResponse<PostLoginRes> getCheckMonthChanged() {
+        try {
+            System.out.println("UserService.postUserLogin ACTIVE USER");
+            // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
+            String userId = jwtService.getUserId();
+            System.out.println("userId = " + userId);
+            // userId로 userIdx 추출
+            int userIdx = userProvider.getUserIdx(userId);
+
+            PostLoginRes postLoginRes = userService.modifyUserLogAt(userIdx);
+            postLoginRes.setJwtId(jwtService.createJwt(userId));
+
+            return new BaseResponse<>(postLoginRes);
+        } catch (BaseException exception) {
+            return new BaseResponse<>(exception.getStatus());
+        }
+
+    }
+
+        /**
+         * 유저 오늘 산책관련 정보 조회 API
+         * [GET] /users/today
+         */
     // Path-variable
     @ResponseBody
     @GetMapping("/today")
@@ -73,7 +94,7 @@ public class UserController {
             System.out.println("userId = " + userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
-            
+
             GetUserTodayRes userTodayRes = userProvider.getUserToday(userIdx);
 
             return new BaseResponse<>(userTodayRes);
