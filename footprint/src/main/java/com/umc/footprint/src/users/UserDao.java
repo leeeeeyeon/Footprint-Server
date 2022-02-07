@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -830,14 +831,6 @@ public class UserDao {
         return patchRepBadgeInfo;
     }
 
-    // 닉네임 변경
-    public int modifyNickname(PatchNicknameReq patchNicknameReq) {
-        String modifyNicknameQuery = "update User set nickname = ? where userIdx = ?";
-        Object[] modifyNicknameParams = new Object[]{patchNicknameReq.getNickname(), patchNicknameReq.getUserIdx()};
-
-        return this.jdbcTemplate.update(modifyNicknameQuery, modifyNicknameParams); // 대응시켜 매핑시켜 쿼리 요청(생성했으면 1, 실패했으면 0)
-    }
-
     // Goal Table에 userIdx에 맞는 walkGoalTime, walkTimeSlot MODIFY
     public int modifyUserGoalTime(int userIdx, PatchUserGoalReq patchUserGoalReq){
 
@@ -954,17 +947,6 @@ public class UserDao {
         String getStatusQuery = "select status from " + tableName + " where userIdx=?";
         return this.jdbcTemplate.queryForObject(getStatusQuery, String.class, userIdx);
     }
-
-
-    // 중복 닉네임 검사
-    public int nicknameExist(PatchNicknameReq patchNicknameReq) {
-        String nickname = patchNicknameReq.getNickname();
-        String nicknameExistQuery = "select count(*) from User where nickname =?";
-
-        return jdbcTemplate.queryForObject(nicknameExistQuery, int.class, nickname);
-    }
-
-
 
     // 월 단위 달성률 계산
     public int calcMonthGoalRate(int userIdx, int beforeMonth){

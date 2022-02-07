@@ -82,7 +82,7 @@ public enum BaseResponseStatus {
     SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
     S3UPLOAD_ERROR(false, 4080, "파일 업로드에 실패하였습니다."),
     MODIFY_USER_GOAL_FAIL(false,4160,"사용자 목표 변경에 실패하였습니다."),
-    MODIFY_NICKNAME_FAIL(false,4161,"닉네임 변경에 실패하였습니다."),
+    MODIFY_USERINFO_FAIL(false,4161,"유저 정보 변경에 실패하였습니다."),
     DELETE_FOOTPRINT_FAIL(false, 4260, "발자국 삭제에 실패하였습니다."),
     MODIFY_FOOTPRINT_FAIL(false, 4261, "발자국 수정에 실패하였습니다.");
 
