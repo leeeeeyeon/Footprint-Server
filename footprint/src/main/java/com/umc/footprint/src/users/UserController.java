@@ -318,7 +318,7 @@ public class UserController {
 
     /** yummy 13
      * 매달 뱃지 상태 조회 API
-     * [GET] /users/badges
+     * [GET] /users/badges/status
      */
     @ResponseBody
     @GetMapping("/badges/status") //매달 첫 접속마다 요청되는 뱃지 확인 API - 이번달 획득 뱃지의 정보를 전달, 없으면 null 반환
