@@ -38,6 +38,7 @@ public enum BaseResponseStatus {
     INVALID_JWT(false, 2002, "유효하지 않은 JWT입니다."),
     INVALID_USER_JWT(false,2003,"권한이 없는 유저의 접근입니다."),
     INVALID_USERIDX(false,2100,"잘못된 유저 인덱스입니다."),
+    NOT_EXIST_USER_IN_PREV_GOAL(false,2118, "이전 달 설정한 목표가 없습니다."),
     NOT_EXIST_USER_IN_GOAL(false,2119, "아직 목표 설정을 하지 않은 사용자입니다."),
     NOT_EXIST_USER_IN_WALK(false,2120, "아직 산책 기록이 없는 사용자입니다."),
     NO_EXIST_WALK(false,2121, "해당 날짜에는 산책을 하지 않았습니다."),
@@ -52,7 +53,7 @@ public enum BaseResponseStatus {
     OVERLAP_DAYIDX(false, 2144,"중복되는 요일 번호가 속해 있습니다."),
     MIN_WALK_GOAL_TIME(false, 2145,"목표산책시간이 최소시간 미만입니다."),
     MAX_WALK_GOAL_TIME(false, 2146,"목표산책시간이 최대시간 초과입니다."),
-    INVALID_WALK_TIME_SLOT(false, 2147,"잘못된 산책 시간대 git s입니다."),
+    INVALID_WALK_TIME_SLOT(false, 2147,"잘못된 산책 시간대입니다."),
     POST_USERS_EMPTY_EMAIL(false, 2148, "이메일을 입력해주세요."),
     POST_USERS_INVALID_EMAIL(false, 2016, "이메일 형식을 확인해주세요."),
     MAX_NICKNAME_LENGTH(false, 2160, "닉네임은 8자를 초과할 수 없습니다."),
@@ -66,6 +67,9 @@ public enum BaseResponseStatus {
     NO_EXIST_FOOTPRINT(false, 2261, "존재하지 않는 발자국입니다."),
     REQUEST_ERROR(false, 2262, "잘못된 산책 인덱스입니다."), // 임시 추가
 
+    INVALID_BADGEIDX(false,2270, "존재하지 않는 뱃지입니다."),
+    NOT_EXIST_USER_BADGE(false, 2271, "해당 사용자가 획득하지 못한 뱃지입니다."),
+
     /**
      * 3000 : Response 오류
      */
@@ -78,7 +82,7 @@ public enum BaseResponseStatus {
     SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
     S3UPLOAD_ERROR(false, 4080, "파일 업로드에 실패하였습니다."),
     MODIFY_USER_GOAL_FAIL(false,4160,"사용자 목표 변경에 실패하였습니다."),
-    MODIFY_NICKNAME_FAIL(false,4161,"닉네임 변경에 실패하였습니다."),
+    MODIFY_USERINFO_FAIL(false,4161,"유저 정보 변경에 실패하였습니다."),
     DELETE_FOOTPRINT_FAIL(false, 4260, "발자국 삭제에 실패하였습니다."),
     MODIFY_FOOTPRINT_FAIL(false, 4261, "발자국 수정에 실패하였습니다.");
 

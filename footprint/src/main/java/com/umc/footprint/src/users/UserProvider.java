@@ -101,7 +101,8 @@ public class UserProvider {
             GetMonthInfoRes getMonthInfoRes;
             if(userWalkExist == false) {
                 List<String> getGoalDays = userDao.getUserGoalDays(userIdx);
-                getMonthInfoRes = new GetMonthInfoRes(getGoalDays, null, null);
+                GetMonthTotal getMonthTotal =new GetMonthTotal(0,0,0);
+                getMonthInfoRes = new GetMonthInfoRes(getGoalDays, null, getMonthTotal);
             } else {
                 getMonthInfoRes = userDao.getMonthInfoRes(userIdx, year, month);
             }
@@ -273,10 +274,14 @@ public class UserProvider {
     // 이번달 사용자가 얻은 뱃지 조회 (PRO, LOVER, MASTER)
     public BadgeInfo getMonthlyBadgeStatus(int userIdx) throws BaseException {
         try {
+            // 이전달 산책 기록 및 목표 설정 여부 확인
+            if(!userDao.checkPrevGoalDay(userIdx)) {
+                throw new BaseException(NOT_EXIST_USER_IN_PREV_GOAL);
+            }
             BadgeInfo getBadgeInfo = userDao.getMonthlyBadgeStatus(userIdx);
             if(getBadgeInfo==null) {
                 throw new BaseException(NO_MONTHLY_BADGE);
-            }
+           }
             return getBadgeInfo;
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);

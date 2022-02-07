@@ -35,18 +35,15 @@ public class UserService {
     @Transactional(rollbackFor = Exception.class)
     public BadgeInfo modifyRepBadge(int userIdx, int badgeIdx) throws BaseException {
         try {
-            /*boolean userExist = userDao.checkUser(userIdx, "User"); // User 테이블 validation
-            if (userExist == false) {
-                throw new BaseException(INVALID_USERIDX);
+            // 해당 뱃지가 Badge 테이블에 존재하는 뱃지인지?
+            if(!userDao.badgeCheck(badgeIdx)) {
+                throw new BaseException(INVALID_BADGEIDX);
             }
 
-            String status = userDao.getStatus(userIdx, "User"); // 사용자 status 확인
-            if (status.equals("INACTIVE")) {
-                throw new BaseException(INACTIVE_USER);
+            // 유저가 해당 뱃지를 갖고 있고, ACTIVE 뱃지인지?
+            if(!userDao.userBadgeCheck(userIdx, badgeIdx)) {
+                throw new BaseException(NOT_EXIST_USER_BADGE);
             }
-            else if (status.equals("BLACK")) {
-                throw new BaseException(BLACK_USER);
-            }*/
 
             BadgeInfo patchRepBadgeInfo = userDao.modifyRepBadge(userIdx, badgeIdx);
             return patchRepBadgeInfo;
@@ -55,15 +52,16 @@ public class UserService {
         }
     }
 
-    // 닉네임 수정(Patch)
-    public void modifyNickname(PatchNicknameReq patchNicknameReq) throws BaseException {
+    // 유저 정보 수정(Patch)
+    public void modifyUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException {
         try {
-            int result = userDao.modifyNickname(patchNicknameReq);
+            int result = userDao.modifyUserInfo(userIdx, patchUserInfoReq);
 
-            if (result == 0) { // 닉네임 변경 실패
-                throw new BaseException(MODIFY_NICKNAME_FAIL);
+            if (result == 0) { // 유저 정보 변경 실패
+                throw new BaseException(MODIFY_USERINFO_FAIL);
             }
         } catch (Exception exception) { // DB에 이상이 있는 경우 에러 메시지를 보냅니다.
+            exception.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
     }
@@ -97,6 +95,10 @@ public class UserService {
             System.out.println("result = " + result);
             int resultNext = userDao.postGoalNext(userIdx, patchUserInfoReq);
             System.out.println("resultNext = " + resultNext);
+
+            //yummy 뱃지 추가
+            userDao.postUserBadge(userIdx, 1); // 발자국 스타터 뱃지 부여
+            modifyRepBadge(userIdx, 1); //대표 뱃지로 설정
 
             if(resultInfo == 0 || result == 0 || resultNext == 0)
                 return 0;

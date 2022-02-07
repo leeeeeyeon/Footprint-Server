@@ -158,12 +158,12 @@ public class UserController {
     }
 
     /**
-     * 유저 닉네임 변경 API
-     * [PATCH] /users/nickname
+     * 유저 정보 변경 API
+     * [PATCH] /users/infos/after
      */
     @ResponseBody
-    @PatchMapping("/nickname")
-    public BaseResponse<String> modifyNickname(@RequestBody User user) {
+    @PatchMapping("/infos/after")
+    public BaseResponse<String> modifyUserInfo(@RequestBody PatchUserInfoReq patchUserInfoReq) {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
@@ -171,13 +171,12 @@ public class UserController {
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
-            PatchNicknameReq patchNicknameReq = new PatchNicknameReq(userIdx, user.getNickname());
-            if (user.getNickname().length() > 8) { // 닉네임 8자 초과
+            if (patchUserInfoReq.getNickname().length() > 8) { // 닉네임 8자 초과
                 throw new BaseException(BaseResponseStatus.MAX_NICKNAME_LENGTH);
             }
-            userService.modifyNickname(patchNicknameReq);
+            userService.modifyUserInfo(userIdx, patchUserInfoReq);
 
-            String result = "닉네임이 수정되었습니다.";
+            String result = "유저 정보가 수정되었습니다.";
             
             return new BaseResponse<>(result);
         } catch (BaseException exception) {
@@ -339,7 +338,7 @@ public class UserController {
 
     /** yummy 13
      * 매달 뱃지 상태 조회 API
-     * [GET] /users/badges
+     * [GET] /users/badges/status
      */
     @ResponseBody
     @GetMapping("/badges/status") //매달 첫 접속마다 요청되는 뱃지 확인 API - 이번달 획득 뱃지의 정보를 전달, 없으면 null 반환
@@ -521,6 +520,29 @@ public class UserController {
             return new BaseResponse<>((exception.getStatus()));
         }
 
+    }
+
+    /** yummy 25
+     * 사용자 탈퇴 API
+     * [GET] /users/unregister
+     */
+    @ResponseBody
+    @DeleteMapping("/unregister")
+    public BaseResponse<String> deleteUser() throws BaseException {
+        try {
+            // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
+            String userId = jwtService.getUserId();
+            System.out.println("userId = " + userId);
+            // userId로 userIdx 추출
+            int userIdx = userProvider.getUserIdx(userId);
+
+
+
+            return new BaseResponse<>("Bye~");
+        }
+        catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
     }
 
 }
