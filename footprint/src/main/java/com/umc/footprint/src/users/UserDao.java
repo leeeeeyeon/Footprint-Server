@@ -384,34 +384,7 @@ public class UserDao {
             }
             getUserDateRes.add(new GetUserDateRes(walk,hashtagList.get(hashtagList.size()-1)));
         }
-
-
-
-//        // 2-2. entireHashtag 를 WalkIdx 단위로 묶어주기(entireHashtag -> hashtagList)
-//        List<ArrayList<String>> hashtagList = new ArrayList<ArrayList<String>>(); // 2차원 Arraylist 생성
-//        int count = 0;  // 1차원단 count 값
-//        for (int i=0 ; i<entireHashtag.size() ; i++){
-//            if(i == 0)  // 초기 i=0 일때 1차원단에 ArrayList 하나 생성
-//                hashtagList.add(new ArrayList<String>());
-//
-//            hashtagList.get(count).add(entireHashtag.get(i).getHashtag());  // entireHashtag의 hashtag값을 순서대로 2차원단 ArrayList에 추가
-//
-//            // i 가 마지막 loop일때 && 다음 나올 entireHashTag의 값이 다른 값일 때, 1차원단 ArrayList 하나 추가 AND count++
-//            if(i != (entireHashtag.size()-1) && entireHashtag.get(i).getWalkIdx() != entireHashtag.get(i+1).getWalkIdx()) {
-//                hashtagList.add(new ArrayList<String>());
-//                count++;
-//            }
-//        }
-//
-//        System.out.println("check point 6");
-//
-//        // 3. Walk 와 HashTag 정보 묶어 처리하기
-//        List<GetUserDateRes> getUserDateRes = new ArrayList<>();
-//        for(int i=0; i<userDateWalkInfo.size(); i++){   // userDateWalkInfo.size() == hashtagList.size() 이므로 userDateWalkInfo.size() 만큼 loop
-//            System.out.println("userDateWalkInfo.get(i)"+userDateWalkInfo.get(i)+"  hashtagList.get(i)"+hashtagList.get(i));
-//            getUserDateRes.add(new GetUserDateRes(userDateWalkInfo.get(i),hashtagList.get(i)));
-//        }
-
+        
         return getUserDateRes;
     }
 
