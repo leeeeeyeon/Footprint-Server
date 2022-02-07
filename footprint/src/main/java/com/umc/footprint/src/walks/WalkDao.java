@@ -16,6 +16,7 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 @Repository
 public class WalkDao {
@@ -89,6 +90,10 @@ public class WalkDao {
         System.out.println("walk.getGoalRate() = " + walk.getGoalRate());
         System.out.println("walk.getPhotoMatchNumList() = " + walk.getPhotoMatchNumList());
         System.out.println("walk.getCalorie() = " + walk.getCalorie());
+
+        TimeZone default_time_zone = TimeZone.getTimeZone("Asia/Seoul");
+
+        TimeZone.setDefault(default_time_zone);
 
         this.jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
