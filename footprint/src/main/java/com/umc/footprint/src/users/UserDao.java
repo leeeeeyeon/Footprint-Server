@@ -140,6 +140,18 @@ public class UserDao {
         return getUserBadges;
     }
 
+    //yummy
+    // 사용자가 얻은 뱃지 등록
+    public int postUserBadge(int userIdx, int badgeIdx) {
+        //UserBadge 테이블에 얻은 뱃지 추가하기
+        String insertBadgeQuery = "INSERT INTO UserBadge (userIdx, badgeIdx, status) VALUES (?,?,'ACTIVE')";
+        Object[] insertBadgeParams = new Object[]{userIdx, badgeIdx};
+        int result = this.jdbcTemplate.update(insertBadgeQuery,insertBadgeParams);
+
+        return result;
+    }
+
+
     // yummy 13
     // 이번 달에 사용자가 얻은 뱃지 조회 (PRO, LOVER, MASTER)
     public BadgeInfo getMonthlyBadgeStatus(int userIdx) {
@@ -292,9 +304,10 @@ public class UserDao {
                         rs.getString("badgeDate")), badgeDate);
 
         //UserBadge 테이블에 얻은 뱃지 추가하기
-        String insertBadgeQuery = "INSERT INTO UserBadge (userIdx, badgeIdx,status) VALUES (?,?,'ACTIVE')";
+        /*String insertBadgeQuery = "INSERT INTO UserBadge (userIdx, badgeIdx,status) VALUES (?,?,'ACTIVE')";
         Object[] insertBadgeParams = new Object[]{userIdx, badgeInfo.getBadgeIdx()};
-        this.jdbcTemplate.update(insertBadgeQuery,insertBadgeParams);
+        this.jdbcTemplate.update(insertBadgeQuery,insertBadgeParams);*/
+        int result = postUserBadge(userIdx, badgeInfo.getBadgeIdx());
 
         return badgeInfo;
     }
