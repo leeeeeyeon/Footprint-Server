@@ -119,8 +119,8 @@ public class WalkDao {
     public void addFootprint(List<SaveFootprint> footprintList, int walkIdx) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        String footprintInsertQuery = "insert into `Footprint`(`coordinate`, `write`, `recordAt`, `walkIdx`, `updateAt`)" +
-                "values (ST_GeomFromText(?),?,?,?,?)";
+        String footprintInsertQuery = "insert into `Footprint`(`coordinate`, `write`, `recordAt`, `walkIdx`, `updateAt`, `onWalk`)" +
+                "values (ST_GeomFromText(?),?,?,?,?,?)";
 
         System.out.println("footprintList.get(i).getStrCoordinate() = " + footprintList.get(0).getStrCoordinate());
         System.out.println("footprintList.get(i).getWrite() = " + footprintList.get(0).getWrite());
@@ -137,6 +137,7 @@ public class WalkDao {
                     preparedStatement.setTimestamp(3, Timestamp.valueOf(footprint.getRecordAt()));
                     preparedStatement.setInt(4, walkIdx);
                     preparedStatement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+                    preparedStatement.setInt(6, footprint.getOnWalk());
                     return preparedStatement;
                 }
             }, keyHolder);
@@ -148,6 +149,7 @@ public class WalkDao {
             System.out.println("footprint.getStrCoordinate() = " + footprint.getStrCoordinate());
             System.out.println("footprint.getWalkIdx() = " + footprint.getWalkIdx());
             System.out.println("footprint.getRecordAt() = " + footprint.getRecordAt());
+            System.out.println("footprint.getOnWalk() = " + footprint.getOnWalk());
         }
     }
 
