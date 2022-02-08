@@ -756,6 +756,10 @@ public class UserDao {
                 walks.add(walk);
             }
 
+            // 2022.01.07 > 2022. 1. 7 의 형식으로 바꿈
+           if(walkAtResult.charAt(5) == '0' || walkAt.charAt(8) == '0') {
+                walkAtResult = walkAtResult.replace(".0", ". ");
+            }
             GetTagRes getTagRes = new GetTagRes(walkAtResult, walks);
             result.add(getTagRes);
         }
