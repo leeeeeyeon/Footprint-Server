@@ -114,14 +114,16 @@ public class UserProvider {
     }
 
 
-    // 해당 userIdx를 갖는 User의 정보 조회
+    // 해당 userIdx를 갖는 유저의 정보 조회
     public GetUserRes getUser(int userIdx) throws BaseException {
         try {
             boolean userExist = userDao.checkUser(userIdx, "User");
+            // 해당 유저가 존재하지 않음
             if (userExist == false) {
                 throw new BaseException(INVALID_USERIDX);
             }
 
+            // 유저 상태에 따른 validation
             String status = userDao.getStatus(userIdx, "User");
             if (status.equals("INACTIVE")) {
                 throw new BaseException(INACTIVE_USER);
@@ -129,6 +131,7 @@ public class UserProvider {
             else if (status.equals("BLACK")) {
                 throw new BaseException(BLACK_USER);
             }
+
             GetUserRes getUserRes = userDao.getUser(userIdx);
             return getUserRes;
         } catch (Exception exception) {
