@@ -384,7 +384,7 @@ public class UserDao {
             }
             getUserDateRes.add(new GetUserDateRes(walk,hashtagList.get(hashtagList.size()-1)));
         }
-        
+
         return getUserDateRes;
     }
 
