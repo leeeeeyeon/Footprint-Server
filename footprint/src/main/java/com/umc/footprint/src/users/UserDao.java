@@ -1158,15 +1158,22 @@ public class UserDao {
 
     public int getUserIdx(String userId) {
         System.out.println("UserDao.getUserIdx");
+        System.out.println("userId = " + userId);
         String getUserIdxQuery = "select userIdx from User where userId = ?";
         return this.jdbcTemplate.queryForObject(getUserIdxQuery, int.class, userId);
     }
 
-    public LocalDateTime getUserLogAt(int userIdx) {
+    public AutoLoginUser getUserLogAt(int userIdx) {
         System.out.println("UserDao.checkMonthChanged");
-        String getUserLogAtQuery = "select logAt from User where userIdx = ?";
-        Timestamp logAt = this.jdbcTemplate.queryForObject(getUserLogAtQuery, Timestamp.class, userIdx);
-        return logAt.toLocalDateTime();
+        String getUserLogAtQuery = "select status,logAt from User where userIdx = ?";
+
+        return this.jdbcTemplate.queryForObject(getUserLogAtQuery,
+                (rs, rowNum) -> AutoLoginUser.builder()
+                        .status(rs.getString("status"))
+                        .logAt(rs.getTimestamp("logAt").toLocalDateTime())
+                        .build()
+                , userIdx);
+
     }
 
     public void modifyUserLogAt(LocalDateTime now, int userIdx) {
@@ -1204,5 +1211,10 @@ public class UserDao {
                 (rs,rowNum)->rs.getBoolean("success"),
                 userIdx);
         return result;
+    }
+
+    public int checkUserId(String userId) {
+        String checkUserIdQuery = "select EXISTS(select userId from User where userId = ?)";
+        return this.jdbcTemplate.queryForObject(checkUserIdQuery, int.class, userId);
     }
 }

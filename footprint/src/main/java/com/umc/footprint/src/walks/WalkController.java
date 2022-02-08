@@ -40,6 +40,7 @@ public class WalkController {
      *  실시간 처리 API
      *  [Post] /walks
      */
+    @ResponseBody
     @PostMapping("") // (POST) 127.0.0.1:3000/walks/
     public BaseResponse<List<PostWalkRes>> saveRecord(
             @RequestPart(value = "walk") SaveWalk walk,

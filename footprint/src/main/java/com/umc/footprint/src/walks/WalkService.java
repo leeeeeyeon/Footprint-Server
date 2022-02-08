@@ -87,6 +87,7 @@ public class WalkService {
                             .walkIdx(request.getFootprintList().get(i).getWalkIdx())
                             .hashtagList(request.getFootprintList().get(i).getHashtagList())
                             .imgUrlList(imgInputList)
+                            .onWalk(request.getFootprintList().get(i).getOnWalk())
                             .build();
 
                     convertedFootprints.add(convertedFootprint);
