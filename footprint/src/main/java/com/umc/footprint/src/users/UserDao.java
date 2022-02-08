@@ -698,6 +698,7 @@ public class UserDao {
 
     // 태그 검색 결과 조회
     public List<GetTagRes> getWalks(int userIdx, String tag) {
+        tag = "#" + tag;
         // 산책 날짜
         String getWalkAtQuery = "select distinct cast(date_format(endAt, '%Y.%m.%d') as char(10)) from Hashtag\n" +
                 "inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
@@ -707,11 +708,10 @@ public class UserDao {
                 "    select walkIdx from Hashtag\n" +
                 "    inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
                 "    inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
-                "    where hashtag=?" +
+                "    where hashtag=? and T.status = ?" +
                 "    ) and W.userIdx=? and T.status=?";
 
-        List<String> walkAtList = jdbcTemplate.queryForList(getWalkAtQuery, String.class, tag, userIdx, "ACTIVE");
-
+        List<String> walkAtList = jdbcTemplate.queryForList(getWalkAtQuery, String.class, tag, "ACTIVE", userIdx, "ACTIVE");
         List<GetTagRes> result = new ArrayList<>(); // 최종 출력 값을 담을 리스트
 
         for(String walkAt : walkAtList) {
@@ -741,7 +741,7 @@ public class UserDao {
             for(Integer walkIdx : walkIdxList) {
                 // 산책 기록 하나 조회
                 String getUserDateWalkQuery = "select walkIdx, date_format(startAt, '%k:%i') as startTime, date_format(endAt, '%k:%i') as endTime, pathImageUrl\n" +
-                        "from Walk W where W.walkIdx=?";
+                        "from Walk W where W.walkIdx=? and W.status=?";
                 UserDateWalk userDateWalk = this.jdbcTemplate.queryForObject(getUserDateWalkQuery,
                         (rs, rowNum)-> new UserDateWalk(
                                 rs.getInt("walkIdx"),
@@ -749,7 +749,7 @@ public class UserDao {
                                 rs.getString("endTime"),
                                 rs.getString("pathImageUrl")
                         )
-                        , walkIdx
+                        , walkIdx, "ACTIVE"
                 );
 
                 SearchWalk walk = new SearchWalk(userDateWalk, getTagList(walkIdx));
@@ -1210,7 +1210,7 @@ public class UserDao {
     //Badge 테이블에 존재하는 뱃지인지 검사하는 메소드
     public boolean checkPrevGoalDay(int userIdx) {
         String checkQuery = "select EXISTS(SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and\n" +
-                "        MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 0 MONTH))) as success;";
+                "        MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 MONTH))) as success;";
         boolean result = this.jdbcTemplate.queryForObject(checkQuery,
                 (rs,rowNum)->rs.getBoolean("success"),
                 userIdx);
