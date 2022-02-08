@@ -1213,8 +1213,4 @@ public class UserDao {
         return result;
     }
 
-    public int checkUserId(String userId) {
-        String checkUserIdQuery = "select EXISTS(select userId from User where userId = ?)";
-        return this.jdbcTemplate.queryForObject(checkUserIdQuery, int.class, userId);
-    }
 }

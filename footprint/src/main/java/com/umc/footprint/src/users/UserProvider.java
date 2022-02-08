@@ -341,13 +341,4 @@ public class UserProvider {
         }
     }
 
-    public int getUserId(String userId) throws BaseException {
-        try {
-            System.out.println("userId = " + userId);
-            System.out.println("UserProvider.getUserId");
-            return userDao.checkUserId(userId);
-        } catch (Exception exception) {
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
 }
