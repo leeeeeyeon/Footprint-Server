@@ -3,6 +3,7 @@ package com.umc.footprint.src.walks;
 import com.umc.footprint.config.BaseException;
 
 import com.umc.footprint.src.AwsS3Service;
+import com.umc.footprint.src.users.UserService;
 import com.umc.footprint.src.walks.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +24,15 @@ import java.util.List;
 public class WalkService {
     private final WalkDao walkDao;
     private final WalkProvider walkProvider;
+    private final UserService userService;
     private final AwsS3Service awsS3Service;
 
 
     @Autowired
-    public WalkService(WalkDao walkDao, WalkProvider walkProvider, AwsS3Service awsS3Service) {
+    public WalkService(WalkDao walkDao, WalkProvider walkProvider, UserService userService, AwsS3Service awsS3Service) {
         this.walkDao = walkDao;
         this.walkProvider = walkProvider;
+        this.userService = userService;
         this.awsS3Service = awsS3Service;
     }
 
@@ -127,7 +130,12 @@ public class WalkService {
                 walkDao.addTag(tagIdxList, request.getWalk().getUserIdx());
             }
 
-            // badge 획득 여부 확인 및 id 반환
+            // 처음 산책인지 확인
+            if (walkProvider.checkFirstWalk(request.getWalk().getUserIdx()) == 1) {
+                userService.modifyRepBadge(request.getWalk().getUserIdx(), 1); //대표 뱃지로 설정
+            }
+
+           // badge 획득 여부 확인 및 id 반환
             System.out.println("10. badge 획득 여부 확인 후 얻은 badgeIdxList 반환");
             List<PostWalkRes> postWalkResList = new ArrayList<PostWalkRes>();
             List<Integer> acquiredBadgeIdxList = walkProvider.getAcquiredBadgeIdxList(request.getWalk().getUserIdx());

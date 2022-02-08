@@ -247,6 +247,8 @@ public class WalkDao {
 
     // 유저의 목표 시간 반환
     public int getWalkGoalTime(int userIdx) {
+        System.out.println("WalkDao.getWalkGoalTime");
+        System.out.println("userIdx = " + userIdx);
         String getTimeQuery = "select walkGoalTime from Goal where userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         int getTimeParam = userIdx;
         return this.jdbcTemplate.queryForObject(getTimeQuery, int.class, getTimeParam);
@@ -265,6 +267,7 @@ public class WalkDao {
                 "        else 0\n" +
                 "        end as distanceBadgeIdx,\n" +
                 "       CASE\n" +
+                "            when (count(Walk.walkIdx) = 1) then 1" +
                 "            when (count(Walk.walkIdx) between 10 and 30) then 6\n" +
                 "            when (count(Walk.walkIdx) between 30 and 50) then 7\n" +
                 "            when (count(Walk.walkIdx) > 50) then 8\n" +
@@ -307,5 +310,10 @@ public class WalkDao {
         }
 
         return postWalkResList;
+    }
+
+    public int checkFirstWalk(int userIdx) {
+        String checkFirstWalkQuery = "select exists (select walkIdx from Walk where userIdx = ? group by userIdx having count(walkIdx) >= 1)";
+        return this.jdbcTemplate.queryForObject(checkFirstWalkQuery, int.class, userIdx);
     }
 }
