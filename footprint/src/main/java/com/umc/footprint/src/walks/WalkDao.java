@@ -313,7 +313,7 @@ public class WalkDao {
     }
 
     public int checkFirstWalk(int userIdx) {
-        String checkFirstWalkQuery = "select exists (select walkIdx from Walk where userIdx = ? group by userIdx having count(walkIdx) >= 1)";
+        String checkFirstWalkQuery = "select exists (select walkIdx from Walk where userIdx = ? group by userIdx having count(walkIdx) = 1)";
         return this.jdbcTemplate.queryForObject(checkFirstWalkQuery, int.class, userIdx);
     }
 }
