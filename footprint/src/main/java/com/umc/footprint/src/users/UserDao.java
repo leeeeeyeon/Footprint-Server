@@ -1137,8 +1137,8 @@ public class UserDao {
         String postLoginQuery = "insert into User(userId, username, email, providerType, status) values (?,?,?,?,?)";
         System.out.println("UserDao.postUserLogin");
         String status = "ONGOING";
-        Object[] postLoginParmas = new Object[]{postLoginReq.getUserId(), postLoginReq.getUsername(), postLoginReq.getEmail(), postLoginReq.getProviderType(), status};
-        this.jdbcTemplate.update(postLoginQuery,  postLoginParmas);
+        Object[] postLoginParams = new Object[]{postLoginReq.getUserId(), postLoginReq.getUsername(), postLoginReq.getEmail(), postLoginReq.getProviderType(), status};
+        this.jdbcTemplate.update(postLoginQuery,  postLoginParams);
     }
 
     public PostLoginRes getUserIdAndStatus(String email) {

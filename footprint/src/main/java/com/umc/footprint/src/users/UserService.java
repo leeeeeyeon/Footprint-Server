@@ -115,17 +115,23 @@ public class UserService {
             System.out.println("UserService.postUserLogin1");
             PostLoginRes result = userProvider.checkEmail(postLoginReq.getEmail());
             System.out.println("result.getStatus() = " + result.getStatus());
+            // status: NONE -> 회원가입(유저 정보 db에 등록 필요)
+            // status: ACTIVE -> 로그인
+            // status: ACTIVE -> 정보 입력 필요
             switch (result.getStatus()) {
                 case "NONE":
                     try {
                         System.out.println("UserService.postUserLogin2");
                         // 암호화
                         String jwt = jwtService.createJwt(postLoginReq.getUserId());
+                        // 유저 정보 db에 등록
                         userDao.postUserLogin(postLoginReq);
 
                         return PostLoginRes.builder()
                                 .jwtId(jwt)
-                                .status("ONGOING").build();
+                                .status("ONGOING")
+                                .checkMonthChanged(false)
+                                .build();
                     } catch (Exception exception) {
                         throw new BaseException(DATABASE_ERROR);
                     }

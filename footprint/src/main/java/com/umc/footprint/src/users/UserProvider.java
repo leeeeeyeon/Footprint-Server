@@ -311,7 +311,11 @@ public class UserProvider {
     public PostLoginRes checkEmail(String email) throws BaseException {
         System.out.println("UserProvider.checkEmail1");
         try {
-            if (userDao.checkEmail(email) == 1) {
+            // flag == 1 -> 유저 이미 존재
+            // flag == 0 -> 유저 정보 등록 필요
+            int flag = userDao.checkEmail(email);
+
+            if (flag == 1) {
                 System.out.println("UserProvider.checkEmail2");
                 // email로 userId랑 상태 추출
                 PostLoginRes postLoginRes = userDao.getUserIdAndStatus(email);
@@ -324,6 +328,7 @@ public class UserProvider {
                 return PostLoginRes.builder()
                         .jwtId("")
                         .status("NONE")
+                        .checkMonthChanged(false)
                         .build();
             }
         } catch (Exception exception) {

@@ -37,6 +37,7 @@ public class UserController {
         this.userService = userService;
         this.jwtService = jwtService;
     }
+
     /**
      * 유저 로그인 API
      * [POST] /users/auth/login
@@ -44,6 +45,12 @@ public class UserController {
     @ResponseBody
     @PostMapping("/auth/login")
     public BaseResponse<PostLoginRes> postUser(@RequestBody PostLoginReq postLoginReq) throws BaseException {
+        // 유저 id를 입력하지 않은 경우
+        if (postLoginReq.getUserId().isEmpty()) {
+            return new BaseResponse<>(POST_USERS_EMPTY_USERID);
+        }
+
+        // 이메일을 입력하지 않은 경우
         if (postLoginReq.getEmail() == null) {
             return new BaseResponse<>(POST_USERS_EMPTY_EMAIL);
         }
@@ -66,6 +73,7 @@ public class UserController {
         try {
             System.out.println("UserService.postUserLogin ACTIVE USER");
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
+             jwtService.getJwt();
             String userId = jwtService.getUserId();
             System.out.println("userId = " + userId);
             // userId로 userIdx 추출
