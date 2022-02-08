@@ -54,10 +54,7 @@ public class FootprintService {
             List<String> dbPhotoList = footprintDao.getPhotoList(footprintIdx);
             // 전달되어온 파일 리스트
             List<MultipartFile> photos = patchFootprintReq.getPhotos();
-
-            System.out.println(photos);
-            System.out.println(photos.get(0).getOriginalFilename());
-            System.out.println(photos.isEmpty());
+            
             if(photos != null) { // 본문만 수정(사진 수정 X)하는 경우 photos 자체가 null이 됨
                 if(dbPhotoList.isEmpty()) { // 발자국에 저장된 사진이 존재하지 않음
                     if(!("".equals(photos.get(0).getOriginalFilename()))) { // 전달된 파일이 하나라도 존재
