@@ -21,7 +21,7 @@ public class JwtService {
     */
     public String createJwt(String userId){
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + 1 * (1000 * 60));
+        Date expiryDate = new Date(now.getTime() + 1 * (1000 * 60 * 60 * 24 * 30));
         return Jwts.builder()
                 .setHeaderParam("type","jwt")
                 .claim("userId",userId)
