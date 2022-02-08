@@ -127,24 +127,23 @@ public class WalkService {
                 System.out.println("8. Hashtag 테이블에 삽입 후 매핑된 Idx 반환 ");
                 List<Pair<Integer, Integer>> tagIdxList = walkDao.addHashtag(request.getFootprintList());
 
-                for (Pair<Integer, Integer> tag : tagIdxList) {
-                    System.out.println("tag.getFirst() = " + tag.getFirst());
-                    System.out.println("tag.getSecond() = " + tag.getSecond());
+                System.out.println("tagIdxList = " + tagIdxList);
+                if (tagIdxList.size() != 0){
+                    for (Pair<Integer, Integer> tag : tagIdxList) {
+                        System.out.println("tag.getFirst() = " + tag.getFirst());
+                        System.out.println("tag.getSecond() = " + tag.getSecond());
+                    }
                 }
 
-                // Tag Table에 삽입
-                System.out.println("9. Tag 테이블에 삽입");
-                walkDao.addTag(tagIdxList, request.getWalk().getUserIdx());
-            }
-
-            // 처음 산책인지 확인
-            if (walkProvider.checkFirstWalk(request.getWalk().getUserIdx()) == 1) {
-                userService.modifyRepBadge(request.getWalk().getUserIdx(), 1); //대표 뱃지로 설정
+                if (tagIdxList.size() != 0){// Tag Table에 삽입
+                    System.out.println("9. Tag 테이블에 삽입");
+                    walkDao.addTag(tagIdxList, request.getWalk().getUserIdx());
+                }
             }
 
             // badge 획득 여부 확인 및 id 반환
             System.out.println("10. badge 획득 여부 확인 후 얻은 badgeIdxList 반환");
-            List<PostWalkRes> postWalkResList = new ArrayList<PostWalkRes>();
+            List<PostWalkRes> postWalkResList = new ArrayList<>();
             List<Integer> acquiredBadgeIdxList = walkProvider.getAcquiredBadgeIdxList(request.getWalk().getUserIdx());
 
             // UserBadge 테이블에 획득한 뱃지 삽입
@@ -152,6 +151,12 @@ public class WalkService {
             if (!acquiredBadgeIdxList.isEmpty()) { // 획득한 뱃지가 있을 경우 삽입
                 walkDao.addUserBadge(acquiredBadgeIdxList, request.getWalk().getUserIdx());
             }
+
+            // 처음 산책인지 확인
+            if (walkProvider.checkFirstWalk(request.getWalk().getUserIdx()) == 1) {
+                userService.modifyRepBadge(request.getWalk().getUserIdx(), 1); //대표 뱃지로 설정
+            }
+
             System.out.println("acquiredBadgeIdxList = " + acquiredBadgeIdxList);
             //획득한 뱃지 넣기 (뱃지 아이디로 뱃지 이름이랑 그림 반환)
 

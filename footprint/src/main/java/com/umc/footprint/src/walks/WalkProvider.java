@@ -62,12 +62,12 @@ public class WalkProvider {
             System.out.println("getBadgeIdx.getRecordBadgeIdx() = " + getBadgeIdx.getRecordBadgeIdx());
             // 원래 가지고 있던 뱃지 조회
             List<Integer> getOriginBadgeIdxList = walkDao.getOriginBadgeIdxList(userIdx);
-            for (Integer badgeIdx : getOriginBadgeIdxList) {
-                System.out.println("badgeIdx = " + badgeIdx);
-            }
+            System.out.println("getOriginBadgeIdxList = " + getOriginBadgeIdxList);
 
             // 얻은 뱃지
             List<Integer> acquiredBadgeIdxList = new ArrayList<>();
+
+
 
             // 원래 갖고 있던 뱃지(2~5)의 가장 큰 값
             int originMaxDistanceBadgeIdx = 1;
@@ -89,8 +89,12 @@ public class WalkProvider {
                 }
             }
 
+            if (getOriginBadgeIdxList.size() == 0) {
+                acquiredBadgeIdxList.add(1);
+            }
+
             // 기록 관련 얻은 뱃지 리스트에 저장
-            if (getBadgeIdx.getRecordBadgeIdx() >= originMaxRecordBadgeIdx) {
+            if (getBadgeIdx.getRecordBadgeIdx() > originMaxRecordBadgeIdx) {
                 acquiredBadgeIdxList.add(getBadgeIdx.getRecordBadgeIdx());
             }
 
@@ -114,6 +118,7 @@ public class WalkProvider {
 
     public int checkFirstWalk(int userIdx) throws BaseException {
         try {
+            System.out.println("WalkProvider.checkFirstWalk entered");
             return walkDao.checkFirstWalk(userIdx);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);

@@ -66,6 +66,9 @@ public class JwtService {
             throw new BaseException(INVALID_JWT);
         }
 
+        Date expiration = claims.getBody().getExpiration();
+        System.out.println("expiration = " + expiration);
+
         // 3. userId 추출
         return claims.getBody().get("userId",String.class);  // jwt 에서 userId를 추출합니다.
     }

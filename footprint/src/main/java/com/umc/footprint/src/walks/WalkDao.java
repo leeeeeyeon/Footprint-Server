@@ -183,11 +183,12 @@ public class WalkDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         //Pair<hashtagIdx, footprintIdx> mapping (tag) idx list
-        List<Pair<Integer, Integer>> tagIdxList = new ArrayList<Pair<Integer, Integer>>();
+        List<Pair<Integer, Integer>> tagIdxList = new ArrayList<>();
 
         // footprint당 hashtag list 삽입
         for (SaveFootprint f : footprintList) {
             if (f.getHashtagList().size() != 0){
+                System.out.println("f.getHashtagList().size() = " + f.getHashtagList().size());
                 for (String hashtag : f.getHashtagList()) {
                     this.jdbcTemplate.update(new PreparedStatementCreator() {
                         @Override
@@ -201,13 +202,19 @@ public class WalkDao {
                 // tag list에 삽입
                 tagIdxList.add(Pair.of(keyHolder.getKey().intValue(), f.getFootprintIdx()));
             }
+            System.out.println("f = " + f);
+            System.out.println("f.getHashtagList().size() = " + f.getHashtagList().size());
         }
 
+        System.out.println("tagIdxList = " + tagIdxList);
+        System.out.println("WalkDao.addHashtag exit");
         return tagIdxList;
     }
 
     public void addTag(List<Pair<Integer, Integer>> tagIdxList, int userIdx) {
         String tagInsertQuery = "insert into Tag(hashtagIdx, footprintIdx, userIdx) values (?,?,?)";
+        System.out.println("tagIdxList = " + tagIdxList);
+        System.out.println("userIdx = " + userIdx);
 
         this.jdbcTemplate.batchUpdate(tagInsertQuery,
                 new BatchPreparedStatementSetter() {
@@ -313,7 +320,8 @@ public class WalkDao {
     }
 
     public int checkFirstWalk(int userIdx) {
-        String checkFirstWalkQuery = "select exists (select walkIdx from Walk where userIdx = ? group by userIdx having count(walkIdx) = 1)";
+        System.out.println("WalkDao.checkFirstWalk");
+        String checkFirstWalkQuery = "select exists (select userIdx from Walk where userIdx = ? group by userIdx having count(walkIdx) = 1)";
         return this.jdbcTemplate.queryForObject(checkFirstWalkQuery, int.class, userIdx);
     }
 }
