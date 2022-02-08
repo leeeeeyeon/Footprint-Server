@@ -55,7 +55,8 @@ public enum BaseResponseStatus {
     MAX_WALK_GOAL_TIME(false, 2146,"목표산책시간이 최대시간 초과입니다."),
     INVALID_WALK_TIME_SLOT(false, 2147,"잘못된 산책 시간대입니다."),
     POST_USERS_EMPTY_EMAIL(false, 2148, "이메일을 입력해주세요."),
-    POST_USERS_INVALID_EMAIL(false, 2016, "이메일 형식을 확인해주세요."),
+    POST_USERS_INVALID_EMAIL(false, 2149, "이메일 형식을 확인해주세요."),
+    EXIST_USER_ID(false, 2150, "중복된 유저 id입니다."),
     MAX_NICKNAME_LENGTH(false, 2160, "닉네임은 8자를 초과할 수 없습니다."),
 
     INVALID_WALKIDX(false, 2200, "잘못된 산책 인덱스입니다."),

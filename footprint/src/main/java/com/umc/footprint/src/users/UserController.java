@@ -43,13 +43,17 @@ public class UserController {
      */
     @ResponseBody
     @PostMapping("/auth/login")
-    public BaseResponse<PostLoginRes> postUser(@RequestBody PostLoginReq postLoginReq) {
+    public BaseResponse<PostLoginRes> postUser(@RequestBody PostLoginReq postLoginReq) throws BaseException {
         if (postLoginReq.getEmail() == null) {
             return new BaseResponse<>(POST_USERS_EMPTY_EMAIL);
         }
         //이메일 정규표현: 입력받은 이메일이 email@domain.xxx와 같은 형식인지 검사합니다. 형식이 올바르지 않다면 에러 메시지를 보냅니다.
         if (!isRegexEmail(postLoginReq.getEmail())) {
             return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
+        }
+        // 유저 id가 이미 존재하는 경우
+        if (userProvider.getUserId(postLoginReq.getUserId()) == 1) {
+            return new BaseResponse<>(EXIST_USER_ID);
         }
         try {
             PostLoginRes postLoginRes = userService.postUserLogin(postLoginReq);
@@ -444,6 +448,7 @@ public class UserController {
             System.out.println("userId = " + userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
+            System.out.println("userIdx = " + userIdx);
 
             // Validaion 1. userIdx 가 0 이하일 경우 exception
             if(userIdx <= 0)

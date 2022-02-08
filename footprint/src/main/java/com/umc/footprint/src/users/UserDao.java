@@ -1132,6 +1132,7 @@ public class UserDao {
 
     public int getUserIdx(String userId) {
         System.out.println("UserDao.getUserIdx");
+        System.out.println("userId = " + userId);
         String getUserIdxQuery = "select userIdx from User where userId = ?";
         return this.jdbcTemplate.queryForObject(getUserIdxQuery, int.class, userId);
     }
@@ -1184,5 +1185,10 @@ public class UserDao {
                 (rs,rowNum)->rs.getBoolean("success"),
                 userIdx);
         return result;
+    }
+
+    public int checkUserId(String userId) {
+        String checkUserIdQuery = "select EXISTS(select userId from User where userId = ?)";
+        return this.jdbcTemplate.queryForObject(checkUserIdQuery, int.class, userId);
     }
 }
