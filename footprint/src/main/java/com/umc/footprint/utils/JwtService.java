@@ -1,12 +1,8 @@
 package com.umc.footprint.utils;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.secret.Secret;
-import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.*;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -14,8 +10,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
-import static com.umc.footprint.config.BaseResponseStatus.EMPTY_JWT;
-import static com.umc.footprint.config.BaseResponseStatus.INVALID_JWT;
+import static com.umc.footprint.config.BaseResponseStatus.*;
 
 @Service
 public class JwtService {
@@ -26,11 +21,12 @@ public class JwtService {
     */
     public String createJwt(String userId){
         Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + 1 * (1000 * 60 * 60 * 24 * 30));
         return Jwts.builder()
                 .setHeaderParam("type","jwt")
                 .claim("userId",userId)
                 .setIssuedAt(now)
-                .setExpiration(new Date(System.currentTimeMillis()+1*(1000*60*60*24*365)))
+                .setExpiration(expiryDate) // jwt 토큰 유효기간 한 달
                 .signWith(SignatureAlgorithm.HS256, Secret.JWT_SECRET_KEY)
                 .compact();
     }
@@ -51,23 +47,26 @@ public class JwtService {
      */
     public String getUserId() throws BaseException {
         //1. JWT 추출
+        System.out.println("1. JWT 추출");
         String accessToken = getJwt();
         if(accessToken == null || accessToken.length() == 0){
             throw new BaseException(EMPTY_JWT);
         }
+        System.out.println("accessToken = " + accessToken);
 
         // 2. JWT parsing
         Jws<Claims> claims;
-        try{
+        try {
+            System.out.println("2. JWT parsing");
             claims = Jwts.parser()
                     .setSigningKey(Secret.JWT_SECRET_KEY)
                     .parseClaimsJws(accessToken);
+        } catch (ExpiredJwtException exception) {
+            throw new BaseException(EXPIRED_JWT);
         } catch (Exception ignored) {
+            System.out.println("토큰 잘못됨");
             throw new BaseException(INVALID_JWT);
         }
-
-        Date expiration = claims.getBody().getExpiration();
-        System.out.println("expiration = " + expiration);
 
         // 3. userId 추출
         return claims.getBody().get("userId",String.class);  // jwt 에서 userId를 추출합니다.

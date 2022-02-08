@@ -73,7 +73,8 @@ public class UserController {
         try {
             System.out.println("UserService.postUserLogin ACTIVE USER");
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
-             jwtService.getJwt();
+
+            jwtService.getJwt();
             String userId = jwtService.getUserId();
             System.out.println("userId = " + userId);
             // userId로 userIdx 추출
