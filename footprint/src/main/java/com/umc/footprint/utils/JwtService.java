@@ -9,6 +9,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.TimeZone;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
 
@@ -20,8 +21,11 @@ public class JwtService {
    @return String
     */
     public String createJwt(String userId){
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + 1 * (1000 * 60 * 60 * 24 * 30));
+        System.out.println("now = " + now);
+        Date expiryDate = new Date(now.getTime() + 2592000000L);
+        System.out.println("expiryDate = " + expiryDate);
         return Jwts.builder()
                 .setHeaderParam("type","jwt")
                 .claim("userId",userId)
