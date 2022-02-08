@@ -1210,7 +1210,7 @@ public class UserDao {
     //Badge 테이블에 존재하는 뱃지인지 검사하는 메소드
     public boolean checkPrevGoalDay(int userIdx) {
         String checkQuery = "select EXISTS(SELECT sun, mon, tue, wed, thu, fri, sat FROM GoalDay WHERE userIdx = ? and\n" +
-                "        MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 0 MONTH))) as success;";
+                "        MONTH(createAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 MONTH))) as success;";
         boolean result = this.jdbcTemplate.queryForObject(checkQuery,
                 (rs,rowNum)->rs.getBoolean("success"),
                 userIdx);
