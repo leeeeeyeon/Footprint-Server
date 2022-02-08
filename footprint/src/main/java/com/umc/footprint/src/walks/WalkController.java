@@ -19,6 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 
+import static com.umc.footprint.config.BaseResponseStatus.EMPTY_WALK_PHOTO;
+
 @RestController
 @RequestMapping("/walks")
 public class WalkController {
@@ -70,8 +72,6 @@ public class WalkController {
 //
 //        System.out.println("photos = " + photos.get(0).getOriginalFilename());
 //        System.out.println("photos.get(0).getContentType() = " + photos.get(0).getContentType());
-
-        System.out.println("Validation 1. ");
 
         try {
 

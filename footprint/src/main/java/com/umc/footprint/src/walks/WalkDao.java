@@ -119,8 +119,8 @@ public class WalkDao {
     public void addFootprint(List<SaveFootprint> footprintList, int walkIdx) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        String footprintInsertQuery = "insert into `Footprint`(`coordinate`, `write`, `recordAt`, `walkIdx`, `updateAt`)" +
-                "values (ST_GeomFromText(?),?,?,?,?)";
+        String footprintInsertQuery = "insert into `Footprint`(`coordinate`, `write`, `recordAt`, `walkIdx`, `updateAt`, `onWalk`)" +
+                "values (ST_GeomFromText(?),?,?,?,?,?)";
 
         System.out.println("footprintList.get(i).getStrCoordinate() = " + footprintList.get(0).getStrCoordinate());
         System.out.println("footprintList.get(i).getWrite() = " + footprintList.get(0).getWrite());
@@ -137,6 +137,7 @@ public class WalkDao {
                     preparedStatement.setTimestamp(3, Timestamp.valueOf(footprint.getRecordAt()));
                     preparedStatement.setInt(4, walkIdx);
                     preparedStatement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+                    preparedStatement.setInt(6, footprint.getOnWalk());
                     return preparedStatement;
                 }
             }, keyHolder);
@@ -148,6 +149,7 @@ public class WalkDao {
             System.out.println("footprint.getStrCoordinate() = " + footprint.getStrCoordinate());
             System.out.println("footprint.getWalkIdx() = " + footprint.getWalkIdx());
             System.out.println("footprint.getRecordAt() = " + footprint.getRecordAt());
+            System.out.println("footprint.getOnWalk() = " + footprint.getOnWalk());
         }
     }
 
@@ -245,6 +247,8 @@ public class WalkDao {
 
     // 유저의 목표 시간 반환
     public int getWalkGoalTime(int userIdx) {
+        System.out.println("WalkDao.getWalkGoalTime");
+        System.out.println("userIdx = " + userIdx);
         String getTimeQuery = "select walkGoalTime from Goal where userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         int getTimeParam = userIdx;
         return this.jdbcTemplate.queryForObject(getTimeQuery, int.class, getTimeParam);
@@ -263,6 +267,7 @@ public class WalkDao {
                 "        else 0\n" +
                 "        end as distanceBadgeIdx,\n" +
                 "       CASE\n" +
+                "            when (count(Walk.walkIdx) = 1) then 1" +
                 "            when (count(Walk.walkIdx) between 10 and 30) then 6\n" +
                 "            when (count(Walk.walkIdx) between 30 and 50) then 7\n" +
                 "            when (count(Walk.walkIdx) > 50) then 8\n" +
@@ -305,5 +310,10 @@ public class WalkDao {
         }
 
         return postWalkResList;
+    }
+
+    public int checkFirstWalk(int userIdx) {
+        String checkFirstWalkQuery = "select exists (select walkIdx from Walk where userIdx = ? group by userIdx having count(walkIdx) = 1)";
+        return this.jdbcTemplate.queryForObject(checkFirstWalkQuery, int.class, userIdx);
     }
 }

@@ -55,7 +55,8 @@ public enum BaseResponseStatus {
     MAX_WALK_GOAL_TIME(false, 2146,"목표산책시간이 최대시간 초과입니다."),
     INVALID_WALK_TIME_SLOT(false, 2147,"잘못된 산책 시간대입니다."),
     POST_USERS_EMPTY_EMAIL(false, 2148, "이메일을 입력해주세요."),
-    POST_USERS_INVALID_EMAIL(false, 2016, "이메일 형식을 확인해주세요."),
+    POST_USERS_INVALID_EMAIL(false, 2149, "이메일 형식을 확인해주세요."),
+    EXIST_USER_ID(false, 2150, "중복된 유저 id입니다."),
     MAX_NICKNAME_LENGTH(false, 2160, "닉네임은 8자를 초과할 수 없습니다."),
 
     INVALID_WALKIDX(false, 2200, "잘못된 산책 인덱스입니다."),
@@ -63,6 +64,7 @@ public enum BaseResponseStatus {
 
     NOT_MATCH_IMAGE_COUNT(false, 2240, "Footprint 개수와 FootprintImg의 개수가 다릅니다."),
     EXCEED_FOOTPRINT_SIZE(false, 2241, "photoMatchNumList를 확인해주십시요."),
+    EMPTY_WALK_PHOTO(false, 2242, "산책 이미지를 입력해주세요."),
     DELETED_FOOTPRINT(false, 2260, "이미 삭제된 발자국입니다."),
     NO_EXIST_FOOTPRINT(false, 2261, "존재하지 않는 발자국입니다."),
     REQUEST_ERROR(false, 2262, "잘못된 산책 인덱스입니다."), // 임시 추가

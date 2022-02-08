@@ -370,32 +370,58 @@ public class UserDao {
             }
             getUserDateRes.add(new GetUserDateRes(walk,hashtagList.get(hashtagList.size()-1)));
         }
-        
+
         return getUserDateRes;
     }
 
-    // 해당 userIdx를 갖는 유저조회
+    // 해당 userIdx를 갖는 유저 정보 조회
     public GetUserRes getUser(int userIdx) {
-        String getUserQuery = "select userIdx, nickname, username, email, status, User.badgeIdx, badgeUrl, birth, sex, height, weight,\n" +
-                "       (select count(*) from Walk where userIdx=?)+1 as walkNumber\n" +
-                "from User inner join Badge B on User.badgeIdx = B.badgeIdx where userIdx=?";
+        int badgeIdx = this.jdbcTemplate.queryForObject("select badgeIdx from User where userIdx=?",
+                int.class, userIdx);
+        if (!badgeCheck(badgeIdx)) { // 유저 대표 뱃지 idx가 0일 경우
+            String getUserQuery = "select userIdx, nickname, username, email, status, birth, sex, height, weight,\n" +
+                    "                    (select count(*) from Walk where userIdx=?)+1 as walkNumber\n" +
+                    "                    from User where userIdx=?";
 
-        return this.jdbcTemplate.queryForObject(getUserQuery,
-                (rs, rowNum) -> new GetUserRes(
-                        rs.getInt("userIdx"),
-                        rs.getString("nickname"),
-                        rs.getString("username"),
-                        rs.getString("email"),
-                        rs.getString("status"),
-                        rs.getInt("badgeIdx"),
-                        rs.getString("badgeUrl"),
-                        rs.getTimestamp("birth"),
-                        rs.getString("sex"),
-                        rs.getInt("height"),
-                        rs.getInt("weight"),
-                        rs.getInt("walkNumber")
-                ),
-                userIdx, userIdx);
+            return this.jdbcTemplate.queryForObject(getUserQuery,
+                    (rs, rowNum) -> new GetUserRes(
+                            rs.getInt("userIdx"),
+                            rs.getString("nickname"),
+                            rs.getString("username"),
+                            rs.getString("email"),
+                            rs.getString("status"),
+                            0,
+                            "",
+                            rs.getTimestamp("birth"),
+                            rs.getString("sex"),
+                            rs.getInt("height"),
+                            rs.getInt("weight"),
+                            rs.getInt("walkNumber")
+                    ),
+                    userIdx, userIdx);
+        }
+        else { // 유저 대표 뱃지 idx가 0이 아닐 경우
+            String getUserQuery = "select userIdx, nickname, username, email, status, User.badgeIdx, badgeUrl, birth, sex, height, weight,\n" +
+                    "       (select count(*) from Walk where userIdx=?)+1 as walkNumber\n" +
+                    "from User inner join Badge B on User.badgeIdx = B.badgeIdx where userIdx=?";
+
+            return this.jdbcTemplate.queryForObject(getUserQuery,
+                    (rs, rowNum) -> new GetUserRes(
+                            rs.getInt("userIdx"),
+                            rs.getString("nickname"),
+                            rs.getString("username"),
+                            rs.getString("email"),
+                            rs.getString("status"),
+                            rs.getInt("badgeIdx"),
+                            rs.getString("badgeUrl"),
+                            rs.getTimestamp("birth"),
+                            rs.getString("sex"),
+                            rs.getInt("height"),
+                            rs.getInt("weight"),
+                            rs.getInt("walkNumber")
+                    ),
+                    userIdx, userIdx);
+        }
     }
 
     // 해당 userIdx를 갖는 유저의 달성정보 조회
@@ -1132,15 +1158,22 @@ public class UserDao {
 
     public int getUserIdx(String userId) {
         System.out.println("UserDao.getUserIdx");
+        System.out.println("userId = " + userId);
         String getUserIdxQuery = "select userIdx from User where userId = ?";
         return this.jdbcTemplate.queryForObject(getUserIdxQuery, int.class, userId);
     }
 
-    public LocalDateTime getUserLogAt(int userIdx) {
+    public AutoLoginUser getUserLogAt(int userIdx) {
         System.out.println("UserDao.checkMonthChanged");
-        String getUserLogAtQuery = "select logAt from User where userIdx = ?";
-        Timestamp logAt = this.jdbcTemplate.queryForObject(getUserLogAtQuery, Timestamp.class, userIdx);
-        return logAt.toLocalDateTime();
+        String getUserLogAtQuery = "select status,logAt from User where userIdx = ?";
+
+        return this.jdbcTemplate.queryForObject(getUserLogAtQuery,
+                (rs, rowNum) -> AutoLoginUser.builder()
+                        .status(rs.getString("status"))
+                        .logAt(rs.getTimestamp("logAt").toLocalDateTime())
+                        .build()
+                , userIdx);
+
     }
 
     public void modifyUserLogAt(LocalDateTime now, int userIdx) {
@@ -1179,4 +1212,5 @@ public class UserDao {
                 userIdx);
         return result;
     }
+
 }
