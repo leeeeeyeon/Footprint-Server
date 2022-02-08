@@ -51,10 +51,7 @@ public class UserController {
         if (!isRegexEmail(postLoginReq.getEmail())) {
             return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
         }
-        // 유저 id가 이미 존재하는 경우
-        if (userProvider.getUserId(postLoginReq.getUserId()) == 1) {
-            return new BaseResponse<>(EXIST_USER_ID);
-        }
+
         try {
             PostLoginRes postLoginRes = userService.postUserLogin(postLoginReq);
             return new BaseResponse<>(postLoginRes);

@@ -3,14 +3,12 @@ package com.umc.footprint.src.walks;
 import com.umc.footprint.config.BaseException;
 
 import com.umc.footprint.src.AwsS3Service;
+import com.umc.footprint.src.users.UserService;
 import com.umc.footprint.src.walks.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
-
-import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
-import static com.umc.footprint.config.BaseResponseStatus.EXCEED_FOOTPRINT_SIZE;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -18,23 +16,35 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.umc.footprint.config.BaseResponseStatus.*;
+
 
 @Service
 public class WalkService {
     private final WalkDao walkDao;
     private final WalkProvider walkProvider;
+    private final UserService userService;
     private final AwsS3Service awsS3Service;
 
 
     @Autowired
-    public WalkService(WalkDao walkDao, WalkProvider walkProvider, AwsS3Service awsS3Service) {
+    public WalkService(WalkDao walkDao, WalkProvider walkProvider, UserService userService, AwsS3Service awsS3Service) {
         this.walkDao = walkDao;
         this.walkProvider = walkProvider;
+        this.userService = userService;
         this.awsS3Service = awsS3Service;
     }
 
     @Transactional(rollbackFor = Exception.class)
     public List<PostWalkRes> saveRecord(PostWalkReq request) throws BaseException {
+        System.out.println("Validation 1. 사진이 하나도 안왔을 때");
+        if (request.getPhotos().size() == 1 && ("".equals(request.getPhotos().get(0).getOriginalFilename()))){
+            System.out.println("request.getPhotos() = " + request.getPhotos());
+            System.out.println("request.getPhotos().get(0).getOriginalFilename() = " + request.getPhotos().get(0).getOriginalFilename());
+            System.out.println("request.getPhotos().isEmpty() = " + request.getPhotos().isEmpty());
+            throw new BaseException(EMPTY_WALK_PHOTO);
+        }
+
         try {
             System.out.println("1. 동선 이미지: file -> url ");
             // 경로 이미지 URL 생성 및 S3 업로드
@@ -63,7 +73,7 @@ public class WalkService {
 
             System.out.println("walkIdx = " + walkIdx);
 
-            if (!request.getFootprintList().isEmpty()){
+            if (!request.getFootprintList().isEmpty()) {
                 System.out.println("4. 발자국 기록 사진들 List<MultipartFile> -> List<String> 으로 변환");
                 List<String> imgUrlList = awsS3Service.uploadFile(request.getPhotos());
 
@@ -125,6 +135,11 @@ public class WalkService {
                 // Tag Table에 삽입
                 System.out.println("9. Tag 테이블에 삽입");
                 walkDao.addTag(tagIdxList, request.getWalk().getUserIdx());
+            }
+
+            // 처음 산책인지 확인
+            if (walkProvider.checkFirstWalk(request.getWalk().getUserIdx()) == 1) {
+                userService.modifyRepBadge(request.getWalk().getUserIdx(), 1); //대표 뱃지로 설정
             }
 
             // badge 획득 여부 확인 및 id 반환

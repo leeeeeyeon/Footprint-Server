@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.umc.footprint.src.users.model.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
@@ -57,13 +58,17 @@ public class UserProvider {
         try {
             // Validation 2. Walk Table 안 존재하는 User인지 확인
             boolean existUserResult = userDao.checkUser(userIdx,"Walk");
-            if (existUserResult == false)
-                throw new BaseException(NOT_EXIST_USER_IN_WALK);
+            if (existUserResult == false) {
+                List<GetUserDateRes> returnList = new ArrayList<>();
+                return returnList;
+            }
 
             // Validation 3. 해당 날짜에 User가 기록한 Walk가 있는지 확인
             int existUserDateResult = userDao.checkUserDateWalk(userIdx, date);
-            if (existUserDateResult == 0)
-                throw new BaseException(NO_EXIST_WALK);
+            if (existUserDateResult == 0) {
+                List<GetUserDateRes> returnList = new ArrayList<>();
+                return returnList;
+            }
 
             List<GetUserDateRes> userDateRes = userDao.getUserDate(userIdx, date);
 
@@ -336,13 +341,4 @@ public class UserProvider {
         }
     }
 
-    public int getUserId(String userId) throws BaseException {
-        try {
-            System.out.println("userId = " + userId);
-            System.out.println("UserProvider.getUserId");
-            return userDao.checkUserId(userId);
-        } catch (Exception exception) {
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
 }
