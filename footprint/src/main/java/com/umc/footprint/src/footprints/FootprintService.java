@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class FootprintService {
     }
 
     // 발자국 수정 (Patch)
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void modifyFootprint(PatchFootprintReq patchFootprintReq, int footprintIdx) throws BaseException {
         try {
             // validation - 존재하지 않는, 삭제된 발자국
@@ -45,26 +45,30 @@ public class FootprintService {
             int userIdx = footprintDao.findUserIdx(footprintIdx);
 
             // 1. 본문 수정
-            footprintDao.modifyWrite(patchFootprintReq, footprintIdx);
+            if(patchFootprintReq.getWrite() != null) {
+                footprintDao.modifyWrite(patchFootprintReq, footprintIdx);
+            }
 
             // 2. 사진 수정
             // DB에 저장되어 있는 파일 리스트
             List<String> dbPhotoList = footprintDao.getPhotoList(footprintIdx);
             // 전달되어온 파일 리스트
             List<MultipartFile> photos = patchFootprintReq.getPhotos();
-
-            if(dbPhotoList.isEmpty()) { // 발자국에 저장된 사진이 존재하지 않음
-                if(!photos.isEmpty()) { // 전달된 파일이 하나라도 존재
-                    uploadImg(photos, userIdx, footprintIdx); // 새로운 사진들 업로드
+            
+            if(photos != null) { // 본문만 수정(사진 수정 X)하는 경우 photos 자체가 null이 됨
+                if(dbPhotoList.isEmpty()) { // 발자국에 저장된 사진이 존재하지 않음
+                    if(!("".equals(photos.get(0).getOriginalFilename()))) { // 전달된 파일이 하나라도 존재
+                        uploadImg(photos, userIdx, footprintIdx); // 새로운 사진들 업로드
+                    }
                 }
-            }
-            else { // 발자국에 저장된 기존 사진들이 존재
-                if(photos.isEmpty()) { // 전달된 파일이 없음 > 사진을 지우고 싶다는 의미 > 기존 사진 삭제만 진행
-                    footprintDao.deletePhotos(footprintIdx); // 기존 사진들 테이블에서 삭제
-                }
-                else {
-                    footprintDao.deletePhotos(footprintIdx);
-                    uploadImg(photos, userIdx, footprintIdx); // 새로운 사진들 업로드
+                else { // 발자국에 저장된 기존 사진들이 존재
+                    if(photos.size()==1 && "".equals(photos.get(0).getOriginalFilename())) { // 전달된 파일이 없음 > 사진을 지우고 싶다는 의미 > 기존 사진 삭제만 진행
+                        footprintDao.deletePhotos(footprintIdx); // 기존 사진들 테이블에서 삭제
+                    }
+                    else {
+                        footprintDao.deletePhotos(footprintIdx);
+                        uploadImg(photos, userIdx, footprintIdx); // 새로운 사진들 업로드
+                    }
                 }
             }
 
@@ -74,30 +78,34 @@ public class FootprintService {
             // 전달되어온 태그 리스트
             List<String> tags = patchFootprintReq.getTagList();
 
-            if(dbTagList.isEmpty()) { // 발자국에 저장된 태그가 존재하지 않음
-                if(!tags.isEmpty()) { // 전달된 태그가 하나라도 존재
-                    footprintDao.addTag(tags, userIdx, footprintIdx);
+            if(patchFootprintReq.getTagList() != null) {
+                if(dbTagList.isEmpty()) { // 발자국에 저장된 태그가 존재하지 않음
+                    if(!tags.isEmpty()) { // 전달된 태그가 하나라도 존재
+                        footprintDao.addTag(tags, userIdx, footprintIdx);
+                    }
                 }
-            }
-            else { // 발자국에 저장된 기존 사진들이 존재
-                if(tags.isEmpty()) { // 전달된 파일이 없음 > 사진을 지우고 싶다는 의미 > 기존 사진 삭제만 진행
-                    footprintDao.deleteHashtags(footprintIdx); // 기존 해시태그들 테이블에서 삭제
-                }
-                else {
-                    footprintDao.deleteHashtags(footprintIdx);
-                    footprintDao.addTag(tags, userIdx, footprintIdx); // 새로운 사진들 업로드
+                else { // 발자국에 저장된 기존 사진들이 존재
+                    if(tags.isEmpty()) { // 전달된 파일이 없음 > 사진을 지우고 싶다는 의미 > 기존 사진 삭제만 진행
+                        footprintDao.deleteHashtags(footprintIdx); // 기존 해시태그들 테이블에서 삭제
+                    }
+                    else {
+                        footprintDao.deleteHashtags(footprintIdx);
+                        footprintDao.addTag(tags, userIdx, footprintIdx); // 새로운 사진들 업로드
+                    }
                 }
             }
 
             // updateAt 업데이트
             footprintDao.updateAt(patchFootprintReq, footprintIdx);
         } catch (Exception exception) { // DB에 이상이 있는 경우 에러 메시지를 보냅니다.
+            exception.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
     }
 
 
     // 발자국 삭제 (PATCH)
+    @Transactional(rollbackFor = Exception.class)
     public void deleteFootprint(int footprintIdx) throws BaseException {
         try {
             int activeFootprint = footprintDao.activeFootprint(footprintIdx);
@@ -121,7 +129,7 @@ public class FootprintService {
     }
 
     // 이미지 URL 생성 > S3 업로드 > Photo 테이블 삽입
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public List<String> uploadImg(List<MultipartFile> photos, int userIdx, int footprintIdx) throws BaseException {
         List<String> photoList = new ArrayList<>(); // URL 저장할 리스트
 

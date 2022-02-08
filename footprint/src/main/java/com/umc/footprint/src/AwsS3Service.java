@@ -32,6 +32,8 @@ public class AwsS3Service {
     // 파일 여러 개 넣을 때
     public ArrayList<String> uploadFile(List<MultipartFile> multipartFile) {
         ArrayList<String> photoUrlList = new ArrayList<>();
+        System.out.println("AwsS3Service.uploadFile start");
+
 
         // forEach 구문을 통해 multipartFile로 넘어온 파일들 하나씩 fileNameList에 추가
         multipartFile.forEach(file -> {
@@ -50,17 +52,27 @@ public class AwsS3Service {
             photoUrlList.add(amazonS3.getUrl(bucket, fileName).toString());
         });
 
+        System.out.println("getFileExtension(photoUrlList.get(0)) = " + getFileExtension(photoUrlList.get(0)));
+
+        System.out.println("AwsS3Service.uploadFile end");
+
         return photoUrlList;
     }
 
     // 파일 하나 넣을 때
     public String uploadFile(MultipartFile oneMultipartFile) throws BaseException {
         String photoUrl;
+        System.out.println("AwsS3Service.uploadFile start");
 
+
+        System.out.println("oneMultipartFile.getOriginalFilename() = " + oneMultipartFile.getOriginalFilename());
         String OnefileName = createFileName(oneMultipartFile.getOriginalFilename());
+        System.out.println("OnefileName = " + OnefileName);
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(oneMultipartFile.getSize());
+        System.out.println("objectMetadata.getContentLength() = " + objectMetadata.getContentLength());
         objectMetadata.setContentType(oneMultipartFile.getContentType());
+        System.out.println("objectMetadata.getContentType() = " + objectMetadata.getContentType());
 
         try (InputStream inputStream = oneMultipartFile.getInputStream()) {
             amazonS3.putObject(new PutObjectRequest(bucket, OnefileName, inputStream, objectMetadata)
@@ -70,7 +82,9 @@ public class AwsS3Service {
         }
 
         photoUrl = amazonS3.getUrl(bucket, OnefileName).toString();
+        System.out.println("getFileExtension(photo) = " + getFileExtension(photoUrl));
 
+        System.out.println("AwsS3Service.uploadFile end");
         return photoUrl;
     }
 
@@ -79,12 +93,21 @@ public class AwsS3Service {
     }
 
     private String createFileName(String fileName) { // 먼저 파일 업로드 시, 파일명을 난수화하기 위해 random으로 돌립니다.
-        return UUID.randomUUID().toString().concat(getFileExtension(fileName));
+        System.out.println("AwsS3Service.createFileName enter");
+        String newFileName = UUID.randomUUID().toString().concat(getFileExtension(fileName));
+        System.out.println("newFileName = " + newFileName);
+        System.out.println("AwsS3Service.createFileName exit");
+        return newFileName;
     }
 
     private String getFileExtension(String fileName) { // file 형식이 잘못된 경우를 확인하기 위해 만들어진 로직이며, 파일 타입과 상관없이 업로드할 수 있게 하기 위해 .의 존재 유무만 판단하였습니다.
         try {
-            return fileName.substring(fileName.lastIndexOf("."));
+            // filename
+            System.out.println("AwsS3Service.getFileExtension enter");
+            String extension = fileName.substring(fileName.lastIndexOf("."));
+            System.out.println("extension = " + extension);
+            System.out.println("AwsS3Service.getFileExtension exit");
+            return extension;
         } catch (StringIndexOutOfBoundsException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 형식의 파일(" + fileName + ") 입니다.");
         }

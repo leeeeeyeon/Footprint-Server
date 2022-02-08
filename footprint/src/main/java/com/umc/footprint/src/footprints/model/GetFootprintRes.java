@@ -19,4 +19,5 @@ public class GetFootprintRes {
     private String write;
     private List<String> photoList;
     private List<String> tagList;
+    private int onWalk;
 }

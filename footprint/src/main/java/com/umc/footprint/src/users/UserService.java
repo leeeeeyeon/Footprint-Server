@@ -12,6 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 @Service
 public class UserService {
     private final UserDao userDao;
@@ -26,24 +31,37 @@ public class UserService {
     }
 
 
-    public BadgeInfo patchRepBadge(int userIdx, int badgeIdx) throws BaseException {
+    // yummy 12
+    @Transactional(rollbackFor = Exception.class)
+    public BadgeInfo modifyRepBadge(int userIdx, int badgeIdx) throws BaseException {
         try {
-            BadgeInfo patchRepBadgeInfo = userDao.patchRepBadge(userIdx, badgeIdx);
+            // 해당 뱃지가 Badge 테이블에 존재하는 뱃지인지?
+            if(!userDao.badgeCheck(badgeIdx)) {
+                throw new BaseException(INVALID_BADGEIDX);
+            }
+
+            // 유저가 해당 뱃지를 갖고 있고, ACTIVE 뱃지인지?
+            if(!userDao.userBadgeCheck(userIdx, badgeIdx)) {
+                throw new BaseException(NOT_EXIST_USER_BADGE);
+            }
+
+            BadgeInfo patchRepBadgeInfo = userDao.modifyRepBadge(userIdx, badgeIdx);
             return patchRepBadgeInfo;
           } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
     }
 
-    // 닉네임 수정(Patch)
-    public void modifyNickname(PatchNicknameReq patchNicknameReq) throws BaseException {
+    // 유저 정보 수정(Patch)
+    public void modifyUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException {
         try {
-            int result = userDao.modifyNickname(patchNicknameReq);
+            int result = userDao.modifyUserInfo(userIdx, patchUserInfoReq);
 
-            if (result == 0) { // 닉네임 변경 실패
-                throw new BaseException(MODIFY_NICKNAME_FAIL);
+            if (result == 0) { // 유저 정보 변경 실패
+                throw new BaseException(MODIFY_USERINFO_FAIL);
             }
         } catch (Exception exception) { // DB에 이상이 있는 경우 에러 메시지를 보냅니다.
+            exception.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
     }
@@ -72,8 +90,15 @@ public class UserService {
     public int postUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException{
         try {
             int resultInfo = userDao.modifyUserInfo(userIdx, patchUserInfoReq);
+            System.out.println("resultInfo = " + resultInfo);
             int result = userDao.postGoal(userIdx, patchUserInfoReq);
+            System.out.println("result = " + result);
             int resultNext = userDao.postGoalNext(userIdx, patchUserInfoReq);
+            System.out.println("resultNext = " + resultNext);
+
+            //yummy 뱃지 추가
+            userDao.postUserBadge(userIdx, 1); // 발자국 스타터 뱃지 부여
+            modifyRepBadge(userIdx, 1); //대표 뱃지로 설정
 
             if(resultInfo == 0 || result == 0 || resultNext == 0)
                 return 0;
@@ -86,26 +111,66 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     public PostLoginRes postUserLogin(PostLoginReq postLoginReq) throws BaseException {
-        // email 중복 확인 있으면 status에 Done 넣고 return
-        System.out.println("UserService.postUserLogin1");
-        PostLoginRes result = userProvider.checkEmail(postLoginReq.getEmail());
-        System.out.println("result.getStatus() = " + result.getStatus());
-        switch (result.getStatus()) {
-            case "NONE":
-                try {
-                    System.out.println("UserService.postUserLogin2");
-                    // 암호화
-                    String jwt = jwtService.createJwt(postLoginReq.getUserId());
-                    userDao.postUserLogin(postLoginReq);
+        { // email 중복 확인 있으면 status에 Done 넣고 return
+            System.out.println("UserService.postUserLogin1");
+            PostLoginRes result = userProvider.checkEmail(postLoginReq.getEmail());
+            System.out.println("result.getStatus() = " + result.getStatus());
+            // status: NONE -> 회원가입(유저 정보 db에 등록 필요)
+            // status: ACTIVE -> 로그인
+            // status: ACTIVE -> 정보 입력 필요
+            switch (result.getStatus()) {
+                case "NONE":
+                    try {
+                        System.out.println("UserService.postUserLogin2");
+                        // 암호화
+                        String jwt = jwtService.createJwt(postLoginReq.getUserId());
+                        // 유저 정보 db에 등록
+                        userDao.postUserLogin(postLoginReq);
 
-                    return new PostLoginRes(jwt, "ONGOING");
-                } catch (Exception exception) {
-                    throw new BaseException(DATABASE_ERROR);
-                }
-            case "DONE":
-            case "ONGOING":
-                return result;
+                        return PostLoginRes.builder()
+                                .jwtId(jwt)
+                                .status("ONGOING")
+                                .checkMonthChanged(false)
+                                .build();
+                    } catch (Exception exception) {
+                        throw new BaseException(DATABASE_ERROR);
+                    }
+                case "ACTIVE":
+                case "ONGOING":
+                    return result;
+            }
+            return null;
         }
-        return null;
+    }
+
+    public PostLoginRes modifyUserLogAt(int userIdx) throws BaseException {
+        try {
+            boolean result = true;
+
+            // 이전에 로그인 했던 시간
+            AutoLoginUser autoLoginUser = userDao.getUserLogAt(userIdx);
+            PostLoginRes postLoginRes = PostLoginRes.builder()
+                    .status(autoLoginUser.getStatus())
+                    .build();
+            LocalDateTime beforeLogAt = autoLoginUser.getLogAt();
+            ZonedDateTime seoulDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+            LocalDateTime now = seoulDateTime.toLocalDateTime();
+            // 달이 같은 경우
+            if (beforeLogAt.getMonth() == LocalDateTime.now().getMonth()) {
+                // 달이 바뀌지 않았다고 response에 저장
+                postLoginRes.setCheckMonthChanged(false);
+            } else {
+                // 달이 바뀌었다고 response에 저장
+                postLoginRes.setCheckMonthChanged(true);
+            }
+
+            // 현재 로그인하는 시간 logAt에 저장
+            System.out.println("now = " + now);
+            userDao.modifyUserLogAt(now, userIdx);
+
+            return postLoginRes;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
 }

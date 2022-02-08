@@ -9,5 +9,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GetFootprintCount {
     private int day;
-    private int footprintCount;
+    private int walkCount;
 }
