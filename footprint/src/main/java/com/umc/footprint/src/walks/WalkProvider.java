@@ -40,11 +40,11 @@ public class WalkProvider {
             // 산책 목표 시간
             Integer walkGoalTime = walkDao.getWalkGoalTime(walk.getUserIdx());
             // (산책 끝 시간 - 산책 시작 시간) / 산책 목표 시간
-            float goalRate =walkTime.floatValue() / walkGoalTime.floatValue();
+            float goalRate =(walkTime.floatValue() / walkGoalTime.floatValue())*100;
 
             // 100퍼 넘을 시 100으로 고정
-            if (goalRate >= 1.0) {
-                goalRate = 1.0f;
+            if (goalRate >= 100.0) {
+                goalRate = 100.0f;
             }
 
             return goalRate;
