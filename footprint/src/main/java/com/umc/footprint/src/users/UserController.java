@@ -60,7 +60,15 @@ public class UserController {
         }
 
         try {
+            // 사용자 등록 또는 로그인
             PostLoginRes postLoginRes = userService.postUserLogin(postLoginReq);
+
+            // 유저 id로 인덱스 값 추출
+            int userIdx = userProvider.getUserIdx(postLoginReq.getUserId());
+
+            // 사용자의 로그인한 날짜 이전 기록과 비교 후 달 바뀌면 true return
+            postLoginRes.setCheckMonthChanged(userService.modifyUserLogAt(userIdx).isCheckMonthChanged());
+
             return new BaseResponse<>(postLoginRes);
         } catch (BaseException exception) {
             return new BaseResponse<>(exception.getStatus());
