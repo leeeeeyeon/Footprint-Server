@@ -15,11 +15,11 @@ CURRENT_PID=$(pgrep -f $APP_NAME)
 #   sleep 5
 # fi
 
-# echo "> BUILD START" 
+echo "> BUILD START" >> /var/www/dev/deploy/footprint/footprintServerLog.out
 
-sudo ./gradlew clean build
+sudo ./gradlew clean build >> /var/www/dev/deploy/footprint/footprintServerLog.out 2>&1
 
-# echo "> BUILD FINISH" 
+echo "> BUILD FINISH" >> /var/www/dev/deploy/footprint/footprintServerLog.out
 
 # echo "> $JAR_PATH 배포" 
 # sudo nohup java -jar $JAR_PATH > footprintServerLog.out 
