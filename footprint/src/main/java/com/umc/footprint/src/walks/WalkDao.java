@@ -64,11 +64,11 @@ public class WalkDao {
     }
 
     public String deleteWalk(int walkIdx) {
-        String deleteWalkQuery = "update Footprint set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 실행될 동적 쿼리문
+        String deleteFootprintQuery = "update Footprint set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 발자국 INACTIVE
+        this.jdbcTemplate.update(deleteFootprintQuery, walkIdx);
+
+        String deleteWalkQuery = "update Walk set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 산책 INACTIVE
         this.jdbcTemplate.update(deleteWalkQuery, walkIdx);
-        //String checkDeleteQuery = "select count(footprintIdx) as footCount from footprint where walkIdx=? and status='ACTIVE';"; // 전체 삭제 확인
-        //Integer footCount = this.jdbcTemplate.queryForObject(checkDeleteQuery,
-        //        (rs, rowNum) -> rs.getInt("footCount"), walkIdx);
 
         return "Success Delete walk record!";
     }
