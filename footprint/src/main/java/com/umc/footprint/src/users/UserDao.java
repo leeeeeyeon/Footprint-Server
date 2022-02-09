@@ -130,8 +130,9 @@ public class UserDao {
     // 사용자가 얻은 뱃지 등록
     public int postUserBadge(int userIdx, int badgeIdx) {
         //UserBadge 테이블에 얻은 뱃지 추가하기
-        String insertBadgeQuery = "INSERT INTO UserBadge (userIdx, badgeIdx, status) VALUES (?,?,'ACTIVE')";
-        Object[] insertBadgeParams = new Object[]{userIdx, badgeIdx};
+        String insertBadgeQuery = "INSERT INTO UserBadge (userIdx, badgeIdx, status) SELECT ?, ?, 'ACTIVE'\n" +
+                "FROM DUAL WHERE NOT EXISTS(SELECT userIdx, badgeIdx from UserBadge where userIdx=? and badgeIdx=? and status='ACTIVE');";
+        Object[] insertBadgeParams = new Object[]{userIdx, badgeIdx, userIdx, badgeIdx};
         int result = this.jdbcTemplate.update(insertBadgeQuery,insertBadgeParams);
 
         return result;
@@ -159,7 +160,8 @@ public class UserDao {
                         rs.getBoolean("fri"),
                         rs.getBoolean("sat")), userIdx);
 
-        int count = 0; //목표요일 전체 횟수
+        System.out.println(getGoalDays);
+        int count = 0; //저번달의 설정한 목표요일 전체 횟수
         int year = now.getYear();
         int month = now.getMonthValue();
 
@@ -178,22 +180,22 @@ public class UserDao {
             if (day == Calendar.SUNDAY && getGoalDays.isSun()==true) {
                 count++;
             }
-            if (day == Calendar.MONDAY && getGoalDays.isMon()==true) {
+            else if (day == Calendar.MONDAY && getGoalDays.isMon()==true) {
                 count++;
             }
-            if (day == Calendar.TUESDAY && getGoalDays.isTue()==true) {
+            else if (day == Calendar.TUESDAY && getGoalDays.isTue()==true) {
                 count++;
             }
-            if (day == Calendar.WEDNESDAY && getGoalDays.isWed()==true) {
+            else if (day == Calendar.WEDNESDAY && getGoalDays.isWed()==true) {
                 count++;
             }
-            if (day == Calendar.THURSDAY && getGoalDays.isThu()==true) {
+            else if (day == Calendar.THURSDAY && getGoalDays.isThu()==true) {
                 count++;
             }
-            if (day == Calendar.FRIDAY && getGoalDays.isFri()==true) {
+            else if (day == Calendar.FRIDAY && getGoalDays.isFri()==true) {
                 count++;
             }
-            if (day == Calendar.SATURDAY && getGoalDays.isSat()==true) {
+            else if (day == Calendar.SATURDAY && getGoalDays.isSat()==true) {
                 count++;
             }
             cal.add(Calendar.DAY_OF_YEAR, 1);
@@ -250,9 +252,17 @@ public class UserDao {
                     break;
             }
         }
+        double walkRate;
+        if(walkCount==0) {
+            walkRate=0;
+        } else {
+            walkRate=count/walkCount * 100;
+        }
 
-        double walkRate = walkCount/count * 100;
-
+        System.out.println("walkCout : "+ walkCount);
+        System.out.println("count : "+ count);
+        System.out.println("walkRate : "+ walkRate);
+        System.out.println("rate : "+ rate);
         /*
          * MASTER - 목표 요일 중 80% 이상 / 달성률 90%
          * PRO - 목표 요일 중 50% 이상 / 달성률 70%

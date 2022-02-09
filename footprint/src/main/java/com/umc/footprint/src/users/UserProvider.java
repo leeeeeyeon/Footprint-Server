@@ -157,79 +157,80 @@ public class UserProvider {
             if(badge.getBadgeDate().equals("0")) {
                 int badgeIdx = badge.getBadgeIdx();
                 switch (badgeIdx) {
-                    case 1 :
+                    case 1:
                         badge.setBadgeOrder(0);
-                        getUserBadges.getBadgeList().set(i,badge);
+                        getUserBadges.getBadgeList().set(i, badge);
                         break;
-                    case 2 :
+                    case 2:
                         badge.setBadgeOrder(1);
-                        getUserBadges.getBadgeList().set(i,badge);;
+                        getUserBadges.getBadgeList().set(i, badge);
+                        ;
                         break;
-                    case 3 :
+                    case 3:
                         badge.setBadgeOrder(2);
-                        getUserBadges.getBadgeList().set(i,badge);
+                        getUserBadges.getBadgeList().set(i, badge);
                         break;
-                    case 4 :
+                    case 4:
                         badge.setBadgeOrder(3);
-                        getUserBadges.getBadgeList().set(i,badge);
+                        getUserBadges.getBadgeList().set(i, badge);
                         break;
-                    case 5 :
+                    case 5:
                         badge.setBadgeOrder(4);
-                        getUserBadges.getBadgeList().set(i,badge);
+                        getUserBadges.getBadgeList().set(i, badge);
                         break;
-                    case 6 :
+                    case 6:
                         badge.setBadgeOrder(5);
-                        getUserBadges.getBadgeList().set(i,badge);
+                        getUserBadges.getBadgeList().set(i, badge);
                         break;
-                    case 7 :
+                    case 7:
                         badge.setBadgeOrder(6);
-                        getUserBadges.getBadgeList().set(i,badge);
+                        getUserBadges.getBadgeList().set(i, badge);
                         break;
-                    case 8 :
+                    case 8:
                         badge.setBadgeOrder(7);
-                        getUserBadges.getBadgeList().set(i,badge);
+                        getUserBadges.getBadgeList().set(i, badge);
                         break;
-                    default:
-                        if(badge.getBadgeDate().charAt(5)=='1') {
-                            if(badge.getBadgeDate().charAt(6)=='-') { //1월
-                                badge.setBadgeOrder(8);
-                            }
-                            if(badge.getBadgeDate().charAt(6)=='0') { //10월
-                                badge.setBadgeOrder(17);
-                            }
-                            if(badge.getBadgeDate().charAt(6)=='1') { //11월
-                                badge.setBadgeOrder(18);
-                            }
-                            if(badge.getBadgeDate().charAt(6)=='2') { //12월
-                                badge.setBadgeOrder(19);
-                            }
-                        }
-                        if(badge.getBadgeDate().charAt(5)=='2') {
-                            badge.setBadgeOrder(9);
-                        }
-                        if(badge.getBadgeDate().charAt(5)=='3') {
-                            badge.setBadgeOrder(10);
-                        }
-                        if(badge.getBadgeDate().charAt(5)=='4') {
-                            badge.setBadgeOrder(11);
-                        }
-                        if(badge.getBadgeDate().charAt(5)=='5') {
-                            badge.setBadgeOrder(12);
-                        }
-                        if(badge.getBadgeDate().charAt(5)=='6') {
-                            badge.setBadgeOrder(13);
-                        }
-                        if(badge.getBadgeDate().charAt(5)=='7') {
-                            badge.setBadgeOrder(14);
-                        }
-                        if(badge.getBadgeDate().charAt(5)=='8') {
-                            badge.setBadgeOrder(15);
-                        }
-                        if(badge.getBadgeDate().charAt(5)=='9') {
-                            badge.setBadgeOrder(16);
-                        }
-                        getUserBadges.getBadgeList().set(i,badge);
                 }
+            } else {
+                if(badge.getBadgeDate().charAt(5)=='1') {
+                    if(badge.getBadgeDate().charAt(6)=='-') { //1월
+                        badge.setBadgeOrder(8);
+                    }
+                    if(badge.getBadgeDate().charAt(6)=='0') { //10월
+                        badge.setBadgeOrder(17);
+                    }
+                    if(badge.getBadgeDate().charAt(6)=='1') { //11월
+                        badge.setBadgeOrder(18);
+                    }
+                    if(badge.getBadgeDate().charAt(6)=='2') { //12월
+                        badge.setBadgeOrder(19);
+                    }
+                }
+                if(badge.getBadgeDate().charAt(5)=='2') {
+                    badge.setBadgeOrder(9);
+                }
+                if(badge.getBadgeDate().charAt(5)=='3') {
+                    badge.setBadgeOrder(10);
+                }
+                if(badge.getBadgeDate().charAt(5)=='4') {
+                    badge.setBadgeOrder(11);
+                }
+                if(badge.getBadgeDate().charAt(5)=='5') {
+                    badge.setBadgeOrder(12);
+                }
+                if(badge.getBadgeDate().charAt(5)=='6') {
+                    badge.setBadgeOrder(13);
+                }
+                if(badge.getBadgeDate().charAt(5)=='7') {
+                    badge.setBadgeOrder(14);
+                }
+                if(badge.getBadgeDate().charAt(5)=='8') {
+                    badge.setBadgeOrder(15);
+                }
+                if(badge.getBadgeDate().charAt(5)=='9') {
+                    badge.setBadgeOrder(16);
+                }
+                getUserBadges.getBadgeList().set(i,badge);
             }
         }
             return getUserBadges;
