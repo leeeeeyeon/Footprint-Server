@@ -105,6 +105,7 @@ public class WalkController {
 
             // Walk 테이블 전체에서 인덱스
             int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
+            System.out.println("wholeWalkIdx = " + wholeWalkIdx);
 
             GetWalkInfo getWalkInfo = walkProvider.getWalkInfo(wholeWalkIdx);
             return new BaseResponse<>(getWalkInfo);

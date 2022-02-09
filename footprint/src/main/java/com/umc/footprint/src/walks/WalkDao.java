@@ -331,7 +331,7 @@ public class WalkDao {
 
     public int getWalkWholeIdx(int walkIdx, int userIdx) {
         System.out.println("WalkDao.getWalkWholeIdx");
-        String getWalkWholeIdxQuery = "select walkIdx from Walk where userIdx = ? and status = 'ACTIVE'ORDER BY walkIdx ASC LIMIT ?,1";
+        String getWalkWholeIdxQuery = "select walkIdx from Walk where userIdx = ? and status = 'ACTIVE' ORDER BY startAt ASC LIMIT ?,1";
         return this.jdbcTemplate.queryForObject(getWalkWholeIdxQuery, int.class, userIdx, walkIdx-1);
     }
 }
