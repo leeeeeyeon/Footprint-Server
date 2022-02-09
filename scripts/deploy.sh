@@ -24,4 +24,4 @@ sudo ./gradlew clean build >> /var/www/dev/deploy/footprint/footprintServerLog.o
 echo "> BUILD FINISH" >> /var/www/dev/deploy/footprint/footprintServerLog.out
 
 echo "> $JAR_PATH 배포" >> /var/www/dev/deploy/footprint/footprintServerLog.out
-java -jar $JAR_PATH  > /var/www/dev/deploy/footprint/dev_footprint.log
+nohup java -jar $JAR_PATH > /var/www/dev/deploy/footprint/dev_footprint.log 2>&1 &
