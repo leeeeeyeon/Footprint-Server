@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -91,16 +92,20 @@ public class WalkDao {
         System.out.println("walk.getPhotoMatchNumList() = " + walk.getPhotoMatchNumList());
         System.out.println("walk.getCalorie() = " + walk.getCalorie());
 
-        TimeZone default_time_zone = TimeZone.getTimeZone("Asia/Seoul");
+        TimeZone default_time_zone = TimeZone.getTimeZone(ZoneId.of("Asia/Seoul"));
 
         TimeZone.setDefault(default_time_zone);
+        Timestamp timestampStartAt = Timestamp.valueOf(walk.getStartAt());
+        System.out.println("timestampStartAt = " + timestampStartAt);
+        Timestamp timestampEndAt = Timestamp.valueOf(walk.getEndAt());
+        System.out.println("timestampEndAt = " + timestampEndAt);
 
         this.jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
                 PreparedStatement preparedStatement = con.prepareStatement(walkInsertQuery, Statement.RETURN_GENERATED_KEYS);
-                preparedStatement.setTimestamp(1, Timestamp.valueOf(walk.getStartAt()));
-                preparedStatement.setTimestamp(2, Timestamp.valueOf(walk.getEndAt()));
+                preparedStatement.setTimestamp(1, timestampStartAt);
+                preparedStatement.setTimestamp(2, timestampStartAt);
                 preparedStatement.setDouble(3, walk.getDistance());
                 preparedStatement.setString(4, walk.getStr_coordinates());
                 preparedStatement.setString(5, pathImgUrl);
