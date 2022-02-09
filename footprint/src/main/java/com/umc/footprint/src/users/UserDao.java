@@ -1083,6 +1083,9 @@ public class UserDao {
         // 3. 이번달 목표 달성률 계산
         int monthGoalRate = (int)((userMonthWalkTime/ (double)( userMonthGoalTime*60 )) * 100);
 
+        if(monthGoalRate > 100)
+            monthGoalRate = 100;
+
         return monthGoalRate;
     }
 
