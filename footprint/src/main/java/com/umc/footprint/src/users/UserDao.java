@@ -351,11 +351,6 @@ public class UserDao {
                 rs.getString("pathImageUrl")
         ),userIdx,date);
 
-        for (UserDateWalk dateWalk : userDateWalkInfo) {
-            String getWalkIdxQuery = "SELECT count(walkIdx)+1 as walkIdx FROM Walk WHERE userIdx = ? and startAt < (SELECT startAt FROM Walk WHERE walkIdx = ?)";
-            int getWalkIdx = this.jdbcTemplate.queryForObject(getWalkIdxQuery, int.class, userIdx, dateWalk.getWalkIdx());
-            dateWalk.setWalkIdx(getWalkIdx);
-        }
 
         // 2-1. Hashtag 정보 가져오기
         String getHashtagQuery = "SELECT SF.walkIdx, H.hashtag " +
@@ -379,10 +374,17 @@ public class UserDao {
         for(UserDateWalk walk : userDateWalkInfo){
             hashtagList.add(new ArrayList<>());
             for(Hashtag tag : entireHashtag){
-                if(walk.getWalkIdx() == tag.getWalkIdx())
-                    hashtagList.get(hashtagList.size()-1).add(tag.getHashtag());
+                if(walk.getWalkIdx() == tag.getWalkIdx()) {
+                    hashtagList.get(hashtagList.size() - 1).add(tag.getHashtag());
+                }
             }
             getUserDateRes.add(new GetUserDateRes(walk,hashtagList.get(hashtagList.size()-1)));
+        }
+
+        for (GetUserDateRes userDateRes : getUserDateRes) {
+            String getWalkIdxQuery = "SELECT count(walkIdx)+1 as walkIdx FROM Walk WHERE userIdx = ? and startAt < (SELECT startAt FROM Walk WHERE walkIdx = ?)";
+            int getWalkIdx = this.jdbcTemplate.queryForObject(getWalkIdxQuery, int.class, userIdx, userDateRes.getUserDateWalk().getWalkIdx());
+            userDateRes.getUserDateWalk().setWalkIdx(getWalkIdx);
         }
 
         return getUserDateRes;
