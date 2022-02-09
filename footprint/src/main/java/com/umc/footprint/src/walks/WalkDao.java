@@ -279,9 +279,9 @@ public class WalkDao {
                 "        end as distanceBadgeIdx,\n" +
                 "       CASE\n" +
                 "            when (count(Walk.walkIdx) = 1) then 1" +
-                "            when (count(Walk.walkIdx) between 10 and 20) then 6\n" +
-                "            when (count(Walk.walkIdx) between 20 and 30) then 7\n" +
-                "            when (count(Walk.walkIdx) > 30) then 8\n" +
+                "            when (count(Walk.walkIdx) between 10 and 19) then 6\n" +
+                "            when (count(Walk.walkIdx) between 20 and 29) then 7\n" +
+                "            when (count(Walk.walkIdx) >= 30) then 8\n" +
                 "        else 0\n" +
                 "        end as recordBadgeIdx\n" +
                 "From Walk\n" +
