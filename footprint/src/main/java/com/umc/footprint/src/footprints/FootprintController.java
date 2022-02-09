@@ -31,6 +31,7 @@ public class FootprintController {
     @GetMapping("/{walkIdx}")
     public BaseResponse<List<GetFootprintRes>> getFootprints(@PathVariable("walkIdx") int walkIdx) {
         try {
+            System.out.println("walkIdx = " + walkIdx);
             List<GetFootprintRes> getFootprintRes = footprintProvider.getFootprints(walkIdx);
             return new BaseResponse<>(getFootprintRes);
         } catch (BaseException exception) {
@@ -46,6 +47,8 @@ public class FootprintController {
     @PatchMapping("/{footprintIdx}")
     public BaseResponse<String> modifyFootprint(@PathVariable("footprintIdx") int footprintIdx, GetFootprint footprint) {
         try {
+            System.out.println("footprintIdx = " + footprintIdx);
+            System.out.println("footprint = " + footprint);
             PatchFootprintReq patchFootprintReq = new PatchFootprintReq(footprint.getWrite(), footprint.getPhotos(), footprint.getTagList());
             footprintService.modifyFootprint(patchFootprintReq, footprintIdx);
 
