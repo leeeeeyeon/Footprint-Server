@@ -127,6 +127,10 @@ public class WalkDao {
         System.out.println("footprintList.get(i).getRecordAt() = " + footprintList.get(0).getRecordAt());
         System.out.println("footprintList.get(i).getWalkIdx() = " + walkIdx);
 
+        TimeZone default_time_zone = TimeZone.getTimeZone("Asia/Seoul");
+
+        TimeZone.setDefault(default_time_zone);
+
         for (SaveFootprint footprint : footprintList){
             this.jdbcTemplate.update(new PreparedStatementCreator() {
                 @Override
