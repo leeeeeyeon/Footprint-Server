@@ -351,6 +351,12 @@ public class UserDao {
                 rs.getString("pathImageUrl")
         ),userIdx,date);
 
+        for (UserDateWalk dateWalk : userDateWalkInfo) {
+            String getWalkIdxQuery = "SELECT count(walkIdx)+1 as walkIdx FROM Walk WHERE userIdx = ? and startAt < (SELECT startAt FROM Walk WHERE walkIdx = ?)";
+            int getWalkIdx = this.jdbcTemplate.queryForObject(getWalkIdxQuery, int.class, userIdx, dateWalk.getWalkIdx());
+            dateWalk.setWalkIdx(getWalkIdx);
+        }
+
         // 2-1. Hashtag 정보 가져오기
         String getHashtagQuery = "SELECT SF.walkIdx, H.hashtag " +
                 "FROM Tag T " +
