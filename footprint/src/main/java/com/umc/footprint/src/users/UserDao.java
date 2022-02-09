@@ -342,7 +342,8 @@ public class UserDao {
         // 1. Walk 정보 가져오기
         String getUserDateWalkQuery = "SELECT walkIdx, DATE_FORMAT(startAt,'%H:%i') as startTime, DATE_FORMAT(endAt,'%H:%i') as endTime, pathImageUrl " +
                 "FROM Walk " +
-                "WHERE userIdx = ? and DATE(startAt) = DATE(?) ";
+                "WHERE userIdx = ? and DATE(startAt) = DATE(?) " +
+                "ORDER BY startAt ";
 
         List<UserDateWalk> userDateWalkInfo = this.jdbcTemplate.query(getUserDateWalkQuery, (rs, rowNum) -> new UserDateWalk(
                 rs.getInt("walkIdx"),
