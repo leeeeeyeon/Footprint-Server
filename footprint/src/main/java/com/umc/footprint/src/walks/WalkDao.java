@@ -328,4 +328,10 @@ public class WalkDao {
         String checkFirstWalkQuery = "select exists (select userIdx from Walk where userIdx = ? group by userIdx having count(walkIdx) = 1)";
         return this.jdbcTemplate.queryForObject(checkFirstWalkQuery, int.class, userIdx);
     }
+
+    public int getWalkWholeIdx(int walkIdx, int userIdx) {
+        System.out.println("WalkDao.getWalkWholeIdx");
+        String getWalkWholeIdxQuery = "select walkIdx from Walk where userIdx = ? and status = 'ACTIVE'ORDER BY walkIdx ASC LIMIT ?,1";
+        return this.jdbcTemplate.queryForObject(getWalkWholeIdxQuery, int.class, userIdx, walkIdx-1);
+    }
 }

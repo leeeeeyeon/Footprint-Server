@@ -97,7 +97,16 @@ public class WalkController {
     @GetMapping("/{walkIdx}") // (GET) 127.0.0.1:3000/walks/{walkIdx}
     public BaseResponse<GetWalkInfo> getWalkInfo(@PathVariable("walkIdx") int walkIdx) {
         try {
-            GetWalkInfo getWalkInfo = walkProvider.getWalkInfo(walkIdx);
+            // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
+            String userId = jwtService.getUserId();
+            System.out.println("userId = " + userId);
+            // userId로 userIdx 추출
+            int userIdx = userProvider.getUserIdx(userId);
+
+            // Walk 테이블 전체에서 인덱스
+            int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
+
+            GetWalkInfo getWalkInfo = walkProvider.getWalkInfo(wholeWalkIdx);
             return new BaseResponse<>(getWalkInfo);
         } catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));
