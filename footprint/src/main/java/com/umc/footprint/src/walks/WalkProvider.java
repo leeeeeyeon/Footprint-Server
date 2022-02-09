@@ -124,4 +124,15 @@ public class WalkProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    public int getWalkWholeIdx(int walkIdx, int userIdx) throws BaseException {
+        try {
+            System.out.println("WalkProvider.getWalkWholeIdx");
+            System.out.println("walkIdx = " + walkIdx);
+            System.out.println("userIdx = " + userIdx);
+            return walkDao.getWalkWholeIdx(walkIdx, userIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }
