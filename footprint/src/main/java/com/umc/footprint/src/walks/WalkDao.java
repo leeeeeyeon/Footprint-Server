@@ -64,11 +64,11 @@ public class WalkDao {
     }
 
     public String deleteWalk(int walkIdx) {
-        String deleteWalkQuery = "update Footprint set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 실행될 동적 쿼리문
+        String deleteFootprintQuery = "update Footprint set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 발자국 INACTIVE
+        this.jdbcTemplate.update(deleteFootprintQuery, walkIdx);
+
+        String deleteWalkQuery = "update Walk set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 산책 INACTIVE
         this.jdbcTemplate.update(deleteWalkQuery, walkIdx);
-        //String checkDeleteQuery = "select count(footprintIdx) as footCount from footprint where walkIdx=? and status='ACTIVE';"; // 전체 삭제 확인
-        //Integer footCount = this.jdbcTemplate.queryForObject(checkDeleteQuery,
-        //        (rs, rowNum) -> rs.getInt("footCount"), walkIdx);
 
         return "Success Delete walk record!";
     }
@@ -126,6 +126,10 @@ public class WalkDao {
         System.out.println("footprintList.get(i).getWrite() = " + footprintList.get(0).getWrite());
         System.out.println("footprintList.get(i).getRecordAt() = " + footprintList.get(0).getRecordAt());
         System.out.println("footprintList.get(i).getWalkIdx() = " + walkIdx);
+
+        TimeZone default_time_zone = TimeZone.getTimeZone("Asia/Seoul");
+
+        TimeZone.setDefault(default_time_zone);
 
         for (SaveFootprint footprint : footprintList){
             this.jdbcTemplate.update(new PreparedStatementCreator() {
@@ -198,9 +202,9 @@ public class WalkDao {
                             return preparedStatement;
                         }
                     }, keyHolder);
+                    // tag list에 삽입
+                    tagIdxList.add(Pair.of(keyHolder.getKey().intValue(), f.getFootprintIdx()));
                 }
-                // tag list에 삽입
-                tagIdxList.add(Pair.of(keyHolder.getKey().intValue(), f.getFootprintIdx()));
             }
             System.out.println("f = " + f);
             System.out.println("f.getHashtagList().size() = " + f.getHashtagList().size());
@@ -275,9 +279,9 @@ public class WalkDao {
                 "        end as distanceBadgeIdx,\n" +
                 "       CASE\n" +
                 "            when (count(Walk.walkIdx) = 1) then 1" +
-                "            when (count(Walk.walkIdx) between 10 and 30) then 6\n" +
-                "            when (count(Walk.walkIdx) between 30 and 50) then 7\n" +
-                "            when (count(Walk.walkIdx) > 50) then 8\n" +
+                "            when (count(Walk.walkIdx) between 10 and 19) then 6\n" +
+                "            when (count(Walk.walkIdx) between 20 and 29) then 7\n" +
+                "            when (count(Walk.walkIdx) >= 30) then 8\n" +
                 "        else 0\n" +
                 "        end as recordBadgeIdx\n" +
                 "From Walk\n" +
