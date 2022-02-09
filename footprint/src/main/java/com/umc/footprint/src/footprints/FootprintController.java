@@ -1,5 +1,8 @@
 package com.umc.footprint.src.footprints;
 
+import com.umc.footprint.src.users.UserProvider;
+import com.umc.footprint.src.walks.WalkProvider;
+import com.umc.footprint.utils.JwtService;
 import org.springframework.web.bind.annotation.*;
 
 import com.umc.footprint.src.footprints.model.*;
@@ -16,11 +19,17 @@ import java.util.List;
 public class FootprintController {
     private final FootprintProvider footprintProvider;
     private final FootprintService footprintService;
+    private final JwtService jwtService;
+    private final UserProvider userProvider;
+    private final WalkProvider walkProvider;
 
     @Autowired
-    public FootprintController(FootprintProvider footprintProvider, FootprintService footprintService) {
+    public FootprintController(FootprintProvider footprintProvider, FootprintService footprintService, JwtService jwtService, UserProvider userProvider, WalkProvider walkProvider) {
         this.footprintProvider = footprintProvider;
         this.footprintService = footprintService;
+        this.jwtService = jwtService;
+        this.userProvider = userProvider;
+        this.walkProvider = walkProvider;
     }
 
     /**
@@ -32,7 +41,18 @@ public class FootprintController {
     public BaseResponse<List<GetFootprintRes>> getFootprints(@PathVariable("walkIdx") int walkIdx) {
         try {
             System.out.println("walkIdx = " + walkIdx);
-            List<GetFootprintRes> getFootprintRes = footprintProvider.getFootprints(walkIdx);
+
+            // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
+            String userId = jwtService.getUserId();
+            System.out.println("userId = " + userId);
+            // userId로 userIdx 추출
+            int userIdx = userProvider.getUserIdx(userId);
+
+            // Walk 테이블 전체에서 인덱스
+            int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
+            System.out.println("wholeWalkIdx = " + wholeWalkIdx);
+
+            List<GetFootprintRes> getFootprintRes = footprintProvider.getFootprints(wholeWalkIdx);
             return new BaseResponse<>(getFootprintRes);
         } catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));
