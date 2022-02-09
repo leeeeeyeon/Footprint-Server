@@ -758,9 +758,11 @@ public class UserDao {
                 // 산책 기록 하나 조회
                 String getUserDateWalkQuery = "select walkIdx, date_format(startAt, '%k:%i') as startTime, date_format(endAt, '%k:%i') as endTime, pathImageUrl\n" +
                         "from Walk W where W.walkIdx=? and W.status=?";
+                String getWalkIdxQuery = "SELECT count(walkIdx)+1 as walkIdx FROM Walk WHERE userIdx = ? and startAt < (SELECT startAt FROM Walk WHERE walkIdx = ?)";
+                int finalWalkIdx = this.jdbcTemplate.queryForObject(getWalkIdxQuery, int.class, userIdx, walkIdx);
                 UserDateWalk userDateWalk = this.jdbcTemplate.queryForObject(getUserDateWalkQuery,
                         (rs, rowNum)-> new UserDateWalk(
-                                rs.getInt("walkIdx"),
+                                finalWalkIdx,
                                 rs.getString("startTime"),
                                 rs.getString("endTime"),
                                 rs.getString("pathImageUrl")
