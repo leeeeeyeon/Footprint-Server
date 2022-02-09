@@ -128,14 +128,12 @@ public class UserDao {
 
     //yummy
     // 사용자가 얻은 뱃지 등록
-    public int postUserBadge(int userIdx, int badgeIdx) {
+    public void postUserBadge(int userIdx, int badgeIdx) {
         //UserBadge 테이블에 얻은 뱃지 추가하기
         String insertBadgeQuery = "INSERT INTO UserBadge (userIdx, badgeIdx, status) SELECT ?, ?, 'ACTIVE'\n" +
                 "FROM DUAL WHERE NOT EXISTS(SELECT userIdx, badgeIdx from UserBadge where userIdx=? and badgeIdx=? and status='ACTIVE');";
         Object[] insertBadgeParams = new Object[]{userIdx, badgeIdx, userIdx, badgeIdx};
-        int result = this.jdbcTemplate.update(insertBadgeQuery,insertBadgeParams);
-
-        return result;
+        this.jdbcTemplate.update(insertBadgeQuery,insertBadgeParams);
     }
 
 
@@ -161,7 +159,7 @@ public class UserDao {
                         rs.getBoolean("sat")), userIdx);
 
         System.out.println(getGoalDays);
-        int count = 0; //저번달의 설정한 목표요일 전체 횟수
+        double count = 0; //저번달의 설정한 목표요일 전체 횟수
         int year = now.getYear();
         int month = now.getMonthValue();
 
@@ -210,7 +208,7 @@ public class UserDao {
 
         // 목표 요일이랑 비교하기
         // 산책 요일이 목표 요일이랑 같으면 count
-        int walkCount = 0;
+        double walkCount = 0; //목표요일에 산책한 횟수
 
         for(int i=0;i<walkDays.size();i++) {
             int walkday = (int) walkDays.get(i);
@@ -256,7 +254,7 @@ public class UserDao {
         if(walkCount==0) {
             walkRate=0;
         } else {
-            walkRate=count/walkCount * 100;
+            walkRate=(walkCount/count) * 100;
         }
 
         System.out.println("walkCout : "+ walkCount);
@@ -299,11 +297,11 @@ public class UserDao {
                         rs.getString("badgeUrl"),
                         rs.getString("badgeDate")), badgeDate);
 
+        //사용자에게 다른 달 뱃지 있는지 확인 - 한 달에 프로, 러버, 마스터 중 하나만 ACTIVE한 상태여야 함!
+
+
         //UserBadge 테이블에 얻은 뱃지 추가하기
-        /*String insertBadgeQuery = "INSERT INTO UserBadge (userIdx, badgeIdx,status) VALUES (?,?,'ACTIVE')";
-        Object[] insertBadgeParams = new Object[]{userIdx, badgeInfo.getBadgeIdx()};
-        this.jdbcTemplate.update(insertBadgeQuery,insertBadgeParams);*/
-        int result = postUserBadge(userIdx, badgeInfo.getBadgeIdx());
+        postUserBadge(userIdx, badgeInfo.getBadgeIdx());
 
         return badgeInfo;
     }
