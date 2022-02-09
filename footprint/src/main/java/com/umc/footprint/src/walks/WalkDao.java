@@ -198,9 +198,9 @@ public class WalkDao {
                             return preparedStatement;
                         }
                     }, keyHolder);
+                    // tag list에 삽입
+                    tagIdxList.add(Pair.of(keyHolder.getKey().intValue(), f.getFootprintIdx()));
                 }
-                // tag list에 삽입
-                tagIdxList.add(Pair.of(keyHolder.getKey().intValue(), f.getFootprintIdx()));
             }
             System.out.println("f = " + f);
             System.out.println("f.getHashtagList().size() = " + f.getHashtagList().size());
