@@ -510,25 +510,25 @@ public class UserDao {
                 if(userWeekDayCount.get(i) == max) {
                     switch (i) {
                         case 0:
-                            mostWalkDay.add("일요일");
+                            mostWalkDay.add("일");
                             break;
                         case 1:
-                            mostWalkDay.add("월요일");
+                            mostWalkDay.add("월");
                             break;
                         case 2:
-                            mostWalkDay.add("화요일");
+                            mostWalkDay.add("화");
                             break;
                         case 3:
-                            mostWalkDay.add("수요일");
+                            mostWalkDay.add("수");
                             break;
                         case 4:
-                            mostWalkDay.add("목요일");
+                            mostWalkDay.add("목");
                             break;
                         case 5:
-                            mostWalkDay.add("금요일");
+                            mostWalkDay.add("금");
                             break;
                         case 6:
-                            mostWalkDay.add("토요일");
+                            mostWalkDay.add("토");
                             break;
                     }
                 }
