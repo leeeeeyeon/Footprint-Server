@@ -1147,7 +1147,10 @@ public class UserDao {
     // 다음달 목표 변경 여부 확인
     public boolean checkGoalModified(int userIdx){
 
-        String getUpdateAtQuery = "SELECT IF(MONTH(updateAt) = MONTH(NOW()), true, false) FROM GoalNext WHERE userIdx = ?";
+        String getUpdateAtQuery = "SELECT IF(YEAR(createAt) = YEAR(NOW()) and MONTH(createAt) = MONTH(NOW()), " +
+                                            "IF(createAt = updateAt, false, true), " +
+                                            "IF(YEAR(updateAt) = YEAR(NOW()) and MONTH(updateAt) = MONTH(NOW()), true, false) ) " +
+                                    "FROM GoalNext WHERE userIdx = ?";
         boolean updateBool = this.jdbcTemplate.queryForObject(getUpdateAtQuery,Boolean.class,userIdx);
 
         return updateBool;
