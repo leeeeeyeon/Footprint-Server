@@ -10,8 +10,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -342,7 +340,7 @@ public class UserDao {
         // 1. Walk 정보 가져오기
         String getUserDateWalkQuery = "SELECT walkIdx, DATE_FORMAT(startAt,'%H:%i') as startTime, DATE_FORMAT(endAt,'%H:%i') as endTime, pathImageUrl " +
                 "FROM Walk " +
-                "WHERE userIdx = ? and DATE(startAt) = DATE(?) " +
+                "WHERE userIdx = ? and DATE(startAt) = DATE(?) and status = 'ACTIVE' " +
                 "ORDER BY startAt ";
 
         List<UserDateWalk> userDateWalkInfo = this.jdbcTemplate.query(getUserDateWalkQuery, (rs, rowNum) -> new UserDateWalk(
@@ -358,7 +356,7 @@ public class UserDao {
                 "FROM Tag T " +
                 "    INNER JOIN (SELECT F.walkIdx, F.footprintIdx " +
                 "                FROM Footprint F " +
-                "                INNER JOIN (SELECT walkIdx FROM Walk W WHERE DATE (startAt) = DATE (?) and userIdx = ?) as W " +
+                "                INNER JOIN (SELECT walkIdx FROM Walk W WHERE DATE (startAt) = DATE (?) and userIdx = ? and status = 'ACTIVE' ) as W " +
                 "                ON F.walkIdx = W.walkIdx) as SF " +
                 "        ON T.footprintIdx = SF.footprintIdx " +
                 "    INNER JOIN Hashtag H " +
@@ -383,7 +381,8 @@ public class UserDao {
         }
 
         for (GetUserDateRes userDateRes : getUserDateRes) {
-            String getWalkIdxQuery = "SELECT count(walkIdx)+1 as walkIdx FROM Walk WHERE userIdx = ? and startAt < (SELECT startAt FROM Walk WHERE walkIdx = ? and status='ACTIVE') and status='ACTIVE'";
+            String getWalkIdxQuery = "SELECT count(walkIdx)+1 as walkIdx FROM Walk WHERE userIdx = ? and status = 'ACTIVE' and startAt < (SELECT startAt FROM Walk WHERE walkIdx = ? and status = 'ACTIVE')";
+
             int getWalkIdx = this.jdbcTemplate.queryForObject(getWalkIdxQuery, int.class, userIdx, userDateRes.getUserDateWalk().getWalkIdx());
             userDateRes.getUserDateWalk().setWalkIdx(getWalkIdx);
         }
@@ -447,7 +446,7 @@ public class UserDao {
         /*
          *   [ 1. 오늘 목표 달성률 계산 ] = todayGoalRate
          * */
-        String getUserTodayGoalRateQuery = "SELECT IFNULL(SUM(goalRate),0) FROM Walk WHERE userIdx = ? and DATE(startAt) = DATE(NOW())";
+        String getUserTodayGoalRateQuery = "SELECT IFNULL(SUM(goalRate),0) FROM Walk WHERE userIdx = ? and status = 'ACTIVE' and DATE(startAt) = DATE(NOW())";
         int todayGoalRate = this.jdbcTemplate.queryForObject(getUserTodayGoalRateQuery,int.class,userIdx);
 
 
@@ -462,7 +461,7 @@ public class UserDao {
          *   [ 3. 산책 횟수 계산 ] = userWalkCount
          * */
 
-        String getUserWalkCountQuery = "SELECT COUNT(*) as walkCount FROM Walk WHERE userIdx = ?";
+        String getUserWalkCountQuery = "SELECT COUNT(*) as walkCount FROM Walk WHERE userIdx = ? and status = 'ACTIVE' ";
         int userWalkCount = this.jdbcTemplate.queryForObject(getUserWalkCountQuery,int.class,userIdx);
 
 
@@ -480,25 +479,25 @@ public class UserDao {
         List<Integer> userWeekDayCount = new ArrayList<>();
         List<Double> userWeekDayRate = new ArrayList<>();
 
-        String getUserSunCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and WEEKDAY(startAt) = 6 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
+        String getUserSunCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and status = 'ACTIVE' and  WEEKDAY(startAt) = 6 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
         userWeekDayCount.add(this.jdbcTemplate.queryForObject(getUserSunCountQuery,int.class,userIdx));
 
-        String getUserMonCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and WEEKDAY(startAt) = 0 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
+        String getUserMonCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and status = 'ACTIVE' and WEEKDAY(startAt) = 0 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
         userWeekDayCount.add(this.jdbcTemplate.queryForObject(getUserMonCountQuery,int.class,userIdx));
 
-        String getUserTueCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and WEEKDAY(startAt) = 1 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
+        String getUserTueCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and status = 'ACTIVE' and WEEKDAY(startAt) = 1 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
         userWeekDayCount.add(this.jdbcTemplate.queryForObject(getUserTueCountQuery,int.class,userIdx));
 
-        String getUserWedCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and WEEKDAY(startAt) = 2 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
+        String getUserWedCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and status = 'ACTIVE' and WEEKDAY(startAt) = 2 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
         userWeekDayCount.add(this.jdbcTemplate.queryForObject(getUserWedCountQuery,int.class,userIdx));
 
-        String getUserThuCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and WEEKDAY(startAt) = 3 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
+        String getUserThuCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and status = 'ACTIVE' and WEEKDAY(startAt) = 3 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
         userWeekDayCount.add(this.jdbcTemplate.queryForObject(getUserThuCountQuery,int.class,userIdx));
 
-        String getUserFriCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and WEEKDAY(startAt) = 4 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
+        String getUserFriCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and status = 'ACTIVE' and WEEKDAY(startAt) = 4 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
         userWeekDayCount.add(this.jdbcTemplate.queryForObject(getUserFriCountQuery,int.class,userIdx));
 
-        String getUserSatCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and WEEKDAY(startAt) = 5 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
+        String getUserSatCountQuery = "SELECT count(*) FROM Walk Where userIdx = ? and status = 'ACTIVE' and WEEKDAY(startAt) = 5 and startAt > DATE_SUB(DATE(CURRENT_TIMESTAMP), INTERVAL 3 MONTH )";
         userWeekDayCount.add(this.jdbcTemplate.queryForObject(getUserSatCountQuery,int.class,userIdx));
 
         // 1-2. 이전 3달 기준 전체 산책 수 구하기
@@ -557,11 +556,11 @@ public class UserDao {
         // List 순서 : -6달 , -5달 , ... , 전달 , 이번달 (총 7개 element)
 
         // 2-1. 이번달 산책 횟수 가져오기
-        String userThisMonthWalkCountQuery = "SELECT count(*) FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(CURRENT_TIMESTAMP)";
+        String userThisMonthWalkCountQuery = "SELECT count(*) FROM Walk WHERE userIdx = ? and status = 'ACTIVE' and MONTH(startAt) = MONTH(CURRENT_TIMESTAMP)";
         int thisMonthWalkCount = this.jdbcTemplate.queryForObject(userThisMonthWalkCountQuery, int.class, userIdx);
 
         // 2-2. 이전 6달 범위 유저 월별 산책 횟수 가져오기
-        String userMonthlyWalkCountQuery = "SELECT count(*) FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
+        String userMonthlyWalkCountQuery = "SELECT count(*) FROM Walk WHERE userIdx = ? and status = 'ACTIVE' and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
 
         List<Integer> monthlyWalkCount = new ArrayList<>();
         for(int i=6; i>=0; i--)
@@ -1007,7 +1006,7 @@ public class UserDao {
             return 0;
 
         // 1. 사용자의 원하는 달 전체 산책 시간 확인 (초 단위)
-        String getUserMonthWalkTimeQuery = "SELECT IFNULL(SUM(TIMESTAMPDIFF(second ,startAt,endAt)),0) as monthWalkTime FROM Walk WHERE userIdx = ? and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
+        String getUserMonthWalkTimeQuery = "SELECT IFNULL(SUM(TIMESTAMPDIFF(second ,startAt,endAt)),0) as monthWalkTime FROM Walk WHERE userIdx = ? and status = 'ACTIVE' and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? MONTH))";
         int userMonthWalkTime = this.jdbcTemplate.queryForObject(getUserMonthWalkTimeQuery,int.class,userIdx,beforeMonth);
 
         // 2. 이번달 목표 시간 계산
