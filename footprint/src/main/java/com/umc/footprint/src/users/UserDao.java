@@ -2,6 +2,7 @@ package com.umc.footprint.src.users;
 
 
 import com.umc.footprint.config.BaseException;
+import com.umc.footprint.src.AwsS3Service;
 import com.umc.footprint.src.users.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1240,5 +1241,81 @@ public class UserDao {
                 userIdx);
         return result;
     }
+
+    //GoalNext 테이블에서 해당 사용자의 목표 삭제 메소드
+    public void deleteGoalNext(int userIdx) {
+        String delGoalNextQuery="delete from GoalNext where userIdx=?;";
+        this.jdbcTemplate.update(delGoalNextQuery,userIdx);
+    }
+
+    //Goal 테이블에서 해당 사용자의 목표 삭제 메소드
+    public void deleteGoal(int userIdx) {
+        String delGoalQuery="delete from Goal where userIdx=?;";
+        this.jdbcTemplate.update(delGoalQuery,userIdx);
+    }
+
+    //GoalDayNext 테이블에서 해당 사용자의 목표 삭제 메소드
+    public void deleteGoalDayNext(int userIdx) {
+        String delGoalDayNextQuery="delete from GoalDayNext where userIdx=?;";
+        this.jdbcTemplate.update(delGoalDayNextQuery,userIdx);
+    }
+
+    //GoalDay 테이블에서 해당 사용자의 목표 삭제 메소드
+    public void deleteGoalDay(int userIdx) {
+        String delGoalDayQuery="delete from GoalDay where userIdx=?;";
+        this.jdbcTemplate.update(delGoalDayQuery,userIdx);
+    }
+    //UserBadge 테이블에서 해당 사용자의 뱃지 삭제 메소드
+    public void deleteUserBadge(int userIdx) {
+        String delUserBadgeQuery="delete from UserBadge where userIdx=?;";
+        this.jdbcTemplate.update(delUserBadgeQuery,userIdx);
+    }
+
+    // Tag 테이블에서 해당 사용자의 태그 삭제 메소드
+    public void deleteTag(int userIdx) {
+        String delTagQuery="delete from Tag where userIdx=?;";
+        this.jdbcTemplate.update(delTagQuery,userIdx);
+    }
+
+    //Photo 테이블에서 해당 사용자의 사진 삭제 메소드
+    public void deletePhoto(int userIdx) {
+        //Photo 테이블에서 해당 사용자의 사진 모두 삭제
+        String delPhotoQuery="delete from Photo where userIdx=?;";
+        this.jdbcTemplate.update(delPhotoQuery,userIdx);
+    }
+
+    //Photo 테이블에서 사용자의 사진 url을 반환하는 메소드
+    public List<String> getImageUrlList(int userIdx) {
+        //s3에서 이미지 url 먼저 삭제하기 위해 imageUrl 리스트로 반환
+        String getImageUrlQuery = "select imageUrl from Photo where userIdx=?;";
+        List<String> imageUrlList = jdbcTemplate.queryForList(getImageUrlQuery, String.class, userIdx);
+        return imageUrlList;
+    }
+
+    // Footprint 테이블에서 해당 사용자의 산책일기 삭제
+    public void deleteFootprint(int userIdx) {
+        //userIdx로 walkIdx 추출
+        String getWalkIdxQuery = "select walkIdx from Walk where userIdx=?;";
+        List<Integer> walkIdxList = jdbcTemplate.queryForList(getWalkIdxQuery, int.class, userIdx);
+
+        //해당 walkIdx에 해당하는 발자국 모두 삭제
+        String delFootprintQuery="delete from Footprint where walkIdx=?;";
+        for(int walkIdx : walkIdxList) {
+            this.jdbcTemplate.update(delFootprintQuery,walkIdx);
+        }
+    }
+
+    // Walk 테이블에서 해당 사용자의 산책 기록 삭제
+    public void deleteWalk(int userIdx) {
+        String delWalkQuery="delete from Walk where userIdx=?;";
+        this.jdbcTemplate.update(delWalkQuery,userIdx);
+    }
+
+    // User 테이블에서 해당 사용자 삭제
+    public void deleteUser(int userIdx) {
+        String delUserQuery="delete from User where userIdx=?;";
+        this.jdbcTemplate.update(delUserQuery,userIdx);
+    }
+
 
 }

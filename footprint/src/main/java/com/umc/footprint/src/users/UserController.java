@@ -555,9 +555,9 @@ public class UserController {
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
+            userService.deleteUser(userIdx);
 
-
-            return new BaseResponse<>("Bye~");
+            return new BaseResponse<>("탈퇴 성공:(");
         }
         catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));
