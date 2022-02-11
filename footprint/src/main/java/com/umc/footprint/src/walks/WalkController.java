@@ -118,11 +118,21 @@ public class WalkController {
     @ResponseBody
     @PatchMapping("/{walkIdx}/status") // (Patch) 127.0.0.1:3000/walks/{walkIdx}/status
     public BaseResponse<String> deleteWalk(@PathVariable("walkIdx") int walkIdx) {
-        if (walkIdx == 0) {
-            return new BaseResponse<>(BaseResponseStatus.REQUEST_ERROR);
-        }
         try {
-            String result = walkService.deleteWalk(walkIdx);
+            // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
+            String userId = jwtService.getUserId();
+            System.out.println("userId = " + userId);
+            // userId로 userIdx 추출
+            int userIdx = userProvider.getUserIdx(userId);
+
+            // Walk 테이블 전체에서 인덱스
+            int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
+            System.out.println("wholeWalkIdx = " + wholeWalkIdx);
+
+            if (wholeWalkIdx == 0) {
+                return new BaseResponse<>(BaseResponseStatus.REQUEST_ERROR);
+            }
+            String result = walkService.deleteWalk(wholeWalkIdx);
             return new BaseResponse<>(result);
         } catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));

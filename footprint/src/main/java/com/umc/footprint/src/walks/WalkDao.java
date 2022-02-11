@@ -35,7 +35,7 @@ public class WalkDao {
         String getTimeQuery = "select date_format(date(startAt), '%Y.%m.%d') as date, \n" +
                 "       date_format(time(startAt),'%H:%i') as startAt,\n" +
                 "       date_format(time(endAt),'%H:%i') as endAt, \n" +
-                "       (timestampdiff(second, startAt, endAt)) as timeString from Walk where walkIdx=?;";
+                "       (timestampdiff(second, startAt, endAt)) as timeString from Walk where walkIdx=? and status='ACTIVE';";
         GetWalkTime getWalkTime = this.jdbcTemplate.queryForObject(getTimeQuery,
                 (rs, rowNum) -> new GetWalkTime(
                         rs.getString("date"),
@@ -51,7 +51,7 @@ public class WalkDao {
                 (rs, rowNum) -> rs.getInt("footCount"), walkIdx);
 
 
-        String getWalkInfoQuery = "select walkIdx, calorie, distance, pathImageUrl from Walk where walkIdx=?;";
+        String getWalkInfoQuery = "select walkIdx, calorie, distance, pathImageUrl from Walk where walkIdx=? and status='ACTIVE';";
         GetWalkInfo getWalkInfo = this.jdbcTemplate.queryForObject(getWalkInfoQuery,
                 (rs,rowNum) -> new GetWalkInfo(
                         rs.getInt("walkIdx"),
@@ -338,5 +338,11 @@ public class WalkDao {
         System.out.println("WalkDao.getWalkWholeIdx");
         String getWalkWholeIdxQuery = "select walkIdx from Walk where userIdx = ? and status = 'ACTIVE' ORDER BY startAt ASC LIMIT ?,1";
         return this.jdbcTemplate.queryForObject(getWalkWholeIdxQuery, int.class, userIdx, walkIdx-1);
+    }
+
+    public int checkWalkVal(int walkIdx) {
+        System.out.println("WalkDao.checkWalkVal");
+        String checkWalkValQuery = "select EXISTS (select walkIdx from Walk where walkIdx=? and status='ACTIVE') as success;";
+        return this.jdbcTemplate.queryForObject(checkWalkValQuery, int.class, walkIdx);
     }
 }
