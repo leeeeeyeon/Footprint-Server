@@ -27,4 +27,8 @@ public class PostWalkReq {
     public void setConvertedFootprints(ArrayList<SaveFootprint> convertedFootprints) {
         this.footprintList = convertedFootprints;
     }
+
+    public void setRemovedPathImgPhotos(List<MultipartFile> removedPathImgPhotos) {
+        this.photos = photos;
+    }
 }
