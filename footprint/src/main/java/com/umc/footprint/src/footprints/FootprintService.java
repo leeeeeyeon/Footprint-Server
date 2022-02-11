@@ -28,7 +28,7 @@ public class FootprintService {
 
     // 발자국 수정 (Patch)
     @Transactional(rollbackFor = Exception.class)
-    public void modifyFootprint(PatchFootprintReq patchFootprintReq, int footprintIdx) throws BaseException {
+    public void modifyFootprint(PatchFootprintReq patchFootprintReq, int footprintIdx, int userIdx) throws BaseException {
         try {
             // validation - 존재하지 않는, 삭제된 발자국
             int activeFootprint = footprintDao.activeFootprint(footprintIdx);
@@ -42,11 +42,9 @@ public class FootprintService {
             }
 
             // 발자국 수정 과정
-            int userIdx = footprintDao.findUserIdx(footprintIdx);
-
             // 1. 본문 수정
             if(patchFootprintReq.getWrite() != null) {
-                footprintDao.modifyWrite(patchFootprintReq, footprintIdx);
+                int modifyWrite = footprintDao.modifyWrite(patchFootprintReq, footprintIdx);
             }
 
             // 2. 사진 수정
