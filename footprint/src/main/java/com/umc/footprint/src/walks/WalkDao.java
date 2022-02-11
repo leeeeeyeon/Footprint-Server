@@ -65,6 +65,8 @@ public class WalkDao {
     }
 
     public String deleteWalk(int walkIdx) {
+
+
         String deleteFootprintQuery = "update Footprint set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 발자국 INACTIVE
         this.jdbcTemplate.update(deleteFootprintQuery, walkIdx);
 
@@ -344,5 +346,23 @@ public class WalkDao {
         System.out.println("WalkDao.checkWalkVal");
         String checkWalkValQuery = "select EXISTS (select walkIdx from Walk where walkIdx=? and status='ACTIVE') as success;";
         return this.jdbcTemplate.queryForObject(checkWalkValQuery, int.class, walkIdx);
+    }
+
+    public List<Integer> getFootprintIdxList(int walkIdx) {
+        String getFootprintQuery = "select footprintIdx from Footprint where walkIdx=?;";
+        List<Integer> footprintIdxList = jdbcTemplate.queryForList(getFootprintQuery, int.class, walkIdx);
+        return footprintIdxList;
+    }
+
+    // 해당 발자국의 사진 inactive
+    public void inactivePhoto(int footprintIdx) {
+        String inactivePhotoQuery = "update Photo set status='INACTIVE' where footprintIdx=? and status='ACTIVE';"; // 사진 INACTIVE
+        this.jdbcTemplate.update(inactivePhotoQuery, footprintIdx);
+    }
+
+    // 해당 발자국의 태그 inactive
+    public void inactiveTag(int footprintIdx) {
+        String inactiveTagQuery = "update Tag set status='INACTIVE' where footprintIdx=? and status='ACTIVE';"; // 태그 INACTIVE
+        this.jdbcTemplate.update(inactiveTagQuery, footprintIdx);
     }
 }
