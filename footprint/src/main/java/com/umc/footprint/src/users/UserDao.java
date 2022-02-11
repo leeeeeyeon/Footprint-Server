@@ -383,7 +383,7 @@ public class UserDao {
         }
 
         for (GetUserDateRes userDateRes : getUserDateRes) {
-            String getWalkIdxQuery = "SELECT count(walkIdx)+1 as walkIdx FROM Walk WHERE userIdx = ? and startAt < (SELECT startAt FROM Walk WHERE walkIdx = ?)";
+            String getWalkIdxQuery = "SELECT count(walkIdx)+1 as walkIdx FROM Walk WHERE userIdx = ? and startAt < (SELECT startAt FROM Walk WHERE walkIdx = ? and status='ACTIVE') and status='ACTIVE'";
             int getWalkIdx = this.jdbcTemplate.queryForObject(getWalkIdxQuery, int.class, userIdx, userDateRes.getUserDateWalk().getWalkIdx());
             userDateRes.getUserDateWalk().setWalkIdx(getWalkIdx);
         }
@@ -759,7 +759,7 @@ public class UserDao {
                 // 산책 기록 하나 조회
                 String getUserDateWalkQuery = "select walkIdx, date_format(startAt, '%k:%i') as startTime, date_format(endAt, '%k:%i') as endTime, pathImageUrl\n" +
                         "from Walk W where W.walkIdx=? and W.status=?";
-                String getWalkIdxQuery = "SELECT count(walkIdx)+1 as walkIdx FROM Walk WHERE userIdx = ? and startAt < (SELECT startAt FROM Walk WHERE walkIdx = ?)";
+                String getWalkIdxQuery = "SELECT count(walkIdx)+1 as walkIdx FROM Walk WHERE userIdx = ? and startAt < (SELECT startAt FROM Walk WHERE walkIdx = ? and status='ACTIVE') and status='ACTIVE'";
                 int finalWalkIdx = this.jdbcTemplate.queryForObject(getWalkIdxQuery, int.class, userIdx, walkIdx);
                 UserDateWalk userDateWalk = this.jdbcTemplate.queryForObject(getUserDateWalkQuery,
                         (rs, rowNum)-> new UserDateWalk(
