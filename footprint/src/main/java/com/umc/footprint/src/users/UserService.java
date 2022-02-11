@@ -4,6 +4,7 @@ import static com.umc.footprint.config.BaseResponseStatus.*;
 
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponseStatus;
+import com.umc.footprint.src.AwsS3Service;
 import com.umc.footprint.src.users.model.*;
 
 import com.umc.footprint.utils.JwtService;
@@ -16,18 +17,21 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Service
 public class UserService {
     private final UserDao userDao;
     private final UserProvider userProvider;
     private final JwtService jwtService;
+    private final AwsS3Service awsS3Service;
 
     @Autowired
-    public UserService(UserDao userDao, UserProvider userProvider, JwtService jwtService) {
+    public UserService(UserDao userDao, UserProvider userProvider, JwtService jwtService, AwsS3Service awsS3Service) {
         this.userDao = userDao;
         this.userProvider = userProvider;
         this.jwtService = jwtService;
+        this.awsS3Service = awsS3Service;
     }
 
 
@@ -169,6 +173,38 @@ public class UserService {
             userDao.modifyUserLogAt(now, userIdx);
 
             return postLoginRes;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteUser(int userIdx) throws BaseException {
+        try{
+            // GoalNext 테이블
+            userDao.deleteGoalNext(userIdx);
+            // GoalDayNext 테이블
+            userDao.deleteGoalDayNext(userIdx);
+            // UserBadge 테이블
+            userDao.deleteUserBadge(userIdx);
+            // Tag 테이블
+            userDao.deleteTag(userIdx);
+
+            // Photo 테이블 -> s3에서 이미지 url 먼저 삭제 후 테이블 삭제 필요
+            List<String> imageUrlList = userDao.getImageUrlList(userIdx); //S3에서 사진 삭제
+            for(String imageUrl : imageUrlList) {
+                String fileName = imageUrl.substring(imageUrl.lastIndexOf("/")+1); // 파일 이름만 자르기
+                awsS3Service.deleteFile(fileName);
+            }
+            userDao.deletePhoto(userIdx); //Photo 테이블에서 삭제
+
+            // Footprint 테이블
+            userDao.deleteFootprint(userIdx);
+            // Walk 테이블
+            userDao.deleteWalk(userIdx);
+            // User 테이블
+            userDao.deleteUser(userIdx);
+
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }
