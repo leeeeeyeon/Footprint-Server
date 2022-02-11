@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,11 @@ public class WalkService {
             System.out.println("1. 동선 이미지: file -> url ");
             // 경로 이미지 URL 생성 및 S3 업로드
             String pathImgUrl = awsS3Service.uploadFile(request.getPhotos().get(0));
+            // 동선 이미지 photos에서 pop
+            List<MultipartFile> removedPathImgPhotos = request.getPhotos();
+            removedPathImgPhotos.remove(0);
+            System.out.println("removedPathImgPhotos = " + removedPathImgPhotos);
+            request.setRemovedPathImgPhotos(removedPathImgPhotos);
             System.out.println("pathImgUrl = " + pathImgUrl);
 
             System.out.println("2. url로 바꾼 동선 이미지 SaveWalk 객체에 저장");
@@ -80,7 +86,7 @@ public class WalkService {
                 //  발자국 Photo 이미지 URL 생성 및 S3 업로드
                 System.out.println("5. 발자국 좌표 List<Double> -> String 으로 변환 후 SaveFootprint 객체에 저장");
                 ArrayList<SaveFootprint> convertedFootprints = new ArrayList<>();
-                int imgInputStartIndex = 1;
+                int imgInputStartIndex = 0;
                 for (int i = 0; i < request.getWalk().getPhotoMatchNumList().size(); i++) {
                     String convertedCoordinate = convertListToString(request.getFootprintList().get(i).getCoordinates());
                     System.out.println("convertedCoordinate = " + convertedCoordinate);
