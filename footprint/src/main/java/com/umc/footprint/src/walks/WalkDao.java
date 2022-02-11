@@ -164,7 +164,7 @@ public class WalkDao {
 
         //Photo 테이블에 insert
     public void addPhoto(int userIdx, List<SaveFootprint> footprintList) {
-        String photoInsertQuery = "insert into `Photo`(`imageUrl`, `userIdx`, `footprintIdx`) values (?,?,?)";
+        String photoInsertQuery = "insert into `Photo`(`imagUrl`, `userIdx`, `footprintIdx`) values (?,?,?)";
 
         for (SaveFootprint footprint : footprintList) {
             this.jdbcTemplate.batchUpdate(photoInsertQuery,

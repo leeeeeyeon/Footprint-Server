@@ -9,6 +9,7 @@ import com.umc.footprint.src.users.model.*;
 import com.umc.footprint.utils.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -109,7 +110,7 @@ public class UserService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public PostLoginRes postUserLogin(PostLoginReq postLoginReq) throws BaseException {
         { // email 중복 확인 있으면 status에 Done 넣고 return
             System.out.println("UserService.postUserLogin1");

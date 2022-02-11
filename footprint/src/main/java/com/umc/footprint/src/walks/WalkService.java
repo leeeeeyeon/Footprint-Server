@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,7 +37,7 @@ public class WalkService {
         this.awsS3Service = awsS3Service;
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public List<PostWalkRes> saveRecord(PostWalkReq request) throws BaseException {
         System.out.println("Validation 1. 사진이 하나도 안왔을 때");
         if (request.getPhotos().size() == 1 && ("".equals(request.getPhotos().get(0).getOriginalFilename()))){
@@ -126,6 +127,8 @@ public class WalkService {
 
 
                 // Photo Table에 삽입
+                // 에러 발생
+                System.out.println("WalkService.saveRecord error");
                 System.out.println("7. Photo 테이블에 삽입");
                 walkDao.addPhoto(request.getWalk().getUserIdx(), request.getFootprintList());
 
