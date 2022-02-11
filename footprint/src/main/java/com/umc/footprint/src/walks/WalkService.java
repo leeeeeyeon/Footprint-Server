@@ -3,6 +3,7 @@ package com.umc.footprint.src.walks;
 import com.umc.footprint.config.BaseException;
 
 import com.umc.footprint.src.AwsS3Service;
+import com.umc.footprint.src.footprints.FootprintService;
 import com.umc.footprint.src.users.UserService;
 import com.umc.footprint.src.walks.model.*;
 
@@ -230,7 +231,16 @@ public class WalkService {
 
     public String deleteWalk(int walkIdx) throws BaseException {
         try {
+            //walkIdx 로 footprintIdx 모두 얻어오기
+            List<Integer> footprintIdxList = walkDao.getFootprintIdxList(walkIdx);
+            for(int footprintIdx : footprintIdxList) {
+                //footprintIdx에 해당하는 photo, tag 모두 INACTIVE
+                walkDao.inactivePhoto(footprintIdx);
+                walkDao.inactiveTag(footprintIdx);
+            }
+
             String result = walkDao.deleteWalk(walkIdx);
+
             return result;
         } catch (Exception exception) { // DB에 이상이 있는 경우 에러 메시지를 보냅니다.
             throw new BaseException(DATABASE_ERROR);

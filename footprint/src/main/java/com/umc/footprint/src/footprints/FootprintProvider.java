@@ -42,7 +42,9 @@ public class FootprintProvider {
             System.out.println("FootprintProvider.getFootprintWholeIdx");
             System.out.println("walkIdx = " + walkIdx);
             System.out.println("footprintIdx = " + footprintIdx);
-            return footprintDao.getFootprintWholeIdx(walkIdx, footprintIdx);
+            int wholeFootprintIdx = footprintDao.getFootprintWholeIdx(walkIdx, footprintIdx);
+            System.out.println(wholeFootprintIdx);
+            return wholeFootprintIdx;
 
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);

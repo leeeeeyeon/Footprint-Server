@@ -286,6 +286,7 @@ public class UserProvider {
             }
             return getTagResult;
         } catch (Exception exception) {
+            exception.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
     }
