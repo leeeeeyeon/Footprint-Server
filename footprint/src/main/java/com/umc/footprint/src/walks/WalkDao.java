@@ -105,7 +105,7 @@ public class WalkDao {
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
                 PreparedStatement preparedStatement = con.prepareStatement(walkInsertQuery, Statement.RETURN_GENERATED_KEYS);
                 preparedStatement.setTimestamp(1, timestampStartAt);
-                preparedStatement.setTimestamp(2, timestampStartAt);
+                preparedStatement.setTimestamp(2, timestampEndAt);
                 preparedStatement.setDouble(3, walk.getDistance());
                 preparedStatement.setString(4, walk.getStr_coordinates());
                 preparedStatement.setString(5, pathImgUrl);
