@@ -1311,11 +1311,20 @@ public class UserDao {
         this.jdbcTemplate.update(delWalkQuery,userIdx);
     }
 
+    //Walk 테이블에서 사용자의 사진 url을 반환하는 메소드
+    public List<String> getPathImageUrlList(int userIdx) {
+        //s3에서 이미지 url 먼저 삭제하기 위해 imageUrl 리스트로 반환
+        String getPathImageUrlQuery = "select pathImageUrl from Walk where userIdx=?;";
+        List<String> pathImageUrlList = jdbcTemplate.queryForList(getPathImageUrlQuery, String.class, userIdx);
+        return pathImageUrlList;
+    }
+
     // User 테이블에서 해당 사용자 삭제
     public void deleteUser(int userIdx) {
         String delUserQuery="delete from User where userIdx=?;";
         this.jdbcTemplate.update(delUserQuery,userIdx);
     }
+
 
 
 }
