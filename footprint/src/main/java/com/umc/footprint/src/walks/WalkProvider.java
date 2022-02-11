@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
+import static com.umc.footprint.config.BaseResponseStatus.INVALID_WALKIDX;
 
 @Service
 public class WalkProvider {
@@ -24,6 +25,10 @@ public class WalkProvider {
 
     public GetWalkInfo getWalkInfo(int walkIdx) throws BaseException {
         try {
+            int check = walkDao.checkWalkVal(walkIdx);
+            if(check!=1) { //산책 INACTIVE
+                throw new BaseException(INVALID_WALKIDX);
+            }
             GetWalkInfo getWalkInfo = walkDao.getWalkInfo(walkIdx);
             return getWalkInfo;
         } catch (Exception exception) {
