@@ -128,8 +128,6 @@ public class WalkService {
 
 
                 // Photo Table에 삽입
-                // 에러 발생
-                System.out.println("WalkService.saveRecord error");
                 System.out.println("7. Photo 테이블에 삽입");
                 walkDao.addPhoto(request.getWalk().getUserIdx(), request.getFootprintList());
 
