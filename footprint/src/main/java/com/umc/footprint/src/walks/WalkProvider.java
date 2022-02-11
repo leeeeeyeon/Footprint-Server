@@ -132,7 +132,7 @@ public class WalkProvider {
 
     public int getWalkWholeIdx(int walkIdx, int userIdx) throws BaseException {
         try {
-            System.out.println("WalkProvider.getWalkWholeIdx");
+            System.out.println("FootprintProvider.getFootprintWholeIdx");
             System.out.println("walkIdx = " + walkIdx);
             System.out.println("userIdx = " + userIdx);
             return walkDao.getWalkWholeIdx(walkIdx, userIdx);
