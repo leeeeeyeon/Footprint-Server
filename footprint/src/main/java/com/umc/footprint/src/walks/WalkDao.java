@@ -73,12 +73,6 @@ public class WalkDao {
         String deleteWalkQuery = "update Walk set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 산책 INACTIVE
         this.jdbcTemplate.update(deleteWalkQuery, walkIdx);
 
-//        String deletePhotoQuery = "update Photo set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 산책 INACTIVE
-//        this.jdbcTemplate.update(deleteWalkQuery, walkIdx);
-
-        String deleteTagQuery = "update Walk set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 산책 INACTIVE
-        this.jdbcTemplate.update(deleteWalkQuery, walkIdx);
-
         return "Success Delete walk record!";
     }
   
