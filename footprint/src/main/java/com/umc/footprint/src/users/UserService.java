@@ -185,6 +185,10 @@ public class UserService {
             userDao.deleteGoalNext(userIdx);
             // GoalDayNext 테이블
             userDao.deleteGoalDayNext(userIdx);
+            // Goal 테이블
+            userDao.deleteGoal(userIdx);
+            // GoalDay 테이블
+            userDao.deleteGoalDay(userIdx);
             // UserBadge 테이블
             userDao.deleteUserBadge(userIdx);
             // Tag 테이블

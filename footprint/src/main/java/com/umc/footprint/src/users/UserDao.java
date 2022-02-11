@@ -1248,12 +1248,23 @@ public class UserDao {
         this.jdbcTemplate.update(delGoalNextQuery,userIdx);
     }
 
+    //Goal 테이블에서 해당 사용자의 목표 삭제 메소드
+    public void deleteGoal(int userIdx) {
+        String delGoalQuery="delete from Goal where userIdx=?;";
+        this.jdbcTemplate.update(delGoalQuery,userIdx);
+    }
+
     //GoalDayNext 테이블에서 해당 사용자의 목표 삭제 메소드
     public void deleteGoalDayNext(int userIdx) {
         String delGoalDayNextQuery="delete from GoalDayNext where userIdx=?;";
         this.jdbcTemplate.update(delGoalDayNextQuery,userIdx);
     }
 
+    //GoalDay 테이블에서 해당 사용자의 목표 삭제 메소드
+    public void deleteGoalDay(int userIdx) {
+        String delGoalDayQuery="delete from GoalDay where userIdx=?;";
+        this.jdbcTemplate.update(delGoalDayQuery,userIdx);
+    }
     //UserBadge 테이블에서 해당 사용자의 뱃지 삭제 메소드
     public void deleteUserBadge(int userIdx) {
         String delUserBadgeQuery="delete from UserBadge where userIdx=?;";
@@ -1305,4 +1316,6 @@ public class UserDao {
         String delUserQuery="delete from User where userIdx=?;";
         this.jdbcTemplate.update(delUserQuery,userIdx);
     }
+
+
 }
