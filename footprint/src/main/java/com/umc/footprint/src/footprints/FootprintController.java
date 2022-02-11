@@ -104,14 +104,11 @@ public class FootprintController {
     @PatchMapping("/{walkIdx}/{footprintIdx}/status")
     public BaseResponse<String> DeleteFootprint(@PathVariable("walkIdx") int walkIdx, @PathVariable("footprintIdx") int footprintIdx) {
         try {
-            /*
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
             System.out.println("userId = " + userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
-             */
-            int userIdx = 1;
 
             // Walk 테이블 전체에서 인덱스
             int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
