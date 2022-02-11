@@ -41,7 +41,7 @@ public class UserDao {
     //월별 발자국(일기) 갯수 조회 - yummy 5
     public List<GetFootprintCount> getMonthFootprints(int userIdx, int year, int month) {
         String Query = "select day(startAt) as day, count(walkIdx) as walkCount from Walk\n" +
-                "where userIdx=? && year(startAt)=? && month(startAt)=? group by day(startAt);";
+                "where userIdx=? and year(startAt)=? and month(startAt)=? and status='ACTIVE' group by day(startAt);";
 
         Object[] getMonthResParams = new Object[]{userIdx, year, month};
         return this.jdbcTemplate.query(Query,
