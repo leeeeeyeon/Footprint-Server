@@ -726,9 +726,11 @@ public class UserDao {
                 "    inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
                 "    inner join Footprint F on T.footprintIdx = F.footprintIdx\n" +
                 "    where hashtag=? and T.status = ?" +
-                "    ) and W.userIdx=? and T.status=?";
+                "    ) and W.userIdx=? and T.status=?" +
+                "order by endAt desc";
 
         List<String> walkAtList = jdbcTemplate.queryForList(getWalkAtQuery, String.class, tag, "ACTIVE", userIdx, "ACTIVE");
+        System.out.println("walkAtList: "+walkAtList);
         List<GetTagRes> result = new ArrayList<>(); // 최종 출력 값을 담을 리스트
 
         for(String walkAt : walkAtList) {
@@ -753,7 +755,7 @@ public class UserDao {
                     "    where hashtag=?\n" +
                     "    and cast(date_format(endAt, '%Y.%m.%d') as char(10))=? and T.status=?";
             List<Integer> walkIdxList = jdbcTemplate.queryForList(walkIdxQuery, int.class, tag, walkAt, "ACTIVE");
-
+            System.out.println("walkIdxList: "+walkIdxList);
             List<SearchWalk> walks = new ArrayList<>(); // 해당 날짜 + 해당 해시태그를 가지는 산책 기록 리스트
             for(Integer walkIdx : walkIdxList) {
                 // 산책 기록 하나 조회
