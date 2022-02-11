@@ -183,14 +183,18 @@ public class UserService {
         try{
             // GoalNext 테이블
             userDao.deleteGoalNext(userIdx);
+
             // GoalDayNext 테이블
             userDao.deleteGoalDayNext(userIdx);
+
             // Goal 테이블
             userDao.deleteGoal(userIdx);
+
             // GoalDay 테이블
             userDao.deleteGoalDay(userIdx);
             // UserBadge 테이블
             userDao.deleteUserBadge(userIdx);
+
             // Tag 테이블
             userDao.deleteTag(userIdx);
 
@@ -204,8 +208,15 @@ public class UserService {
 
             // Footprint 테이블
             userDao.deleteFootprint(userIdx);
-            // Walk 테이블
+
+            // Walk 테이블 - 동선 이미지 S3 에서도 삭제
+            List<String> pathImageUrlList = userDao.getPathImageUrlList(userIdx); //S3에서 사진 삭제
+            for(String imageUrl : pathImageUrlList) {
+                String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1); // 파일 이름만 자르기
+                awsS3Service.deleteFile(fileName);
+            }
             userDao.deleteWalk(userIdx);
+
             // User 테이블
             userDao.deleteUser(userIdx);
 
