@@ -74,7 +74,7 @@ public class FootprintController {
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
              */
-            int userIdx = 1;
+            int userIdx = 72;
 
             // Walk 테이블 전체에서 인덱스
             int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
@@ -85,7 +85,7 @@ public class FootprintController {
             System.out.println("wholeFootprintIdx = " + wholeFootprintIdx);
 
             PatchFootprintReq patchFootprintReq = new PatchFootprintReq(footprint.getWrite(), footprint.getPhotos(), footprint.getTagList());
-            footprintService.modifyFootprint(patchFootprintReq, wholeFootprintIdx);
+            footprintService.modifyFootprint(patchFootprintReq, wholeFootprintIdx, userIdx);
 
             String result = "발자국이 수정되었습니다.";
             System.out.println(result);
