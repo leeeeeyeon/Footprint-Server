@@ -84,13 +84,13 @@ public class FootprintService {
                         footprintDao.addTag(tags, userIdx, footprintIdx);
                     }
                 }
-                else { // 발자국에 저장된 기존 사진들이 존재
-                    if(tags.isEmpty()) { // 전달된 파일이 없음 > 사진을 지우고 싶다는 의미 > 기존 사진 삭제만 진행
+                else { // 발자국에 저장된 기존 태그들이 존재
+                    if(tags.isEmpty()) { // 전달된 리스트가 없음 > 태그를 지우고 싶다는 의미 > 기존 태그 삭제만 진행
                         footprintDao.deleteHashtags(footprintIdx); // 기존 해시태그들 테이블에서 삭제
                     }
                     else {
                         footprintDao.deleteHashtags(footprintIdx);
-                        footprintDao.addTag(tags, userIdx, footprintIdx); // 새로운 사진들 업로드
+                        footprintDao.addTag(tags, userIdx, footprintIdx); // 새로운 해시태그들 업로드
                     }
                 }
             }
@@ -104,7 +104,7 @@ public class FootprintService {
     }
 
 
-    // 발자국 삭제 (PATCH)
+    // 발자국 삭제 (PATCH) - 사진 삭제, 태그 삭제, 발자국 기록 삭제
     @Transactional(rollbackFor = Exception.class)
     public void deleteFootprint(int footprintIdx) throws BaseException {
         try {
@@ -117,13 +117,12 @@ public class FootprintService {
             else if (activeFootprint == 0) { // 이미 삭제된 발자국
                 throw new BaseException(DELETED_FOOTPRINT);
             }
-            int result = footprintDao.deleteFootprint(footprintIdx); // 발자국 삭제 성공 - 1, 실패 - 0
 
-            // 발자국 삭제 실패 (Footprint, Photo 테이블 중 업데이트 되지 않은 테이블 존재)
-            if (result == 0) {
-                throw new BaseException(DELETE_FOOTPRINT_FAIL);
-            }
+            footprintDao.deletePhotos(footprintIdx);
+            footprintDao.deleteHashtags(footprintIdx);
+            footprintDao.deleteFootprint(footprintIdx); // 발자국 삭제 성공 - 1, 실패 - 0
         } catch (Exception exception) {
+            exception.printStackTrace();
             throw new BaseException(DATABASE_ERROR);
         }
     }

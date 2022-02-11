@@ -36,4 +36,16 @@ public class FootprintProvider {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    public int getFootprintWholeIdx(int walkIdx, int footprintIdx) throws BaseException {
+        try {
+            System.out.println("FootprintProvider.getFootprintWholeIdx");
+            System.out.println("walkIdx = " + walkIdx);
+            System.out.println("footprintIdx = " + footprintIdx);
+            return footprintDao.getFootprintWholeIdx(walkIdx, footprintIdx);
+
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }
