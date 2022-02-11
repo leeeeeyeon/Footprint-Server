@@ -114,6 +114,7 @@ public class WalkController {
         }
     }
 
+    //yummy 21
     //해당 산책의 기록(발자국) 전체 삭제
     @ResponseBody
     @PatchMapping("/{walkIdx}/status") // (Patch) 127.0.0.1:3000/walks/{walkIdx}/status
