@@ -3,7 +3,6 @@ package com.umc.footprint.src.walks;
 import com.umc.footprint.config.BaseException;
 
 import com.umc.footprint.src.AwsS3Service;
-import com.umc.footprint.src.footprints.FootprintService;
 import com.umc.footprint.src.users.UserService;
 import com.umc.footprint.src.walks.model.*;
 
@@ -59,6 +58,9 @@ public class WalkService {
             request.setRemovedPathImgPhotos(removedPathImgPhotos);
             System.out.println("pathImgUrl = " + pathImgUrl);
 
+            // 라인에 좌표가 올 때 나는 오류 방지 (복제)
+            List<List<Double>> safeCoordinate = changeSafeCoordinate(request.getWalk().getCoordinates());
+
             System.out.println("2. url로 바꾼 동선 이미지 SaveWalk 객체에 저장");
             // string으로 변환한 동선 저장
             request.setWalkStrCoordinate(
@@ -66,7 +68,7 @@ public class WalkService {
                             .startAt(request.getWalk().getStartAt())
                             .endAt(request.getWalk().getEndAt())
                             .distance(request.getWalk().getDistance())
-                            .str_coordinates(convert2DListToString(request.getWalk().getCoordinates()))
+                            .str_coordinates(convert2DListToString(safeCoordinate))
                             .userIdx(request.getWalk().getUserIdx())
                             .goalRate(walkProvider.getGoalRate(request.getWalk()))
                             .calorie(request.getWalk().getCalorie())
@@ -178,6 +180,22 @@ public class WalkService {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             throw new BaseException(DATABASE_ERROR);
         }
+    }
+
+    private ArrayList<List<Double>> changeSafeCoordinate(List<List<Double>> coordinates) {
+        ArrayList<List<Double>> safeCoordinate = new ArrayList<>();
+        for (List<Double> line : coordinates) {
+            // 좌표가 하나만 있는 라인이 있을 때
+            System.out.println("line = " + line);
+            if (line.size() == 2) {
+                System.out.println("if statement enter");
+                line.add(line.get(0));
+                line.add(line.get(1));
+                System.out.println("line = " + line);
+            }
+            safeCoordinate.add(line);
+        }
+        return safeCoordinate;
     }
 
     // List<List<>> -> String in WalkDao
