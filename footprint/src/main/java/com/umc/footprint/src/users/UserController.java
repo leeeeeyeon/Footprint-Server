@@ -192,6 +192,10 @@ public class UserController {
             if (patchUserInfoReq.getNickname().length() > 8) { // 닉네임 8자 초과
                 throw new BaseException(BaseResponseStatus.MAX_NICKNAME_LENGTH);
             }
+            if (patchUserInfoReq.getBirth().equals("0000-00-00")) {
+                throw new BaseException(BaseResponseStatus.INVALID_BIRTH);
+            }
+
             userService.modifyUserInfo(userIdx, patchUserInfoReq);
 
             String result = "유저 정보가 수정되었습니다.";
