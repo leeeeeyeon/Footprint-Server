@@ -37,7 +37,7 @@ public class UserService {
 
 
     // yummy 12
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public BadgeInfo modifyRepBadge(int userIdx, int badgeIdx) throws BaseException {
         try {
             // 해당 뱃지가 Badge 테이블에 존재하는 뱃지인지?
@@ -58,6 +58,7 @@ public class UserService {
     }
 
     // 유저 정보 수정(Patch)
+    @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public void modifyUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException {
         try {
             int result = userDao.modifyUserInfo(userIdx, patchUserInfoReq);
@@ -72,7 +73,7 @@ public class UserService {
     }
 
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public void modifyGoal(int userIdx, PatchUserGoalReq patchUserGoalReq) throws BaseException{
         try{
             int resultTime = userDao.modifyUserGoalTime(userIdx, patchUserGoalReq);
@@ -91,7 +92,7 @@ public class UserService {
 
 
     // 해당 userIdx를 갖는 Goal 정보 저장
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public int postUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException{
         try {
             int resultInfo = userDao.modifyUserInfo(userIdx, patchUserInfoReq);
@@ -179,7 +180,7 @@ public class UserService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public void deleteUser(int userIdx) throws BaseException {
         try{
             // GoalNext 테이블

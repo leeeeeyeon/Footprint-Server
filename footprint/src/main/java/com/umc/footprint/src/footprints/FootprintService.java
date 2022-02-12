@@ -7,6 +7,7 @@ import com.umc.footprint.src.AwsS3Service;
 import com.umc.footprint.src.footprints.model.PatchFootprintReq;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,7 @@ public class FootprintService {
     }
 
     // 발자국 수정 (Patch)
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public void modifyFootprint(PatchFootprintReq patchFootprintReq, int footprintIdx, int userIdx) throws BaseException {
         try {
             // validation - 존재하지 않는, 삭제된 발자국
@@ -103,7 +104,7 @@ public class FootprintService {
 
 
     // 발자국 삭제 (PATCH) - 사진 삭제, 태그 삭제, 발자국 기록 삭제
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public void deleteFootprint(int footprintIdx) throws BaseException {
         try {
             int activeFootprint = footprintDao.activeFootprint(footprintIdx);

@@ -227,6 +227,7 @@ public class WalkService {
         return result;
     }
 
+    @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public String deleteWalk(int walkIdx) throws BaseException {
         try {
             //walkIdx 로 footprintIdx 모두 얻어오기
