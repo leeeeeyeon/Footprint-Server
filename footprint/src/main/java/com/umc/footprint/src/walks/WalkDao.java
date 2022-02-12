@@ -75,7 +75,7 @@ public class WalkDao {
 
         return "Success Delete walk record!";
     }
-  
+
     //Walk 테이블에 insert
     public int addWalk(SaveWalk walk, String pathImgUrl) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
