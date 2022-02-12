@@ -397,7 +397,7 @@ public class UserDao {
                 int.class, userIdx);
         if (!badgeCheck(badgeIdx)) { // 유저 대표 뱃지 idx가 0일 경우
             String getUserQuery = "select userIdx, nickname, username, email, status, birth, sex, height, weight,\n" +
-                    "                    (select count(*) from Walk where userIdx=?)+1 as walkNumber\n" +
+                    "                    (select count(*) from Walk where userIdx=? and status ='ACTIVE')+1 as walkNumber\n" +
                     "                    from User where userIdx=?";
 
             return this.jdbcTemplate.queryForObject(getUserQuery,
