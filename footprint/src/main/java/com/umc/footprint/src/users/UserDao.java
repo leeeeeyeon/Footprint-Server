@@ -419,7 +419,7 @@ public class UserDao {
         }
         else { // 유저 대표 뱃지 idx가 0이 아닐 경우
             String getUserQuery = "select userIdx, nickname, username, email, status, User.badgeIdx, badgeUrl, birth, sex, height, weight,\n" +
-                    "       (select count(*) from Walk where userIdx=?)+1 as walkNumber\n" +
+                    "       (select count(*) from Walk where userIdx=? and status ='ACTIVE')+1 as walkNumber\n" +
                     "from User inner join Badge B on User.badgeIdx = B.badgeIdx where userIdx=?";
 
             return this.jdbcTemplate.queryForObject(getUserQuery,
