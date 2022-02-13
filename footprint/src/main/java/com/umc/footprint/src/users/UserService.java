@@ -102,10 +102,6 @@ public class UserService {
             int resultNext = userDao.postGoalNext(userIdx, patchUserInfoReq);
             System.out.println("resultNext = " + resultNext);
 
-            //yummy 뱃지 추가
-            userDao.postUserBadge(userIdx, 1); // 발자국 스타터 뱃지 부여
-            modifyRepBadge(userIdx, 1); //대표 뱃지로 설정
-
             if(resultInfo == 0 || result == 0 || resultNext == 0)
                 return 0;
             return 1;

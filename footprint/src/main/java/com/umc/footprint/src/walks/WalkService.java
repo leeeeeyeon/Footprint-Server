@@ -85,7 +85,10 @@ public class WalkService {
 
             if (!request.getFootprintList().isEmpty()) {
                 System.out.println("4. 발자국 기록 사진들 List<MultipartFile> -> List<String> 으로 변환");
-                List<String> imgUrlList = awsS3Service.uploadFile(request.getPhotos());
+                List<String> imgUrlList = new ArrayList<>();
+                if (request.getPhotos().size() != 0) {
+                    imgUrlList = awsS3Service.uploadFile(request.getPhotos());
+                }
 
                 //  발자국 Photo 이미지 URL 생성 및 S3 업로드
                 System.out.println("5. 발자국 좌표 List<Double> -> String 으로 변환 후 SaveFootprint 객체에 저장");
@@ -163,7 +166,7 @@ public class WalkService {
             }
 
             // 처음 산책인지 확인
-            if (walkProvider.checkFirstWalk(request.getWalk().getUserIdx()) == 1) {
+            if (walkProvider.checkFirstWalk(request.getWalk().getUserIdx()) == 0) {
                 userService.modifyRepBadge(request.getWalk().getUserIdx(), 1); //대표 뱃지로 설정
             }
 
