@@ -330,9 +330,10 @@ public class WalkDao {
         return postWalkResList;
     }
 
+    // 유저의 산책 회수 반환
     public int checkFirstWalk(int userIdx) {
         System.out.println("WalkDao.checkFirstWalk");
-        String checkFirstWalkQuery = "select exists (select userIdx from Walk where userIdx = ? group by userIdx having count(walkIdx) = 1)";
+        String checkFirstWalkQuery = "select count(walkIdx) from Walk where userIdx = ?";
         return this.jdbcTemplate.queryForObject(checkFirstWalkQuery, int.class, userIdx);
     }
 

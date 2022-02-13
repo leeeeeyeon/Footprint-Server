@@ -163,7 +163,7 @@ public class WalkService {
             }
 
             // 처음 산책인지 확인
-            if (walkProvider.checkFirstWalk(request.getWalk().getUserIdx()) == 1) {
+            if (walkProvider.checkFirstWalk(request.getWalk().getUserIdx()) == 0) {
                 userService.modifyRepBadge(request.getWalk().getUserIdx(), 1); //대표 뱃지로 설정
             }
 
