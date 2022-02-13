@@ -260,8 +260,6 @@ public class UserController {
     @ResponseBody
     @GetMapping("/tmonth")
     public BaseResponse<GetMonthInfoRes> getMonthInfo() {
-        // TO-DO-LIST
-
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
