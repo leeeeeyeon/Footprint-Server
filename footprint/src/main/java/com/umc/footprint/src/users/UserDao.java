@@ -101,7 +101,7 @@ public class UserDao {
     }
     public GetUserBadges getUserBadges(int userIdx) {
         //대표 뱃지 조회
-        String getRepBadgeQuery = "select * from Badge where badgeIdx=(select badgeIdx from footprintdb.User where userIdx=?);";
+        String getRepBadgeQuery = "select * from Badge where badgeIdx=(select badgeIdx from User where userIdx=?);";
         BadgeInfo repBadgeInfo = this.jdbcTemplate.queryForObject(getRepBadgeQuery,
                 (rs,rowNum) -> new BadgeInfo(
                         rs.getInt("badgeIdx"),
@@ -111,7 +111,7 @@ public class UserDao {
 
         //전체 뱃지 조회
         String getUserBadgesQuery = "select * from Badge where badgeIdx in " +
-                "(select badgeIdx from footprintdb.UserBadge where userIdx=? and status='ACTIVE');";
+                "(select badgeIdx from UserBadge where userIdx=? and status='ACTIVE');";
         List<BadgeOrder> badgeInfoList = this.jdbcTemplate.query(getUserBadgesQuery,
                 (rs, rowNum) -> new BadgeOrder(
                         rs.getInt("badgeIdx"),
