@@ -43,7 +43,7 @@ public class UserProvider {
     //yummy 5
     //월별 발자국(일기) 갯수 조회
     public List<GetFootprintCount> getMonthFootprints(int userIdx, int year, int month) throws BaseException {
-        //try {
+        try {
             // User 테이블 validation
             boolean userExist = userDao.checkUser(userIdx, "User");
             if (userExist == false) {
@@ -64,9 +64,9 @@ public class UserProvider {
 
             List<GetFootprintCount> getMonthFootprints = userDao.getMonthFootprints(userIdx, year, month);
             return getMonthFootprints;
-//        } catch (Exception exception) {
-//          throw new BaseException(DATABASE_ERROR);
-//        }
+        } catch (Exception exception) {
+          throw new BaseException(DATABASE_ERROR);
+        }
     }
   
 
@@ -168,7 +168,7 @@ public class UserProvider {
     }
 
 
-    // yummy11
+    // yummy 11
     // 사용자 전체 뱃지 조회 API
     public GetUserBadges getUserBadges(int userIdx) throws BaseException {
         try {
