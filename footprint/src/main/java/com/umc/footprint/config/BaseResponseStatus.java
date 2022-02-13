@@ -59,6 +59,7 @@ public enum BaseResponseStatus {
     POST_USERS_INVALID_EMAIL(false, 2149, "이메일 형식을 확인해주세요."),
     POST_USERS_EMPTY_USERID(false, 2150, "유저 ID를 입력해주세요."),
     MAX_NICKNAME_LENGTH(false, 2160, "닉네임은 8자를 초과할 수 없습니다."),
+    INVALID_BIRTH(false, 2161, "생년월일 값은 0000-00-00이 될 수 없습니다."),
 
     INVALID_WALKIDX(false, 2200, "잘못된 산책 인덱스입니다."),
     NO_FOOTPRINT_IN_WALK(false, 2221, "해당 산책 기록에는 발자국이 존재하지 않습니다."),
