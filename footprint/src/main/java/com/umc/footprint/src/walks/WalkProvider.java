@@ -66,7 +66,7 @@ public class WalkProvider {
             GetBadgeIdx getBadgeIdx = walkDao.getAcquiredBadgeIdxList(userIdx);
             // 원래 가지고 있던 뱃지 조회
             List<Integer> getOriginBadgeIdxList = walkDao.getOriginBadgeIdxList(userIdx);
-            log.info("원래 가지고 있던 뱃지들: {}", getOriginBadgeIdxList);
+            log.debug("원래 가지고 있던 뱃지들: {}", getOriginBadgeIdxList);
 
             // 얻은 뱃지
             List<Integer> acquiredBadgeIdxList = new ArrayList<>();
@@ -128,8 +128,8 @@ public class WalkProvider {
 
     public int getWalkWholeIdx(int walkIdx, int userIdx) throws BaseException {
         try {
-            log.info("walkIdx: {}", walkIdx);
-            log.info("userIdx: {}", userIdx);
+            log.debug("walkIdx: {}", walkIdx);
+            log.debug("userIdx: {}", userIdx);
             return walkDao.getWalkWholeIdx(walkIdx, userIdx);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);

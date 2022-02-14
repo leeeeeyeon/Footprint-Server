@@ -53,19 +53,19 @@ public class WalkController {
             ) throws BaseException {
         // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
         String userId = jwtService.getUserId();
-        log.info("userId = " + userId);
+        log.debug("userId = " + userId);
         // userId로 userIdx 추출
         int userIdx = userProvider.getUserIdx(userId);
         walk.setUserIdx(userIdx);
 
 
-        log.info("walk startAt: {}", walk.getStartAt());
-        log.info("walk endAt: {}", walk.getEndAt());
-        log.info("walk distance: {}", walk.getDistance());
-        log.info("walk userIdx: {}", walk.getUserIdx());
-        log.info("walk coordinate: {}", walk.getCoordinates());
-        log.info("walk calorie: {}", walk.getCalorie());
-        log.info("walk photoMatchNumList: {}", walk.getPhotoMatchNumList());
+        log.debug("walk startAt: {}", walk.getStartAt());
+        log.debug("walk endAt: {}", walk.getEndAt());
+        log.debug("walk distance: {}", walk.getDistance());
+        log.debug("walk userIdx: {}", walk.getUserIdx());
+        log.debug("walk coordinate: {}", walk.getCoordinates());
+        log.debug("walk calorie: {}", walk.getCalorie());
+        log.debug("walk photoMatchNumList: {}", walk.getPhotoMatchNumList());
 
 
 
@@ -95,13 +95,13 @@ public class WalkController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            log.info("userId: {}", userId);
+            log.debug("userId: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
             // Walk 테이블 전체에서 인덱스
             int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
-            log.info("wholeWalkIdx: {}", wholeWalkIdx);
+            log.debug("wholeWalkIdx: {}", wholeWalkIdx);
 
             GetWalkInfo getWalkInfo = walkProvider.getWalkInfo(wholeWalkIdx);
             return new BaseResponse<>(getWalkInfo);
@@ -118,13 +118,13 @@ public class WalkController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            log.info("userId: {}", userId);
+            log.debug("userId: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
             // Walk 테이블 전체에서 인덱스
             int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
-            log.info("wholeWalkIdx: {}", wholeWalkIdx);
+            log.debug("wholeWalkIdx: {}", wholeWalkIdx);
 
             if (wholeWalkIdx == 0) {
                 return new BaseResponse<>(BaseResponseStatus.REQUEST_ERROR);

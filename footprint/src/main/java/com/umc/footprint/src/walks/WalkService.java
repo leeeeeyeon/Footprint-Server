@@ -41,27 +41,27 @@ public class WalkService {
 
     @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public List<PostWalkRes> saveRecord(PostWalkReq request) throws BaseException {
-        log.info("Validation 1. 사진이 하나도 안왔을 때");
+        log.debug("Validation 1. 사진이 하나도 안왔을 때");
         if (request.getPhotos().size() == 1 && ("".equals(request.getPhotos().get(0).getOriginalFilename()))){
-            log.info("request photos: {}", request.getPhotos());
+            log.debug("request photos: {}", request.getPhotos());
             throw new BaseException(EMPTY_WALK_PHOTO);
         }
 
         try {
-            log.info("1. 동선 이미지: file -> url ");
+            log.debug("1. 동선 이미지: file -> url ");
             // 경로 이미지 URL 생성 및 S3 업로드
             String pathImgUrl = awsS3Service.uploadFile(request.getPhotos().get(0));
             // 동선 이미지 photos에서 pop
             List<MultipartFile> removedPathImgPhotos = request.getPhotos();
             removedPathImgPhotos.remove(0);
-            log.info("동선 이미지가 빠진 사진 리스트: {}", removedPathImgPhotos);
+            log.debug("동선 이미지가 빠진 사진 리스트: {}", removedPathImgPhotos);
             request.setRemovedPathImgPhotos(removedPathImgPhotos);
-            log.info("동선 이미지 url: {}", pathImgUrl);
+            log.debug("동선 이미지 url: {}", pathImgUrl);
 
             // 라인에 좌표가 올 때 나는 오류 방지 (복제)
             List<List<Double>> safeCoordinate = changeSafeCoordinate(request.getWalk().getCoordinates());
 
-            log.info("2. url로 바꾼 동선 이미지 SaveWalk 객체에 저장");
+            log.debug("2. url로 바꾼 동선 이미지 SaveWalk 객체에 저장");
             // string으로 변환한 동선 저장
             request.setWalkStrCoordinate(
                     SaveWalk.builder()
@@ -77,27 +77,27 @@ public class WalkService {
             );
 
             // Walk Table에 삽입 후 생성된 walkIdx return
-            log.info("3. Walk 테이블에 insert 후 walkIdx 반환");
+            log.debug("3. Walk 테이블에 insert 후 walkIdx 반환");
             int walkIdx = walkDao.addWalk(request.getWalk(), pathImgUrl);
 
 
-            log.info("생성된 walkIdx: {}", walkIdx);
+            log.debug("생성된 walkIdx: {}", walkIdx);
 
-            log.info("발자국 기록이 존재할 때");
+            log.debug("발자국 기록이 존재할 때");
             if (!request.getFootprintList().isEmpty()) {
-                log.info("4. 발자국 기록 사진들 List<MultipartFile> -> List<String> 으로 변환");
+                log.debug("4. 발자국 기록 사진들 List<MultipartFile> -> List<String> 으로 변환");
                 List<String> imgUrlList = new ArrayList<>();
                 if (request.getPhotos().size() != 0) {
                     imgUrlList = awsS3Service.uploadFile(request.getPhotos());
                 }
 
                 //  발자국 Photo 이미지 URL 생성 및 S3 업로드
-                log.info("5. 발자국 좌표 List<Double> -> String 으로 변환 후 SaveFootprint 객체에 저장");
+                log.debug("5. 발자국 좌표 List<Double> -> String 으로 변환 후 SaveFootprint 객체에 저장");
                 ArrayList<SaveFootprint> convertedFootprints = new ArrayList<>();
                 int imgInputStartIndex = 0;
                 for (int i = 0; i < request.getWalk().getPhotoMatchNumList().size(); i++) {
                     String convertedCoordinate = convertListToString(request.getFootprintList().get(i).getCoordinates());
-                    log.info("String으로 변환된 발자국 좌표", convertedCoordinate);
+                    log.debug("String으로 변환된 발자국 좌표", convertedCoordinate);
                     int imgInputEndIndex = imgInputStartIndex + request.getWalk().getPhotoMatchNumList().get(i);
                     if (imgInputEndIndex > request.getPhotos().size()) {
                         throw new BaseException(EXCEED_FOOTPRINT_SIZE);
@@ -119,31 +119,31 @@ public class WalkService {
                 request.setConvertedFootprints(convertedFootprints);
 
                 // Footprint Table에 삽입 후 생성된 footprintIdx Footprint에 초기화
-                log.info("6. Footprint 테이블에 삽입후 footprintIdx SaveFootprint 테이블에 삽입");
+                log.debug("6. Footprint 테이블에 삽입후 footprintIdx SaveFootprint 테이블에 삽입");
                 walkDao.addFootprint(request.getFootprintList(), walkIdx);
 
                 // Photo Table에 삽입
-                log.info("7. Photo 테이블에 삽입");
+                log.debug("7. Photo 테이블에 삽입");
                 walkDao.addPhoto(request.getWalk().getUserIdx(), request.getFootprintList());
 
                 // Hashtag Table에 삽입 후 tagIdx(hashtagIdx, footprintIdx) mapping pair 반환
-                log.info("8. Hashtag 테이블에 삽입 후 매핑된 Idx 반환 ");
+                log.debug("8. Hashtag 테이블에 삽입 후 매핑된 Idx 반환 ");
                 List<Pair<Integer, Integer>> tagIdxList = walkDao.addHashtag(request.getFootprintList());
 
                 if (tagIdxList.size() != 0){// Tag Table에 삽입
-                    log.info("9. Tag 테이블에 삽입");
+                    log.debug("9. Tag 테이블에 삽입");
                     walkDao.addTag(tagIdxList, request.getWalk().getUserIdx());
                 }
             }
 
             // badge 획득 여부 확인 및 id 반환
-            log.info("10. badge 획득 여부 확인 후 얻은 badgeIdxList 반환");
+            log.debug("10. badge 획득 여부 확인 후 얻은 badgeIdxList 반환");
             List<PostWalkRes> postWalkResList = new ArrayList<>();
             List<Integer> acquiredBadgeIdxList = walkProvider.getAcquiredBadgeIdxList(request.getWalk().getUserIdx());
             Collections.sort(acquiredBadgeIdxList);
 
             // UserBadge 테이블에 획득한 뱃지 삽입
-            log.info("11. 얻은 뱃지 리스트 UserBadge 테이블에 삽입");
+            log.debug("11. 얻은 뱃지 리스트 UserBadge 테이블에 삽입");
             if (!acquiredBadgeIdxList.isEmpty()) { // 획득한 뱃지가 있을 경우 삽입
                 walkDao.addUserBadge(acquiredBadgeIdxList, request.getWalk().getUserIdx());
             }
@@ -153,14 +153,14 @@ public class WalkService {
                 userService.modifyRepBadge(request.getWalk().getUserIdx(), 1); //대표 뱃지로 설정
             }
 
-            log.info("새롭게 얻은 뱃지 리스트: {}", acquiredBadgeIdxList);
+            log.debug("새롭게 얻은 뱃지 리스트: {}", acquiredBadgeIdxList);
 
 
             //획득한 뱃지 넣기 (뱃지 아이디로 뱃지 이름이랑 그림 반환)
-            log.info("12. 뱃지 리스트로 이름과 url 반환 후 request 객체에 저장");
+            log.debug("12. 뱃지 리스트로 이름과 url 반환 후 request 객체에 저장");
             postWalkResList = walkProvider.getBadgeInfo(acquiredBadgeIdxList);
 
-            log.info("response로 반환할 뱃지 이름: {}", postWalkResList.stream().map(PostWalkRes::getBadgeName).collect(Collectors.toList()));
+            log.debug("response로 반환할 뱃지 이름: {}", postWalkResList.stream().map(PostWalkRes::getBadgeName).collect(Collectors.toList()));
 
             return postWalkResList;
 
@@ -174,7 +174,7 @@ public class WalkService {
         ArrayList<List<Double>> safeCoordinate = new ArrayList<>();
         for (List<Double> line : coordinates) {
             // 좌표가 하나만 있는 라인이 있을 때
-            log.info("line: {}", line);
+            log.debug("line: {}", line);
             if (line.size() == 2) {
                 line.add(line.get(0));
                 line.add(line.get(1));
@@ -187,7 +187,7 @@ public class WalkService {
     // List<List<>> -> String in WalkDao
     public String convert2DListToString(List<List<Double>> inputList){
 
-        log.info("String으로 변환할 리스트: {}", inputList);
+        log.debug("String으로 변환할 리스트: {}", inputList);
 
         StringBuilder str = new StringBuilder();
         str.append("MULTILINESTRING(");
@@ -218,7 +218,7 @@ public class WalkService {
     }
 
     public String convertListToString(List<Double> inputList) {
-        log.info("string 형으로 바꿀 list: {} ", inputList);
+        log.debug("string 형으로 바꿀 list: {} ", inputList);
 
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("POINT(");

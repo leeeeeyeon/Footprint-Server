@@ -42,17 +42,17 @@ public class FootprintController {
     @GetMapping("/{walkIdx}")
     public BaseResponse<List<GetFootprintRes>> getFootprints(@PathVariable("walkIdx") int walkIdx) {
         try {
-            log.info("walkIdx: {}", walkIdx);
+            log.debug("walkIdx: {}", walkIdx);
 
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            log.info("userId: {}", userId);
+            log.debug("userId: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
             // Walk 테이블 전체에서 인덱스
             int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
-            log.info("wholeWalkIdx: {}", wholeWalkIdx);
+            log.debug("wholeWalkIdx: {}", wholeWalkIdx);
 
             List<GetFootprintRes> getFootprintRes = footprintProvider.getFootprints(wholeWalkIdx);
             return new BaseResponse<>(getFootprintRes);
@@ -71,23 +71,23 @@ public class FootprintController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            log.info("userId: {}", userId);
+            log.debug("userId: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
             // Walk 테이블 전체에서 인덱스
             int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
-            log.info("wholeWalkIdx: {}", wholeWalkIdx);
+            log.debug("wholeWalkIdx: {}", wholeWalkIdx);
 
             // Footprint 테이블 전체에서 인덱스
             int wholeFootprintIdx = footprintProvider.getFootprintWholeIdx(wholeWalkIdx, footprintIdx);
-            log.info("wholeFootprintIdx: {}", wholeFootprintIdx);
+            log.debug("wholeFootprintIdx: {}", wholeFootprintIdx);
 
             PatchFootprintReq patchFootprintReq = new PatchFootprintReq(footprint.getWrite(), footprint.getPhotos(), footprint.getTagList());
             footprintService.modifyFootprint(patchFootprintReq, wholeFootprintIdx, userIdx);
 
             String result = "발자국이 수정되었습니다.";
-            log.info("result: {}", result);
+            log.debug("result: {}", result);
             return new BaseResponse<>(result);
         } catch (BaseException exception) {
             exception.printStackTrace();
@@ -105,17 +105,17 @@ public class FootprintController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            log.info("userId: {}", userId);
+            log.debug("userId: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
             // Walk 테이블 전체에서 인덱스
             int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
-            log.info("wholeWalkIdx: {}", wholeWalkIdx);
+            log.debug("wholeWalkIdx: {}", wholeWalkIdx);
 
             // Footprint 테이블 전체에서 인덱스
             int wholeFootprintIdx = footprintProvider.getFootprintWholeIdx(wholeWalkIdx, footprintIdx);
-            log.info("wholeFootprintIdx: {}", wholeFootprintIdx);
+            log.debug("wholeFootprintIdx: {}", wholeFootprintIdx);
             footprintService.deleteFootprint(footprintIdx);
             String result = "발자국을 삭제하였습니다.";
 

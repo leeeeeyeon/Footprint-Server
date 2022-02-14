@@ -85,15 +85,15 @@ public class WalkDao {
         String walkInsertQuery = "insert into Walk(startAt, endAt, distance, coordinate, pathImageUrl, userIdx, goalRate, calorie) " +
                 "values (?,?,?,ST_GeomFromText(?),?,?,?,?)";
 
-        log.info("walk startAt: {}", walk.getStartAt());
-        log.info("walk endAt: {}", walk.getEndAt());
-        log.info("walk distance: {}", walk.getDistance());
-        log.info("walk userIdx: {}", walk.getUserIdx());
-        log.info("walk strCoordinate: {}", walk.getStrCoordinates());
-        log.info("walk pathImgUrl: {}", pathImgUrl);
-        log.info("walk goalRate: {}", walk.getGoalRate());
-        log.info("walk calorie: {}", walk.getCalorie());
-        log.info("walk photoMatchNumList: {}", walk.getPhotoMatchNumList());
+        log.debug("walk startAt: {}", walk.getStartAt());
+        log.debug("walk endAt: {}", walk.getEndAt());
+        log.debug("walk distance: {}", walk.getDistance());
+        log.debug("walk userIdx: {}", walk.getUserIdx());
+        log.debug("walk strCoordinate: {}", walk.getStrCoordinates());
+        log.debug("walk pathImgUrl: {}", pathImgUrl);
+        log.debug("walk goalRate: {}", walk.getGoalRate());
+        log.debug("walk calorie: {}", walk.getCalorie());
+        log.debug("walk photoMatchNumList: {}", walk.getPhotoMatchNumList());
 
         TimeZone default_time_zone = TimeZone.getTimeZone(ZoneId.of("Asia/Seoul"));
 
@@ -145,12 +145,12 @@ public class WalkDao {
             // 자동 생성되는 인덱스 리스트에 추가
             footprint.setFootprintIdx(keyHolder.getKey().intValue());
 
-            log.info("발자국 인덱스: {}", footprint.getFootprintIdx());
-            log.info("발자국 좌표(String): {}", footprint.getStrCoordinate());
-            log.info("발자국 내용: {}", footprint.getWrite());
-            log.info("발자국 기록 시간: {}", footprint.getRecordAt());
-            log.info("발자국 walkIdx: {}", walkIdx);
-            log.info("발자국 onWalk: {}", footprint.getOnWalk());
+            log.debug("발자국 인덱스: {}", footprint.getFootprintIdx());
+            log.debug("발자국 좌표(String): {}", footprint.getStrCoordinate());
+            log.debug("발자국 내용: {}", footprint.getWrite());
+            log.debug("발자국 기록 시간: {}", footprint.getRecordAt());
+            log.debug("발자국 walkIdx: {}", walkIdx);
+            log.debug("발자국 onWalk: {}", footprint.getOnWalk());
         }
     }
 
@@ -201,10 +201,10 @@ public class WalkDao {
                     tagIdxList.add(Pair.of(keyHolder.getKey().intValue(), footprint.getFootprintIdx()));
                 }
             }
-            log.info("발자국 해시태그들: {}" + footprint.getHashtagList());
+            log.debug("발자국 해시태그들: {}" + footprint.getHashtagList());
         }
 
-        log.info("tag 인덱스들: {}", tagIdxList);
+        log.debug("tag 인덱스들: {}", tagIdxList);
         return tagIdxList;
     }
 
@@ -249,7 +249,7 @@ public class WalkDao {
 
     // 유저의 목표 시간 반환
     public int getWalkGoalTime(int userIdx) {
-        log.info("userIdx: {}", userIdx);
+        log.debug("userIdx: {}", userIdx);
         String getTimeQuery = "select walkGoalTime from Goal where userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         int getTimeParam = userIdx;
         return this.jdbcTemplate.queryForObject(getTimeQuery, int.class, getTimeParam);
@@ -283,8 +283,8 @@ public class WalkDao {
                         .recordBadgeIdx(rs.getInt("recordBadgeIdx"))
                         .build()
                 , userIdx);
-        log.info("가지고 있던 기록 관련 뱃지중 가장 큰 인덱스: {}", getBadgeIdx.getRecordBadgeIdx());
-        log.info("가지고 있던 거리 관련 뱃지중 가장 큰 인덱스: {}", getBadgeIdx.getDistanceBadgeIdx());
+        log.debug("가지고 있던 기록 관련 뱃지중 가장 큰 인덱스: {}", getBadgeIdx.getRecordBadgeIdx());
+        log.debug("가지고 있던 거리 관련 뱃지중 가장 큰 인덱스: {}", getBadgeIdx.getDistanceBadgeIdx());
         return getBadgeIdx;
     }
 
@@ -323,7 +323,7 @@ public class WalkDao {
     }
 
     public int checkWalkVal(int walkIdx) {
-        log.info("WalkDao.checkWalkVal");
+        log.debug("WalkDao.checkWalkVal");
         String checkWalkValQuery = "select EXISTS (select walkIdx from Walk where walkIdx=? and status='ACTIVE') as success;";
         return this.jdbcTemplate.queryForObject(checkWalkValQuery, int.class, walkIdx);
     }

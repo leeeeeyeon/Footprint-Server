@@ -41,10 +41,10 @@ public class FootprintProvider {
 
     public int getFootprintWholeIdx(int walkIdx, int footprintIdx) throws BaseException {
         try {
-            log.info("walkIdx: {} ", walkIdx);
-            log.info("footprintIdx: {} ", footprintIdx);
+            log.debug("walkIdx: {} ", walkIdx);
+            log.debug("footprintIdx: {} ", footprintIdx);
             int wholeFootprintIdx = footprintDao.getFootprintWholeIdx(walkIdx, footprintIdx);
-            log.info("wholeFootprintIdx: {}", wholeFootprintIdx);
+            log.debug("wholeFootprintIdx: {}", wholeFootprintIdx);
             return wholeFootprintIdx;
 
         } catch (Exception exception) {
