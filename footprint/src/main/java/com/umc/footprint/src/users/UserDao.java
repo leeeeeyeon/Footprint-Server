@@ -57,7 +57,7 @@ public class UserDao {
         List<String> goalDayList = getUserGoalDays(userIdx);
 
         //이번달 일별 달성률 조회(List)
-        String getDayRateQuery = "select day(startAt) as day, sum(goalRate) as rate from Walk where userIdx=? group by day(startAt);";
+        String getDayRateQuery = "select day(startAt) as day, sum(goalRate) as rate from Walk where userIdx=? and status = 'ACTIVE' group by day(startAt);";
         List<GetDayRateRes> getDayRatesRes = this.jdbcTemplate.query(getDayRateQuery,
                 (rs, rowNum) -> new GetDayRateRes(
                         rs.getInt("day"),
@@ -67,7 +67,7 @@ public class UserDao {
         //사용자의 이번 달 누적 시간, 거리, 평균 칼로리
         String getMonthInfoQuery = "select sum((timestampdiff(second,startAt, endAt))) as monthTotalMin,\n" +
                 "                sum(distance) as monthTotalDistance, sum(calorie) as monthPerCal\n" +
-                "                from Walk where userIdx=? and year(startAt)=? and month(startAt)=?;";
+                "                from Walk where userIdx=? and status = 'ACTIVE' and year(startAt)=? and month(startAt)=?;";
         Object[] getMonthInfoParams = new Object[]{userIdx, year, month};
         GetMonthTotal getMonthTotal = this.jdbcTemplate.queryForObject(getMonthInfoQuery,
                 (rs, rowNum) -> new GetMonthTotal(
@@ -199,8 +199,8 @@ public class UserDao {
         }  while (cal.get(Calendar.MONTH) == month);
 
         // 이번달 산책 날짜의 요일을 받기
-        String walkCountQuery = "select dayofweek(startAt) as day from Walk where userIdx=? and " +
-                "MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 MONTH));";
+        String walkCountQuery = "select dayofweek(startAt) as day from Walk where userIdx=? and status = 'ACTIVE' " +
+                "and MONTH(startAt) = MONTH(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 MONTH));";
         List<Object> walkDays = this.jdbcTemplate.query(walkCountQuery,
                 (rs,rowNum) -> (rs.getInt("day")), userIdx);
 
@@ -314,7 +314,7 @@ public class UserDao {
                 "FROM Walk W " +
                 "INNER JOIN (SELECT useridx, walkGoalTime FROM Goal WHERE useridx = ? and MONTH(createAt) = MONTH(NOW())) as G " +
                 "ON W.userIdx = G.userIdx " +
-                "WHERE W.userIdx = ? AND DATE(W.startAt) = DATE(NOW()) " +
+                "WHERE W.userIdx = ? AND DATE(W.startAt) = DATE(NOW()) AND W.status = 'ACTIVE' " +
                 "GROUP BY G.walkGoalTime ";
         int getUserIdxParam = userIdx;
 
@@ -983,7 +983,7 @@ public class UserDao {
     // 해당 날짜에 해당 유저가 산책을 했는지 확인
     public int checkUserDateWalk(int userIdx, String date){
 
-        String checkUserWalkQuery = "SELECT userIdx FROM Walk WHERE DATE(startAt) = DATE(?) and userIdx = ? GROUP BY userIdx";
+        String checkUserWalkQuery = "SELECT userIdx FROM Walk WHERE DATE(startAt) = DATE(?) and userIdx = ? and status = 'ACTIVE' GROUP BY userIdx";
         List<Integer> existWalk =  this.jdbcTemplate.queryForList(checkUserWalkQuery,int.class,date,userIdx);
 
         if (existWalk.size() != 0)
@@ -1190,7 +1190,7 @@ public class UserDao {
     public int getUserIdx(String userId) {
         System.out.println("UserDao.getUserIdx");
         System.out.println("userId = " + userId);
-        String getUserIdxQuery = "select userIdx from User where userId = ?";
+        String getUserIdxQuery = "select userIdx from User where userId = ? ";
         return this.jdbcTemplate.queryForObject(getUserIdxQuery, int.class, userId);
     }
 
@@ -1297,11 +1297,11 @@ public class UserDao {
     // Footprint 테이블에서 해당 사용자의 산책일기 삭제
     public void deleteFootprint(int userIdx) {
         //userIdx로 walkIdx 추출
-        String getWalkIdxQuery = "select walkIdx from Walk where userIdx=?;";
+        String getWalkIdxQuery = "select walkIdx from Walk where userIdx=? and status = 'ACTIVE';";
         List<Integer> walkIdxList = jdbcTemplate.queryForList(getWalkIdxQuery, int.class, userIdx);
 
         //해당 walkIdx에 해당하는 발자국 모두 삭제
-        String delFootprintQuery="delete from Footprint where walkIdx=?;";
+        String delFootprintQuery="delete from Footprint where walkIdx=? and status = 'ACTIVE';";
         for(int walkIdx : walkIdxList) {
             this.jdbcTemplate.update(delFootprintQuery,walkIdx);
         }
@@ -1309,14 +1309,14 @@ public class UserDao {
 
     // Walk 테이블에서 해당 사용자의 산책 기록 삭제
     public void deleteWalk(int userIdx) {
-        String delWalkQuery="delete from Walk where userIdx=?;";
+        String delWalkQuery="delete from Walk where userIdx=? and status = 'ACTIVE';";
         this.jdbcTemplate.update(delWalkQuery,userIdx);
     }
 
     //Walk 테이블에서 사용자의 사진 url을 반환하는 메소드
     public List<String> getPathImageUrlList(int userIdx) {
         //s3에서 이미지 url 먼저 삭제하기 위해 imageUrl 리스트로 반환
-        String getPathImageUrlQuery = "select pathImageUrl from Walk where userIdx=?;";
+        String getPathImageUrlQuery = "select pathImageUrl from Walk where userIdx=? and status = 'ACTIVE';";
         List<String> pathImageUrlList = jdbcTemplate.queryForList(getPathImageUrlQuery, String.class, userIdx);
         return pathImageUrlList;
     }
