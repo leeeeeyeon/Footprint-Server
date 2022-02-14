@@ -8,6 +8,7 @@ import com.umc.footprint.src.AwsS3Service;
 import com.umc.footprint.src.users.model.*;
 
 import com.umc.footprint.utils.JwtService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -20,6 +21,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 public class UserService {
     private final UserDao userDao;
@@ -114,16 +116,14 @@ public class UserService {
     @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public PostLoginRes postUserLogin(PostLoginReq postLoginReq) throws BaseException {
         { // email 중복 확인 있으면 status에 Done 넣고 return
-            System.out.println("UserService.postUserLogin1");
             PostLoginRes result = userProvider.checkEmail(postLoginReq.getEmail());
-            System.out.println("result.getStatus() = " + result.getStatus());
+            log.info("유저의 status: {}", result.getStatus());
             // status: NONE -> 회원가입(유저 정보 db에 등록 필요)
             // status: ACTIVE -> 로그인
             // status: ACTIVE -> 정보 입력 필요
             switch (result.getStatus()) {
                 case "NONE":
                     try {
-                        System.out.println("UserService.postUserLogin2");
                         // 암호화
                         String jwt = jwtService.createJwt(postLoginReq.getUserId());
                         // 유저 정보 db에 등록
@@ -167,7 +167,7 @@ public class UserService {
             }
 
             // 현재 로그인하는 시간 logAt에 저장
-            System.out.println("now = " + now);
+            log.info("현재 시간: {}", now);
             userDao.modifyUserLogAt(now, userIdx);
 
             return postLoginRes;

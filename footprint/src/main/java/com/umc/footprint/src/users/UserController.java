@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.umc.footprint.src.users.model.*;
 import com.umc.footprint.utils.JwtService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import static com.umc.footprint.config.BaseResponseStatus.*;
 import static com.umc.footprint.utils.ValidationRegax.isRegexEmail;
 
 
+@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -79,12 +81,10 @@ public class UserController {
     @GetMapping("/autologin")
     public BaseResponse<PostLoginRes> getCheckMonthChanged() {
         try {
-            System.out.println("UserService.postUserLogin ACTIVE USER");
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
-
             jwtService.getJwt();
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.info("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 

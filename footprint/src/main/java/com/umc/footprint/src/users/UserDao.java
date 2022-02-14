@@ -5,6 +5,7 @@ import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.AwsS3Service;
 import com.umc.footprint.src.users.model.*;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,6 +24,7 @@ import java.util.*;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
 
+@Slf4j
 @Repository
 public class UserDao {
     private JdbcTemplate jdbcTemplate;
@@ -1169,7 +1171,6 @@ public class UserDao {
     }
 
     public PostLoginRes getUserIdAndStatus(String email) {
-        System.out.println("UserDao.getUserIdAndStatus");
         String checkEmailQuery = "select userId, status from User where email = ?";
         return this.jdbcTemplate.queryForObject(checkEmailQuery,
                 (rs, rowNum) -> PostLoginRes.builder()
@@ -1180,7 +1181,6 @@ public class UserDao {
     }
 
     public int checkEmail(String email) {
-        System.out.println("UserDao.checkEmail");
         String checkEmailQuery = "select exists(select email from User where email = ?)";
         return this.jdbcTemplate.queryForObject(checkEmailQuery,
                 int.class,
@@ -1188,14 +1188,12 @@ public class UserDao {
     }
 
     public int getUserIdx(String userId) {
-        System.out.println("UserDao.getUserIdx");
-        System.out.println("userId = " + userId);
+        log.info("userId: {}", userId);
         String getUserIdxQuery = "select userIdx from User where userId = ?";
         return this.jdbcTemplate.queryForObject(getUserIdxQuery, int.class, userId);
     }
 
     public AutoLoginUser getUserLogAt(int userIdx) {
-        System.out.println("UserDao.checkMonthChanged");
         String getUserLogAtQuery = "select status,logAt from User where userIdx = ?";
 
         return this.jdbcTemplate.queryForObject(getUserLogAtQuery,
@@ -1208,7 +1206,6 @@ public class UserDao {
     }
 
     public void modifyUserLogAt(LocalDateTime now, int userIdx) {
-        System.out.println("UserDao.modifyUserLogAt");
         String modifyUserLogAtQuery = "update User set logAt = ? where userIdx = ?";
         Object[] modifyUserLogAtParams = new Object[]{now, userIdx};
 

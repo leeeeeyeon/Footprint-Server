@@ -5,6 +5,7 @@ import com.umc.footprint.src.walks.WalkDao;
 
 import com.umc.footprint.src.users.model.GetUserTodayRes;
 import com.umc.footprint.utils.JwtService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.util.List;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
 
+@Slf4j
 @Service
 public class UserProvider {
 
@@ -334,14 +336,12 @@ public class UserProvider {
 
     // email을 통해 유저 중복 검사
     public PostLoginRes checkEmail(String email) throws BaseException {
-        System.out.println("UserProvider.checkEmail1");
         try {
             // flag == 1 -> 유저 이미 존재
             // flag == 0 -> 유저 정보 등록 필요
             int flag = userDao.checkEmail(email);
 
             if (flag == 1) {
-                System.out.println("UserProvider.checkEmail2");
                 // email로 userId랑 상태 추출
                 PostLoginRes postLoginRes = userDao.getUserIdAndStatus(email);
                 // userId 암호화
@@ -364,7 +364,6 @@ public class UserProvider {
     // userId로 userIdx 추출
     public int getUserIdx(String userId) throws BaseException {
         try {
-            System.out.println("UserProvider.getUserIdx");
             return userDao.getUserIdx(userId);
         } catch (Exception exception) {
             throw new BaseException(NOT_EXIST_USER);
