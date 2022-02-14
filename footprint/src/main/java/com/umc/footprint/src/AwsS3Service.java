@@ -52,7 +52,7 @@ public class AwsS3Service {
             photoUrlList.add(amazonS3.getUrl(bucket, fileName).toString());
         });
 
-        log.info("첫번째 파일의 extension: {}", getFileExtension(photoUrlList.get(0)));
+        log.debug("첫번째 파일의 extension: {}", getFileExtension(photoUrlList.get(0)));
 
         return photoUrlList;
     }
@@ -62,13 +62,13 @@ public class AwsS3Service {
         String photoUrl;
 
 
-        log.info("파일 이름: {}", oneMultipartFile.getOriginalFilename());
+        log.debug("파일 이름: {}", oneMultipartFile.getOriginalFilename());
         String OnefileName = createFileName(oneMultipartFile.getOriginalFilename());
-        log.info("변환된 파일 이름: {}", OnefileName);
+        log.debug("변환된 파일 이름: {}", OnefileName);
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(oneMultipartFile.getSize());
         objectMetadata.setContentType(oneMultipartFile.getContentType());
-        log.info("content type: {}", objectMetadata.getContentType());
+        log.debug("content type: {}", objectMetadata.getContentType());
 
         try (InputStream inputStream = oneMultipartFile.getInputStream()) {
             amazonS3.putObject(new PutObjectRequest(bucket, OnefileName, inputStream, objectMetadata)

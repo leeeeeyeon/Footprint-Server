@@ -12,14 +12,14 @@ public class GeometryUtil {
     public static Geometry wktToGeometry(String wellKnownText) {
         Geometry geometry = null;
 
-        log.info("wellKnownText: {}", wellKnownText);
+        log.debug("wellKnownText: {}", wellKnownText);
         try {
             geometry = wktReader.read(wellKnownText);
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-        log.info("geometry: {}", geometry);
+        log.debug("geometry: {}", geometry);
         return geometry;
     }
 }

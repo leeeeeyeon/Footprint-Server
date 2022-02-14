@@ -30,7 +30,7 @@ public class JwtService {
     public String createJwt(String userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + 2592000000L);
-        log.info("만기 날짜: {}", expiryDate);
+        log.debug("만기 날짜: {}", expiryDate);
 
         return Jwts.builder()
                 .setHeaderParam("type", "jwt")
@@ -57,24 +57,24 @@ public class JwtService {
      */
     public String getUserId() throws BaseException {
         //1. JWT 추출
-        log.info("1. JWT 추출");
+        log.debug("1. JWT 추출");
         String accessToken = getJwt();
         if (accessToken == null || accessToken.length() == 0) {
             throw new BaseException(EMPTY_JWT);
         }
-        log.info("accessToken = " + accessToken);
+        log.debug("accessToken = " + accessToken);
 
         // 2. JWT parsing
         Jws<Claims> claims;
         try {
-            log.info("2. JWT parsing");
+            log.debug("2. JWT parsing");
             claims = Jwts.parser()
                     .setSigningKey(JwtSecretKey)
                     .parseClaimsJws(accessToken);
         } catch (ExpiredJwtException exception) {
             throw new BaseException(EXPIRED_JWT);
         } catch (Exception ignored) {
-            log.info("토큰 잘못됨");
+            log.debug("토큰 잘못됨");
             throw new BaseException(INVALID_JWT);
         }
 

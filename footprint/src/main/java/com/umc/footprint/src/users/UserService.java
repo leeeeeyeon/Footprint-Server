@@ -98,11 +98,11 @@ public class UserService {
     public int postUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException{
         try {
             int resultInfo = userDao.modifyUserInfo(userIdx, patchUserInfoReq);
-            log.info("resultInfo: {}", resultInfo);
+            log.debug("resultInfo: {}", resultInfo);
             int result = userDao.postGoal(userIdx, patchUserInfoReq);
-            log.info("result : {}", result);
+            log.debug("result : {}", result);
             int resultNext = userDao.postGoalNext(userIdx, patchUserInfoReq);
-            log.info("resultNext: {}", resultNext);
+            log.debug("resultNext: {}", resultNext);
 
             if(resultInfo == 0 || result == 0 || resultNext == 0)
                 return 0;
@@ -117,7 +117,7 @@ public class UserService {
     public PostLoginRes postUserLogin(PostLoginReq postLoginReq) throws BaseException {
         { // email 중복 확인 있으면 status에 Done 넣고 return
             PostLoginRes result = userProvider.checkEmail(postLoginReq.getEmail());
-            log.info("유저의 status: {}", result.getStatus());
+            log.debug("유저의 status: {}", result.getStatus());
             // status: NONE -> 회원가입(유저 정보 db에 등록 필요)
             // status: ACTIVE -> 로그인
             // status: ACTIVE -> 정보 입력 필요
@@ -167,7 +167,7 @@ public class UserService {
             }
 
             // 현재 로그인하는 시간 logAt에 저장
-            log.info("현재 시간: {}", now);
+            log.debug("현재 시간: {}", now);
             userDao.modifyUserLogAt(now, userIdx);
 
             return postLoginRes;
