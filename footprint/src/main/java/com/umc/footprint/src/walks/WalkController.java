@@ -95,13 +95,13 @@ public class WalkController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.info("userId: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
             // Walk 테이블 전체에서 인덱스
             int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
-            System.out.println("wholeWalkIdx = " + wholeWalkIdx);
+            log.info("wholeWalkIdx: {}", wholeWalkIdx);
 
             GetWalkInfo getWalkInfo = walkProvider.getWalkInfo(wholeWalkIdx);
             return new BaseResponse<>(getWalkInfo);
@@ -118,13 +118,13 @@ public class WalkController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.info("userId: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
             // Walk 테이블 전체에서 인덱스
             int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
-            System.out.println("wholeWalkIdx = " + wholeWalkIdx);
+            log.info("wholeWalkIdx: {}", wholeWalkIdx);
 
             if (wholeWalkIdx == 0) {
                 return new BaseResponse<>(BaseResponseStatus.REQUEST_ERROR);

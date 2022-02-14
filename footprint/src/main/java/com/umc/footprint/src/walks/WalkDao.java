@@ -318,13 +318,12 @@ public class WalkDao {
     }
 
     public int getWalkWholeIdx(int walkIdx, int userIdx) {
-        System.out.println("WalkDao.getWalkWholeIdx");
         String getWalkWholeIdxQuery = "select walkIdx from Walk where userIdx = ? and status = 'ACTIVE' ORDER BY startAt ASC LIMIT ?,1";
         return this.jdbcTemplate.queryForObject(getWalkWholeIdxQuery, int.class, userIdx, walkIdx-1);
     }
 
     public int checkWalkVal(int walkIdx) {
-        System.out.println("WalkDao.checkWalkVal");
+        log.info("WalkDao.checkWalkVal");
         String checkWalkValQuery = "select EXISTS (select walkIdx from Walk where walkIdx=? and status='ACTIVE') as success;";
         return this.jdbcTemplate.queryForObject(checkWalkValQuery, int.class, walkIdx);
     }
