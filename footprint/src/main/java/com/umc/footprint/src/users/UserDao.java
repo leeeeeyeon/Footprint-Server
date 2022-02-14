@@ -159,7 +159,7 @@ public class UserDao {
                         rs.getBoolean("fri"),
                         rs.getBoolean("sat")), userIdx);
 
-        System.out.println(getGoalDays);
+        log.info("getGoalDays: {}", getGoalDays.toString());
         double count = 0; //저번달의 설정한 목표요일 전체 횟수
         int year = now.getYear();
         int month = now.getMonthValue();
@@ -258,10 +258,10 @@ public class UserDao {
             walkRate=(walkCount/count) * 100;
         }
 
-        System.out.println("walkCout : "+ walkCount);
-        System.out.println("count : "+ count);
-        System.out.println("walkRate : "+ walkRate);
-        System.out.println("rate : "+ rate);
+        log.info("walkCout: {}", walkCount);
+        log.info("count: {}", count);
+        log.info("walkRate: {}", walkRate);
+        log.info("rate: {}", rate);
         /*
          * MASTER - 목표 요일 중 80% 이상 / 달성률 90%
          * PRO - 목표 요일 중 50% 이상 / 달성률 70%
@@ -732,7 +732,7 @@ public class UserDao {
                 "order by endAt desc";
 
         List<String> walkAtList = jdbcTemplate.queryForList(getWalkAtQuery, String.class, tag, "ACTIVE", userIdx, "ACTIVE");
-        System.out.println("walkAtList: "+walkAtList);
+        log.info("walkAtList: {}", walkAtList);
         List<GetTagRes> result = new ArrayList<>(); // 최종 출력 값을 담을 리스트
 
         for(String walkAt : walkAtList) {
@@ -757,7 +757,7 @@ public class UserDao {
                     "    where hashtag=?\n" +
                     "    and cast(date_format(endAt, '%Y.%m.%d') as char(10))=? and T.status=?";
             List<Integer> walkIdxList = jdbcTemplate.queryForList(walkIdxQuery, int.class, tag, walkAt, "ACTIVE");
-            System.out.println("walkIdxList: "+walkIdxList);
+            log.info("walkIdxList: {}", walkIdxList);
             List<SearchWalk> walks = new ArrayList<>(); // 해당 날짜 + 해당 해시태그를 가지는 산책 기록 리스트
             for(Integer walkIdx : walkIdxList) {
                 // 산책 기록 하나 조회
@@ -911,7 +911,7 @@ public class UserDao {
     // 초기 유저 추가 정보를 User 테이블에 추가
     public int modifyUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) {
 
-        System.out.println("userIdx = " + userIdx);
+        log.info("userIdx: {}", userIdx);
         String patchUserInfoQuery = "UPDATE User SET nickname = ?, birth = ?, sex = ?, height = ?, weight = ?, status = ? WHERE userIdx = ?";
         Object[] patchUserInfoParams = new Object[]{patchUserInfoReq.getNickname(), patchUserInfoReq.getBirth(), patchUserInfoReq.getSex(),
                 patchUserInfoReq.getHeight(), patchUserInfoReq.getWeight(), "ACTIVE",userIdx};
@@ -974,7 +974,7 @@ public class UserDao {
 
     // true = 유저 있다 & false = 유저 없다.
     public boolean checkUser(int userIdx, String tableName) throws BaseException {
-        System.out.println("UserDao.checkUser");
+        log.info("UserDao.checkUser");
         int userCount = this.jdbcTemplate.queryForObject("SELECT count(*) FROM " + tableName + " WHERE userIdx = ? ", int.class, userIdx);
 
         if (userCount != 0)
@@ -996,7 +996,7 @@ public class UserDao {
 
     // 유저 상태 조회 - validation에 사용
     public String getStatus(int userIdx, String tableName) {
-        System.out.println("UserDao.getStatus");
+        log.info("UserDao.getStatus");
         String getStatusQuery = "select status from " + tableName + " where userIdx=?";
         return this.jdbcTemplate.queryForObject(getStatusQuery, String.class, userIdx);
     }
@@ -1164,7 +1164,6 @@ public class UserDao {
     // 로그인 정보 입력
     public void postUserLogin(PostLoginReq postLoginReq) {
         String postLoginQuery = "insert into User(userId, username, email, providerType, status) values (?,?,?,?,?)";
-        System.out.println("UserDao.postUserLogin");
         String status = "ONGOING";
         Object[] postLoginParams = new Object[]{postLoginReq.getUserId(), postLoginReq.getUsername(), postLoginReq.getEmail(), postLoginReq.getProviderType(), status};
         this.jdbcTemplate.update(postLoginQuery,  postLoginParams);

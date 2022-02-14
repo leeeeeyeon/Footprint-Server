@@ -98,11 +98,11 @@ public class UserService {
     public int postUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException{
         try {
             int resultInfo = userDao.modifyUserInfo(userIdx, patchUserInfoReq);
-            System.out.println("resultInfo = " + resultInfo);
+            log.info("resultInfo: {}", resultInfo);
             int result = userDao.postGoal(userIdx, patchUserInfoReq);
-            System.out.println("result = " + result);
+            log.info("result : {}", result);
             int resultNext = userDao.postGoalNext(userIdx, patchUserInfoReq);
-            System.out.println("resultNext = " + resultNext);
+            log.info("resultNext: {}", resultNext);
 
             if(resultInfo == 0 || result == 0 || resultNext == 0)
                 return 0;

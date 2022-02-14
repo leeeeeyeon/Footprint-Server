@@ -37,7 +37,7 @@ public class UserProvider {
 
         GetUserTodayRes userTodayRes = userDao.getUserToday(userIdx);
 
-        System.out.println("userTodayRes : " + userTodayRes);
+        log.info("userTodayRes: {}", userTodayRes);
 
         return userTodayRes;
     }
