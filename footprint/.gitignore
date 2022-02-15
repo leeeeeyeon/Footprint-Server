@@ -39,4 +39,6 @@ out/
 ### DevOps 설정 관련 비밀번호 ###
 application.yml
 aws.yml
-Secret.java
+
+### Log 파일 ###
+*.log

@@ -74,7 +74,7 @@ public class JwtService {
         } catch (ExpiredJwtException exception) {
             throw new BaseException(EXPIRED_JWT);
         } catch (Exception ignored) {
-            log.debug("토큰 잘못됨");
+            log.error("토큰 잘못됨");
             throw new BaseException(INVALID_JWT);
         }
 
