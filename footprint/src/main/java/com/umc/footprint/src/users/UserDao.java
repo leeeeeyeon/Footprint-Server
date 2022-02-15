@@ -310,7 +310,7 @@ public class UserDao {
     // 해당 userIdx를 갖는 오늘 산책 관련 정보 조회
     public GetUserTodayRes getUserToday(int userIdx){
         String getUserTodayQuery = "SELECT SUM(W.goalRate) as goalRate, G.walkGoalTime, " +
-                "SUM(TIMESTAMPDIFF(minute,W.startAt,W.endAt)) as walkTime, " +
+                "SUM(TIMESTAMPDIFF(second ,W.startAt,W.endAt)) as walkTime, " +
                 "SUM(W.distance) as distance, " +
                 "SUM(W.calorie) as calorie " +
                 "FROM Walk W " +
@@ -975,7 +975,11 @@ public class UserDao {
     // true = 유저 있다 & false = 유저 없다.
     public boolean checkUser(int userIdx, String tableName) throws BaseException {
         log.debug("UserDao.checkUser");
-        int userCount = this.jdbcTemplate.queryForObject("SELECT count(*) FROM " + tableName + " WHERE userIdx = ? ", int.class, userIdx);
+        int userCount;
+        if (tableName == "Walk")
+            userCount = this.jdbcTemplate.queryForObject("SELECT count(*) FROM " + tableName + " WHERE userIdx = ? and status = 'ACTIVE'", int.class, userIdx);
+        else
+            userCount = this.jdbcTemplate.queryForObject("SELECT count(*) FROM " + tableName + " WHERE userIdx = ? ", int.class, userIdx);
 
         if (userCount != 0)
             return true;

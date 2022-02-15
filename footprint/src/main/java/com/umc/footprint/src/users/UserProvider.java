@@ -37,6 +37,7 @@ public class UserProvider {
     public GetUserTodayRes getUserToday(int userIdx) throws BaseException {
 
         GetUserTodayRes userTodayRes = userDao.getUserToday(userIdx);
+        userTodayRes.setWalkTime(userTodayRes.getWalkTime()/60);
 
         log.debug("userTodayRes: {}", userTodayRes);
 
