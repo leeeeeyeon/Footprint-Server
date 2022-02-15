@@ -115,6 +115,20 @@ public class UserService {
         try {
             int resultInfo = userDao.modifyUserInfo(userIdx, patchUserInfoReq);
             log.debug("resultInfo: {}", resultInfo);
+
+            // 요일별 인덱스 차이 해결을 위한 임시 코드
+            List<Integer> dayIdxList = new ArrayList<>();
+            for (Integer dayIdx: patchUserInfoReq.getDayIdx()){
+                if(dayIdx == 7)
+                    dayIdxList.add(1);
+                else
+                    dayIdxList.add(dayIdx+1);
+            }
+            Collections.sort(dayIdxList);
+            patchUserInfoReq.setDayIdx(dayIdxList);
+            log.debug("dayIdxList : {}",dayIdxList);
+            //
+
             int result = userDao.postGoal(userIdx, patchUserInfoReq);
             log.debug("result : {}", result);
             int resultNext = userDao.postGoalNext(userIdx, patchUserInfoReq);
