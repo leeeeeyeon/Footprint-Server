@@ -19,6 +19,9 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -81,6 +84,19 @@ public class UserService {
             int resultTime = userDao.modifyUserGoalTime(userIdx, patchUserGoalReq);
             if(resultTime == 0)
                 throw new BaseException(BaseResponseStatus.MODIFY_USER_GOAL_FAIL);
+
+            // 요일별 인덱스 차이 해결을 위한 임시 코드
+            List<Integer> dayIdxList = new ArrayList<>();
+            for (Integer dayIdx: patchUserGoalReq.getDayIdx()){
+                if(dayIdx == 7)
+                    dayIdxList.add(1);
+                else
+                    dayIdxList.add(dayIdx+1);
+            }
+            Collections.sort(dayIdxList);
+            patchUserGoalReq.setDayIdx(dayIdxList);
+            log.debug("dayIdxList : {}",dayIdxList);
+            //
 
             int resultDay = userDao.modifyUserGoalDay(userIdx, patchUserGoalReq);
             if(resultDay == 0)

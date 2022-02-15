@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.umc.footprint.src.users.model.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
@@ -268,6 +269,19 @@ public class UserProvider {
     public GetUserGoalRes getUserGoal(int userIdx) throws BaseException{
         try{
             GetUserGoalRes getUserGoalRes = userDao.getUserGoal(userIdx);
+
+            // 요일별 인덱스 차이 해결을 위한 임시 코드
+            List<Integer> dayIdxList = new ArrayList<>();
+            for (Integer dayIdx: getUserGoalRes.getDayIdx()){
+                if(dayIdx == 1)
+                    dayIdxList.add(7);
+                else
+                    dayIdxList.add(dayIdx-1);
+            }
+            Collections.sort(dayIdxList);
+            getUserGoalRes.setDayIdx(dayIdxList);
+            //
+
             return getUserGoalRes;
         } catch (Exception exception){
             throw new BaseException(DATABASE_ERROR);
@@ -278,6 +292,19 @@ public class UserProvider {
     public GetUserGoalRes getUserGoalNext(int userIdx) throws BaseException{
         try{
             GetUserGoalRes getUserGoalRes = userDao.getUserGoalNext(userIdx);
+
+            // 요일별 인덱스 차이 해결을 위한 임시 코드
+            List<Integer> dayIdxList = new ArrayList<>();
+            for (Integer dayIdx: getUserGoalRes.getDayIdx()){
+                if(dayIdx == 1)
+                    dayIdxList.add(7);
+                else
+                    dayIdxList.add(dayIdx-1);
+            }
+            Collections.sort(dayIdxList);
+            getUserGoalRes.setDayIdx(dayIdxList);
+            //
+
             return getUserGoalRes;
         } catch (Exception exception){
           throw new BaseException(DATABASE_ERROR);
