@@ -3,6 +3,7 @@ package com.umc.footprint.src.walks;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.walks.model.*;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.List;
 import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
 import static com.umc.footprint.config.BaseResponseStatus.INVALID_WALKIDX;
 
+@Slf4j
 @Service
 public class WalkProvider {
     private final WalkDao walkDao;
@@ -39,7 +41,6 @@ public class WalkProvider {
     //
     public Float getGoalRate(SaveWalk walk) throws BaseException {
         try {
-            System.out.println("WalkProvider.getGoalRate");
             // 산책 시간
             Integer walkTime = Math.toIntExact(Duration.between(walk.getStartAt(), walk.getEndAt()).toMinutes());
             // 산책 목표 시간
@@ -63,16 +64,12 @@ public class WalkProvider {
         try {
             // 조건에 부합하는 뱃지 조회
             GetBadgeIdx getBadgeIdx = walkDao.getAcquiredBadgeIdxList(userIdx);
-            System.out.println("getBadgeIdx.getDistanceBadgeIdx() = " + getBadgeIdx.getDistanceBadgeIdx());
-            System.out.println("getBadgeIdx.getRecordBadgeIdx() = " + getBadgeIdx.getRecordBadgeIdx());
             // 원래 가지고 있던 뱃지 조회
             List<Integer> getOriginBadgeIdxList = walkDao.getOriginBadgeIdxList(userIdx);
-            System.out.println("getOriginBadgeIdxList = " + getOriginBadgeIdxList);
+            log.debug("원래 가지고 있던 뱃지들: {}", getOriginBadgeIdxList);
 
             // 얻은 뱃지
             List<Integer> acquiredBadgeIdxList = new ArrayList<>();
-
-
 
             // 원래 갖고 있던 뱃지(2~5)의 가장 큰 값
             int originMaxDistanceBadgeIdx = 1;
@@ -123,7 +120,6 @@ public class WalkProvider {
 
     public int checkFirstWalk(int userIdx) throws BaseException {
         try {
-            System.out.println("WalkProvider.checkFirstWalk entered");
             return walkDao.checkFirstWalk(userIdx);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
@@ -132,9 +128,8 @@ public class WalkProvider {
 
     public int getWalkWholeIdx(int walkIdx, int userIdx) throws BaseException {
         try {
-            System.out.println("FootprintProvider.getFootprintWholeIdx");
-            System.out.println("walkIdx = " + walkIdx);
-            System.out.println("userIdx = " + userIdx);
+            log.debug("walkIdx: {}", walkIdx);
+            log.debug("userIdx: {}", userIdx);
             return walkDao.getWalkWholeIdx(walkIdx, userIdx);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);

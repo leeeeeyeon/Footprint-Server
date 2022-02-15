@@ -2,6 +2,7 @@ package com.umc.footprint.src.footprints;
 
 import com.umc.footprint.config.BaseException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import static com.umc.footprint.config.BaseResponseStatus.*;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class FootprintProvider {
     private final FootprintDao footprintDao;
@@ -39,11 +41,10 @@ public class FootprintProvider {
 
     public int getFootprintWholeIdx(int walkIdx, int footprintIdx) throws BaseException {
         try {
-            System.out.println("FootprintProvider.getFootprintWholeIdx");
-            System.out.println("walkIdx = " + walkIdx);
-            System.out.println("footprintIdx = " + footprintIdx);
+            log.debug("walkIdx: {} ", walkIdx);
+            log.debug("footprintIdx: {} ", footprintIdx);
             int wholeFootprintIdx = footprintDao.getFootprintWholeIdx(walkIdx, footprintIdx);
-            System.out.println(wholeFootprintIdx);
+            log.debug("wholeFootprintIdx: {}", wholeFootprintIdx);
             return wholeFootprintIdx;
 
         } catch (Exception exception) {

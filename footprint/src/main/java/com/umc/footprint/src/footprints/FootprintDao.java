@@ -154,7 +154,6 @@ public class FootprintDao {
 
     // 산책 내 n번째 발자국 -> 전체에서의 발자국 인덱스
    public int getFootprintWholeIdx(int walkIdx, int footprintIdx) {
-        System.out.println("FootprintDao.getFootprintWholeIdx");
         String getFootprintWholeIdxQuery = "select footprintIdx from Footprint\n" +
                 "join Walk W on Footprint.walkIdx = W.walkIdx\n" +
                 "where W.walkIdx = ? and Footprint.status = 'ACTIVE'\n" +
