@@ -5,6 +5,7 @@ import com.umc.footprint.src.walks.WalkDao;
 
 import com.umc.footprint.src.users.model.GetUserTodayRes;
 import com.umc.footprint.utils.JwtService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,10 +13,12 @@ import org.springframework.stereotype.Service;
 import com.umc.footprint.src.users.model.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
 
+@Slf4j
 @Service
 public class UserProvider {
 
@@ -35,7 +38,7 @@ public class UserProvider {
 
         GetUserTodayRes userTodayRes = userDao.getUserToday(userIdx);
 
-        System.out.println("userTodayRes : " + userTodayRes);
+        log.debug("userTodayRes: {}", userTodayRes);
 
         return userTodayRes;
     }
@@ -266,6 +269,19 @@ public class UserProvider {
     public GetUserGoalRes getUserGoal(int userIdx) throws BaseException{
         try{
             GetUserGoalRes getUserGoalRes = userDao.getUserGoal(userIdx);
+
+            // 요일별 인덱스 차이 해결을 위한 임시 코드
+            List<Integer> dayIdxList = new ArrayList<>();
+            for (Integer dayIdx: getUserGoalRes.getDayIdx()){
+                if(dayIdx == 1)
+                    dayIdxList.add(7);
+                else
+                    dayIdxList.add(dayIdx-1);
+            }
+            Collections.sort(dayIdxList);
+            getUserGoalRes.setDayIdx(dayIdxList);
+            //
+
             return getUserGoalRes;
         } catch (Exception exception){
             throw new BaseException(DATABASE_ERROR);
@@ -276,6 +292,19 @@ public class UserProvider {
     public GetUserGoalRes getUserGoalNext(int userIdx) throws BaseException{
         try{
             GetUserGoalRes getUserGoalRes = userDao.getUserGoalNext(userIdx);
+
+            // 요일별 인덱스 차이 해결을 위한 임시 코드
+            List<Integer> dayIdxList = new ArrayList<>();
+            for (Integer dayIdx: getUserGoalRes.getDayIdx()){
+                if(dayIdx == 1)
+                    dayIdxList.add(7);
+                else
+                    dayIdxList.add(dayIdx-1);
+            }
+            Collections.sort(dayIdxList);
+            getUserGoalRes.setDayIdx(dayIdxList);
+            //
+
             return getUserGoalRes;
         } catch (Exception exception){
           throw new BaseException(DATABASE_ERROR);
@@ -334,14 +363,12 @@ public class UserProvider {
 
     // email을 통해 유저 중복 검사
     public PostLoginRes checkEmail(String email) throws BaseException {
-        System.out.println("UserProvider.checkEmail1");
         try {
             // flag == 1 -> 유저 이미 존재
             // flag == 0 -> 유저 정보 등록 필요
             int flag = userDao.checkEmail(email);
 
             if (flag == 1) {
-                System.out.println("UserProvider.checkEmail2");
                 // email로 userId랑 상태 추출
                 PostLoginRes postLoginRes = userDao.getUserIdAndStatus(email);
                 // userId 암호화
@@ -364,7 +391,6 @@ public class UserProvider {
     // userId로 userIdx 추출
     public int getUserIdx(String userId) throws BaseException {
         try {
-            System.out.println("UserProvider.getUserIdx");
             return userDao.getUserIdx(userId);
         } catch (Exception exception) {
             throw new BaseException(NOT_EXIST_USER);

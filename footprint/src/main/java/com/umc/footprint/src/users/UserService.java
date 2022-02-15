@@ -8,6 +8,7 @@ import com.umc.footprint.src.AwsS3Service;
 import com.umc.footprint.src.users.model.*;
 
 import com.umc.footprint.utils.JwtService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,8 +19,12 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Service
 public class UserService {
     private final UserDao userDao;
@@ -80,6 +85,19 @@ public class UserService {
             if(resultTime == 0)
                 throw new BaseException(BaseResponseStatus.MODIFY_USER_GOAL_FAIL);
 
+            // 요일별 인덱스 차이 해결을 위한 임시 코드
+            List<Integer> dayIdxList = new ArrayList<>();
+            for (Integer dayIdx: patchUserGoalReq.getDayIdx()){
+                if(dayIdx == 7)
+                    dayIdxList.add(1);
+                else
+                    dayIdxList.add(dayIdx+1);
+            }
+            Collections.sort(dayIdxList);
+            patchUserGoalReq.setDayIdx(dayIdxList);
+            log.debug("dayIdxList : {}",dayIdxList);
+            //
+
             int resultDay = userDao.modifyUserGoalDay(userIdx, patchUserGoalReq);
             if(resultDay == 0)
                 throw new BaseException(BaseResponseStatus.MODIFY_USER_GOAL_FAIL);
@@ -96,11 +114,11 @@ public class UserService {
     public int postUserInfo(int userIdx, PatchUserInfoReq patchUserInfoReq) throws BaseException{
         try {
             int resultInfo = userDao.modifyUserInfo(userIdx, patchUserInfoReq);
-            System.out.println("resultInfo = " + resultInfo);
+            log.debug("resultInfo: {}", resultInfo);
             int result = userDao.postGoal(userIdx, patchUserInfoReq);
-            System.out.println("result = " + result);
+            log.debug("result : {}", result);
             int resultNext = userDao.postGoalNext(userIdx, patchUserInfoReq);
-            System.out.println("resultNext = " + resultNext);
+            log.debug("resultNext: {}", resultNext);
 
             if(resultInfo == 0 || result == 0 || resultNext == 0)
                 return 0;
@@ -114,16 +132,14 @@ public class UserService {
     @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public PostLoginRes postUserLogin(PostLoginReq postLoginReq) throws BaseException {
         { // email 중복 확인 있으면 status에 Done 넣고 return
-            System.out.println("UserService.postUserLogin1");
             PostLoginRes result = userProvider.checkEmail(postLoginReq.getEmail());
-            System.out.println("result.getStatus() = " + result.getStatus());
+            log.debug("유저의 status: {}", result.getStatus());
             // status: NONE -> 회원가입(유저 정보 db에 등록 필요)
             // status: ACTIVE -> 로그인
             // status: ACTIVE -> 정보 입력 필요
             switch (result.getStatus()) {
                 case "NONE":
                     try {
-                        System.out.println("UserService.postUserLogin2");
                         // 암호화
                         String jwt = jwtService.createJwt(postLoginReq.getUserId());
                         // 유저 정보 db에 등록
@@ -167,7 +183,7 @@ public class UserService {
             }
 
             // 현재 로그인하는 시간 logAt에 저장
-            System.out.println("now = " + now);
+            log.debug("현재 시간: {}", now);
             userDao.modifyUserLogAt(now, userIdx);
 
             return postLoginRes;

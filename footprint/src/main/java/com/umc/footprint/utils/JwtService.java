@@ -3,6 +3,7 @@ import com.umc.footprint.config.BaseException;
 import io.jsonwebtoken.*;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -14,6 +15,7 @@ import java.util.TimeZone;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JwtService {
@@ -26,12 +28,9 @@ public class JwtService {
    @return String
     */
     public String createJwt(String userId) {
-        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
         Date now = new Date();
-        System.out.println("now = " + now);
         Date expiryDate = new Date(now.getTime() + 2592000000L);
-        System.out.println("expiryDate = " + expiryDate);
-        System.out.println("JwtSecretKey = " + JwtSecretKey);
+        log.debug("만기 날짜: {}", expiryDate);
 
         return Jwts.builder()
                 .setHeaderParam("type", "jwt")
@@ -58,24 +57,24 @@ public class JwtService {
      */
     public String getUserId() throws BaseException {
         //1. JWT 추출
-        System.out.println("1. JWT 추출");
+        log.debug("1. JWT 추출");
         String accessToken = getJwt();
         if (accessToken == null || accessToken.length() == 0) {
             throw new BaseException(EMPTY_JWT);
         }
-        System.out.println("accessToken = " + accessToken);
+        log.debug("accessToken = " + accessToken);
 
         // 2. JWT parsing
         Jws<Claims> claims;
         try {
-            System.out.println("2. JWT parsing");
+            log.debug("2. JWT parsing");
             claims = Jwts.parser()
                     .setSigningKey(JwtSecretKey)
                     .parseClaimsJws(accessToken);
         } catch (ExpiredJwtException exception) {
             throw new BaseException(EXPIRED_JWT);
         } catch (Exception ignored) {
-            System.out.println("토큰 잘못됨");
+            log.error("토큰 잘못됨");
             throw new BaseException(INVALID_JWT);
         }
 

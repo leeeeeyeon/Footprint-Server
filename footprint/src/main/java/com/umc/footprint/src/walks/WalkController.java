@@ -12,6 +12,7 @@ import com.umc.footprint.src.users.UserProvider;
 import com.umc.footprint.src.walks.model.*;
 
 import com.umc.footprint.utils.JwtService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 import static com.umc.footprint.config.BaseResponseStatus.EMPTY_WALK_PHOTO;
 
+@Slf4j
 @RestController
 @RequestMapping("/walks")
 public class WalkController {
@@ -51,27 +53,21 @@ public class WalkController {
             ) throws BaseException {
         // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
         String userId = jwtService.getUserId();
-        System.out.println("userId = " + userId);
+        log.debug("userId = " + userId);
         // userId로 userIdx 추출
         int userIdx = userProvider.getUserIdx(userId);
         walk.setUserIdx(userIdx);
 
 
-        System.out.println("walk.getStartAt() = " + walk.getStartAt());
-        System.out.println("walk.getEndAt() = " + walk.getEndAt());
-        System.out.println("walk.getDistance() = " + walk.getDistance());
-        System.out.println("walk.getUserIdx() = " + walk.getUserIdx());
-        System.out.println("walk.getCoordinates() = " + walk.getCoordinates());
-        System.out.println("walk.getCalorie() = " + walk.getCalorie());
+        log.debug("walk startAt: {}", walk.getStartAt());
+        log.debug("walk endAt: {}", walk.getEndAt());
+        log.debug("walk distance: {}", walk.getDistance());
+        log.debug("walk userIdx: {}", walk.getUserIdx());
+        log.debug("walk coordinate: {}", walk.getCoordinates());
+        log.debug("walk calorie: {}", walk.getCalorie());
+        log.debug("walk photoMatchNumList: {}", walk.getPhotoMatchNumList());
 
-        System.out.println("walk.getPhotoMatchNumList() = " + walk.getPhotoMatchNumList());
-//        System.out.println("footprintList = " + footprintList.get(0).getWrite());
-//        System.out.println("footprintList = " + footprintList.get(0).getCoordinates());
-//        System.out.println("footprintList = " + footprintList.get(0).getHashtagList());
-//        System.out.println("footprintList = " + footprintList.get(0).getRecordAt());
-//
-//        System.out.println("photos = " + photos.get(0).getOriginalFilename());
-//        System.out.println("photos.get(0).getContentType() = " + photos.get(0).getContentType());
+
 
         try {
 
@@ -99,13 +95,13 @@ public class WalkController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("userId: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
             // Walk 테이블 전체에서 인덱스
             int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
-            System.out.println("wholeWalkIdx = " + wholeWalkIdx);
+            log.debug("wholeWalkIdx: {}", wholeWalkIdx);
 
             GetWalkInfo getWalkInfo = walkProvider.getWalkInfo(wholeWalkIdx);
             return new BaseResponse<>(getWalkInfo);
@@ -122,13 +118,13 @@ public class WalkController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("userId: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
             // Walk 테이블 전체에서 인덱스
             int wholeWalkIdx = walkProvider.getWalkWholeIdx(walkIdx, userIdx);
-            System.out.println("wholeWalkIdx = " + wholeWalkIdx);
+            log.debug("wholeWalkIdx: {}", wholeWalkIdx);
 
             if (wholeWalkIdx == 0) {
                 return new BaseResponse<>(BaseResponseStatus.REQUEST_ERROR);
