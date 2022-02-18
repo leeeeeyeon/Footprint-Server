@@ -2,12 +2,15 @@ package com.umc.footprint.src.walks;
 
 import com.umc.footprint.config.BaseException;
 
+import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.src.AwsS3Service;
 import com.umc.footprint.src.users.UserService;
 import com.umc.footprint.src.walks.model.*;
 
+import com.umc.footprint.utils.AES128;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
@@ -29,14 +32,15 @@ public class WalkService {
     private final WalkProvider walkProvider;
     private final UserService userService;
     private final AwsS3Service awsS3Service;
-
+    private final EncryptProperties encryptProperties;
 
     @Autowired
-    public WalkService(WalkDao walkDao, WalkProvider walkProvider, UserService userService, AwsS3Service awsS3Service) {
+    public WalkService(WalkDao walkDao, WalkProvider walkProvider, UserService userService, AwsS3Service awsS3Service, EncryptProperties encryptProperties) {
         this.walkDao = walkDao;
         this.walkProvider = walkProvider;
         this.userService = userService;
         this.awsS3Service = awsS3Service;
+        this.encryptProperties = encryptProperties;
     }
 
     @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
@@ -51,12 +55,14 @@ public class WalkService {
             log.debug("1. 동선 이미지: file -> url ");
             // 경로 이미지 URL 생성 및 S3 업로드
             String pathImgUrl = awsS3Service.uploadFile(request.getPhotos().get(0));
+            String encryptImage = new AES128(encryptProperties.getKey()).encrypt(pathImgUrl);
             // 동선 이미지 photos에서 pop
             List<MultipartFile> removedPathImgPhotos = request.getPhotos();
             removedPathImgPhotos.remove(0);
             log.debug("동선 이미지가 빠진 사진 리스트: {}", removedPathImgPhotos);
             request.setRemovedPathImgPhotos(removedPathImgPhotos);
             log.debug("동선 이미지 url: {}", pathImgUrl);
+            log.debug("암호화된 동선 이미지 url: {}", encryptImage);
 
             // 라인에 좌표가 올 때 나는 오류 방지 (복제)
             List<List<Double>> safeCoordinate = changeSafeCoordinate(request.getWalk().getCoordinates());
@@ -68,7 +74,7 @@ public class WalkService {
                             .startAt(request.getWalk().getStartAt())
                             .endAt(request.getWalk().getEndAt())
                             .distance(request.getWalk().getDistance())
-                            .strCoordinates(convert2DListToString(safeCoordinate))
+                            .strCoordinates(new AES128(encryptProperties.getKey()).encrypt(convert2DListToString(safeCoordinate)))
                             .userIdx(request.getWalk().getUserIdx())
                             .goalRate(walkProvider.getGoalRate(request.getWalk()))
                             .calorie(request.getWalk().getCalorie())
@@ -78,10 +84,12 @@ public class WalkService {
 
             // Walk Table에 삽입 후 생성된 walkIdx return
             log.debug("3. Walk 테이블에 insert 후 walkIdx 반환");
-            int walkIdx = walkDao.addWalk(request.getWalk(), pathImgUrl);
+            int walkIdx = walkDao.addWalk(request.getWalk(), encryptImage);
 
 
             log.debug("생성된 walkIdx: {}", walkIdx);
+
+
 
             log.debug("발자국 기록이 존재할 때");
             if (!request.getFootprintList().isEmpty()) {
@@ -103,13 +111,22 @@ public class WalkService {
                         throw new BaseException(EXCEED_FOOTPRINT_SIZE);
                     }
                     List<String> imgInputList = new ArrayList<String>(imgUrlList.subList(imgInputStartIndex, imgInputEndIndex));
+                    List<String> encryptedImageList = new ArrayList<>();
+                    for (String img : imgInputList) {
+                        encryptedImageList.add(new AES128(encryptProperties.getKey()).encrypt(img));
+                    }
+                    List<String> encryptedHashtagList = new ArrayList<>();
+                    for (String hashtag : request.getFootprintList().get(i).getHashtagList()) {
+                        encryptedHashtagList.add(new AES128(encryptProperties.getKey()).encrypt(hashtag));
+                    }
+
                     SaveFootprint convertedFootprint = SaveFootprint.builder()
-                            .strCoordinate(convertedCoordinate)
-                            .write(request.getFootprintList().get(i).getWrite())
+                            .strCoordinate(new AES128(encryptProperties.getKey()).encrypt(convertedCoordinate))
+                            .write(new AES128(encryptProperties.getKey()).encrypt(request.getFootprintList().get(i).getWrite()))
                             .recordAt(request.getFootprintList().get(i).getRecordAt())
                             .walkIdx(request.getFootprintList().get(i).getWalkIdx())
-                            .hashtagList(request.getFootprintList().get(i).getHashtagList())
-                            .imgUrlList(imgInputList)
+                            .hashtagList(encryptedHashtagList)
+                            .imgUrlList(encryptedImageList)
                             .onWalk(request.getFootprintList().get(i).getOnWalk())
                             .build();
 

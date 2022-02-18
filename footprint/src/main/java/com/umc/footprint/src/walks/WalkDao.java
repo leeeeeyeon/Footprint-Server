@@ -83,7 +83,7 @@ public class WalkDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         String walkInsertQuery = "insert into Walk(startAt, endAt, distance, coordinate, pathImageUrl, userIdx, goalRate, calorie) " +
-                "values (?,?,?,ST_GeomFromText(?),?,?,?,?)";
+                "values (?,?,?,?,?,?,?,?)";
 
         log.debug("walk startAt: {}", walk.getStartAt());
         log.debug("walk endAt: {}", walk.getEndAt());
@@ -126,7 +126,7 @@ public class WalkDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         String footprintInsertQuery = "insert into `Footprint`(`coordinate`, `write`, `recordAt`, `walkIdx`, `updateAt`, `onWalk`)" +
-                "values (ST_GeomFromText(?),?,?,?,?,?)";
+                "values (?,?,?,?,?,?)";
 
         for (SaveFootprint footprint : footprintList){
             this.jdbcTemplate.update(new PreparedStatementCreator() {
