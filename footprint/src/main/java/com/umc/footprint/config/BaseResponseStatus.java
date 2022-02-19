@@ -37,7 +37,9 @@ public enum BaseResponseStatus {
     EMPTY_JWT(false, 2001, "JWT를 입력해주세요."),
     INVALID_JWT(false, 2002, "유효하지 않은 JWT입니다."),
     INVALID_USER_JWT(false,2003,"권한이 없는 유저의 접근입니다."),
+    EXPIRED_JWT(false, 2004, "만료된 JWT입니다."),
     INVALID_USERIDX(false,2100,"잘못된 유저 인덱스입니다."),
+    NOT_EXIST_USER(false, 2101, "존재하지 않는 유저입니다."),
     NOT_EXIST_USER_IN_PREV_GOAL(false,2118, "이전 달 설정한 목표가 없습니다."),
     NOT_EXIST_USER_IN_GOAL(false,2119, "아직 목표 설정을 하지 않은 사용자입니다."),
     NOT_EXIST_USER_IN_WALK(false,2120, "아직 산책 기록이 없는 사용자입니다."),
@@ -58,6 +60,7 @@ public enum BaseResponseStatus {
     POST_USERS_INVALID_EMAIL(false, 2149, "이메일 형식을 확인해주세요."),
     POST_USERS_EMPTY_USERID(false, 2150, "유저 ID를 입력해주세요."),
     MAX_NICKNAME_LENGTH(false, 2160, "닉네임은 8자를 초과할 수 없습니다."),
+    INVALID_BIRTH(false, 2161, "생년월일 값은 0000-00-00이 될 수 없습니다."),
 
     INVALID_WALKIDX(false, 2200, "잘못된 산책 인덱스입니다."),
     NO_FOOTPRINT_IN_WALK(false, 2221, "해당 산책 기록에는 발자국이 존재하지 않습니다."),

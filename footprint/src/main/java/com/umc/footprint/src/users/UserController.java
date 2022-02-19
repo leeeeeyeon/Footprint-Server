@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.umc.footprint.src.users.model.*;
 import com.umc.footprint.utils.JwtService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import static com.umc.footprint.config.BaseResponseStatus.*;
 import static com.umc.footprint.utils.ValidationRegax.isRegexEmail;
 
 
+@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -60,7 +62,15 @@ public class UserController {
         }
 
         try {
+            // 사용자 등록 또는 로그인
             PostLoginRes postLoginRes = userService.postUserLogin(postLoginReq);
+
+            // 유저 id로 인덱스 값 추출
+            int userIdx = userProvider.getUserIdx(postLoginReq.getUserId());
+
+            // 사용자의 로그인한 날짜 이전 기록과 비교 후 달 바뀌면 true return
+            postLoginRes.setCheckMonthChanged(userService.modifyUserLogAt(userIdx).isCheckMonthChanged());
+
             return new BaseResponse<>(postLoginRes);
         } catch (BaseException exception) {
             return new BaseResponse<>(exception.getStatus());
@@ -71,11 +81,10 @@ public class UserController {
     @GetMapping("/autologin")
     public BaseResponse<PostLoginRes> getCheckMonthChanged() {
         try {
-            System.out.println("UserService.postUserLogin ACTIVE USER");
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
-             jwtService.getJwt();
+            jwtService.getJwt();
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -100,7 +109,7 @@ public class UserController {
         try{
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -130,7 +139,7 @@ public class UserController {
         try{
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -153,7 +162,7 @@ public class UserController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -176,13 +185,17 @@ public class UserController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
             if (patchUserInfoReq.getNickname().length() > 8) { // 닉네임 8자 초과
                 throw new BaseException(BaseResponseStatus.MAX_NICKNAME_LENGTH);
             }
+            if (patchUserInfoReq.getBirth().equals("0000-00-00")) {
+                throw new BaseException(BaseResponseStatus.INVALID_BIRTH);
+            }
+
             userService.modifyUserInfo(userIdx, patchUserInfoReq);
 
             String result = "유저 정보가 수정되었습니다.";
@@ -204,7 +217,7 @@ public class UserController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -227,7 +240,7 @@ public class UserController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -247,12 +260,10 @@ public class UserController {
     @ResponseBody
     @GetMapping("/tmonth")
     public BaseResponse<GetMonthInfoRes> getMonthInfo() {
-        // TO-DO-LIST
-
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -308,7 +319,7 @@ public class UserController {
        try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -333,7 +344,7 @@ public class UserController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -355,7 +366,7 @@ public class UserController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -380,7 +391,7 @@ public class UserController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -402,7 +413,7 @@ public class UserController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -426,7 +437,7 @@ public class UserController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -450,10 +461,9 @@ public class UserController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
-            System.out.println("userIdx = " + userIdx);
 
             // Validaion 1. userIdx 가 0 이하일 경우 exception
             if(userIdx <= 0)
@@ -517,7 +527,7 @@ public class UserController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
@@ -542,13 +552,13 @@ public class UserController {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
-            System.out.println("userId = " + userId);
+            log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
+            userService.deleteUser(userIdx);
 
-
-            return new BaseResponse<>("Bye~");
+            return new BaseResponse<>("탈퇴 성공:(");
         }
         catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));

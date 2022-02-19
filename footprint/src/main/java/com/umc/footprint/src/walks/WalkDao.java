@@ -2,6 +2,7 @@ package com.umc.footprint.src.walks;
 
 import com.umc.footprint.src.walks.model.*;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -14,10 +15,12 @@ import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
+@Slf4j
 @Repository
 public class WalkDao {
     private JdbcTemplate jdbcTemplate;
@@ -34,7 +37,7 @@ public class WalkDao {
         String getTimeQuery = "select date_format(date(startAt), '%Y.%m.%d') as date, \n" +
                 "       date_format(time(startAt),'%H:%i') as startAt,\n" +
                 "       date_format(time(endAt),'%H:%i') as endAt, \n" +
-                "       (timestampdiff(second, startAt, endAt)) as timeString from Walk where walkIdx=?;";
+                "       (timestampdiff(second, startAt, endAt)) as timeString from Walk where walkIdx=? and status='ACTIVE';";
         GetWalkTime getWalkTime = this.jdbcTemplate.queryForObject(getTimeQuery,
                 (rs, rowNum) -> new GetWalkTime(
                         rs.getString("date"),
@@ -50,7 +53,7 @@ public class WalkDao {
                 (rs, rowNum) -> rs.getInt("footCount"), walkIdx);
 
 
-        String getWalkInfoQuery = "select walkIdx, calorie, distance, pathImageUrl from Walk where walkIdx=?;";
+        String getWalkInfoQuery = "select walkIdx, calorie, distance, pathImageUrl from Walk where walkIdx=? and status='ACTIVE';";
         GetWalkInfo getWalkInfo = this.jdbcTemplate.queryForObject(getWalkInfoQuery,
                 (rs,rowNum) -> new GetWalkInfo(
                         rs.getInt("walkIdx"),
@@ -64,15 +67,17 @@ public class WalkDao {
     }
 
     public String deleteWalk(int walkIdx) {
-        String deleteWalkQuery = "update Footprint set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 실행될 동적 쿼리문
+
+
+        String deleteFootprintQuery = "update Footprint set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 발자국 INACTIVE
+        this.jdbcTemplate.update(deleteFootprintQuery, walkIdx);
+
+        String deleteWalkQuery = "update Walk set status='INACTIVE' where walkIdx=? and status='ACTIVE';"; // 산책 INACTIVE
         this.jdbcTemplate.update(deleteWalkQuery, walkIdx);
-        //String checkDeleteQuery = "select count(footprintIdx) as footCount from footprint where walkIdx=? and status='ACTIVE';"; // 전체 삭제 확인
-        //Integer footCount = this.jdbcTemplate.queryForObject(checkDeleteQuery,
-        //        (rs, rowNum) -> rs.getInt("footCount"), walkIdx);
 
         return "Success Delete walk record!";
     }
-  
+
     //Walk 테이블에 insert
     public int addWalk(SaveWalk walk, String pathImgUrl) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -80,29 +85,30 @@ public class WalkDao {
         String walkInsertQuery = "insert into Walk(startAt, endAt, distance, coordinate, pathImageUrl, userIdx, goalRate, calorie) " +
                 "values (?,?,?,ST_GeomFromText(?),?,?,?,?)";
 
-        System.out.println("walk.getStartAt() = " + walk.getStartAt());
-        System.out.println("walk.getEndAt() = " + walk.getEndAt());
-        System.out.println("walk.getDistance() = " + walk.getDistance());
-        System.out.println("walk.getUserIdx() = " + walk.getUserIdx());
-        System.out.println("walk.getStr_coordinates() = " + walk.getStr_coordinates());
-        System.out.println("pathImgUrl = " + pathImgUrl);
-        System.out.println("walk.getUserIdx() = " + walk.getUserIdx());
-        System.out.println("walk.getGoalRate() = " + walk.getGoalRate());
-        System.out.println("walk.getPhotoMatchNumList() = " + walk.getPhotoMatchNumList());
-        System.out.println("walk.getCalorie() = " + walk.getCalorie());
+        log.debug("walk startAt: {}", walk.getStartAt());
+        log.debug("walk endAt: {}", walk.getEndAt());
+        log.debug("walk distance: {}", walk.getDistance());
+        log.debug("walk userIdx: {}", walk.getUserIdx());
+        log.debug("walk strCoordinate: {}", walk.getStrCoordinates());
+        log.debug("walk pathImgUrl: {}", pathImgUrl);
+        log.debug("walk goalRate: {}", walk.getGoalRate());
+        log.debug("walk calorie: {}", walk.getCalorie());
+        log.debug("walk photoMatchNumList: {}", walk.getPhotoMatchNumList());
 
-        TimeZone default_time_zone = TimeZone.getTimeZone("Asia/Seoul");
+        TimeZone default_time_zone = TimeZone.getTimeZone(ZoneId.of("Asia/Seoul"));
 
         TimeZone.setDefault(default_time_zone);
+        Timestamp timestampStartAt = Timestamp.valueOf(walk.getStartAt());
+        Timestamp timestampEndAt = Timestamp.valueOf(walk.getEndAt());
 
         this.jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
                 PreparedStatement preparedStatement = con.prepareStatement(walkInsertQuery, Statement.RETURN_GENERATED_KEYS);
-                preparedStatement.setTimestamp(1, Timestamp.valueOf(walk.getStartAt()));
-                preparedStatement.setTimestamp(2, Timestamp.valueOf(walk.getEndAt()));
+                preparedStatement.setTimestamp(1, timestampStartAt);
+                preparedStatement.setTimestamp(2, timestampEndAt);
                 preparedStatement.setDouble(3, walk.getDistance());
-                preparedStatement.setString(4, walk.getStr_coordinates());
+                preparedStatement.setString(4, walk.getStrCoordinates());
                 preparedStatement.setString(5, pathImgUrl);
                 preparedStatement.setInt(6, walk.getUserIdx());
                 preparedStatement.setFloat(7, walk.getGoalRate());
@@ -122,11 +128,6 @@ public class WalkDao {
         String footprintInsertQuery = "insert into `Footprint`(`coordinate`, `write`, `recordAt`, `walkIdx`, `updateAt`, `onWalk`)" +
                 "values (ST_GeomFromText(?),?,?,?,?,?)";
 
-        System.out.println("footprintList.get(i).getStrCoordinate() = " + footprintList.get(0).getStrCoordinate());
-        System.out.println("footprintList.get(i).getWrite() = " + footprintList.get(0).getWrite());
-        System.out.println("footprintList.get(i).getRecordAt() = " + footprintList.get(0).getRecordAt());
-        System.out.println("footprintList.get(i).getWalkIdx() = " + walkIdx);
-
         for (SaveFootprint footprint : footprintList){
             this.jdbcTemplate.update(new PreparedStatementCreator() {
                 @Override
@@ -144,12 +145,12 @@ public class WalkDao {
             // 자동 생성되는 인덱스 리스트에 추가
             footprint.setFootprintIdx(keyHolder.getKey().intValue());
 
-            System.out.println("footprint.getFootprintIdx() = " + footprint.getFootprintIdx());
-            System.out.println("footprint.getWrite() = " + footprint.getWrite());
-            System.out.println("footprint.getStrCoordinate() = " + footprint.getStrCoordinate());
-            System.out.println("footprint.getWalkIdx() = " + footprint.getWalkIdx());
-            System.out.println("footprint.getRecordAt() = " + footprint.getRecordAt());
-            System.out.println("footprint.getOnWalk() = " + footprint.getOnWalk());
+            log.debug("발자국 인덱스: {}", footprint.getFootprintIdx());
+            log.debug("발자국 좌표(String): {}", footprint.getStrCoordinate());
+            log.debug("발자국 내용: {}", footprint.getWrite());
+            log.debug("발자국 기록 시간: {}", footprint.getRecordAt());
+            log.debug("발자국 walkIdx: {}", walkIdx);
+            log.debug("발자국 onWalk: {}", footprint.getOnWalk());
         }
     }
 
@@ -178,7 +179,6 @@ public class WalkDao {
 
     public List<Pair<Integer, Integer>> addHashtag(List<SaveFootprint> footprintList) {
         String hashtagInsertQuery = "insert into Hashtag(hashtag) values (?)";
-        System.out.println("footprintList.get(0).getHashtagList() = " + footprintList.get(0).getHashtagList());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -186,10 +186,9 @@ public class WalkDao {
         List<Pair<Integer, Integer>> tagIdxList = new ArrayList<>();
 
         // footprint당 hashtag list 삽입
-        for (SaveFootprint f : footprintList) {
-            if (f.getHashtagList().size() != 0){
-                System.out.println("f.getHashtagList().size() = " + f.getHashtagList().size());
-                for (String hashtag : f.getHashtagList()) {
+        for (SaveFootprint footprint : footprintList) {
+            if (footprint.getHashtagList().size() != 0){
+                for (String hashtag : footprint.getHashtagList()) {
                     this.jdbcTemplate.update(new PreparedStatementCreator() {
                         @Override
                         public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
@@ -198,23 +197,19 @@ public class WalkDao {
                             return preparedStatement;
                         }
                     }, keyHolder);
+                    // tag list에 삽입
+                    tagIdxList.add(Pair.of(keyHolder.getKey().intValue(), footprint.getFootprintIdx()));
                 }
-                // tag list에 삽입
-                tagIdxList.add(Pair.of(keyHolder.getKey().intValue(), f.getFootprintIdx()));
             }
-            System.out.println("f = " + f);
-            System.out.println("f.getHashtagList().size() = " + f.getHashtagList().size());
+            log.debug("발자국 해시태그들: {}" + footprint.getHashtagList());
         }
 
-        System.out.println("tagIdxList = " + tagIdxList);
-        System.out.println("WalkDao.addHashtag exit");
+        log.debug("tag 인덱스들: {}", tagIdxList);
         return tagIdxList;
     }
 
     public void addTag(List<Pair<Integer, Integer>> tagIdxList, int userIdx) {
         String tagInsertQuery = "insert into Tag(hashtagIdx, footprintIdx, userIdx) values (?,?,?)";
-        System.out.println("tagIdxList = " + tagIdxList);
-        System.out.println("userIdx = " + userIdx);
 
         this.jdbcTemplate.batchUpdate(tagInsertQuery,
                 new BatchPreparedStatementSetter() {
@@ -254,8 +249,7 @@ public class WalkDao {
 
     // 유저의 목표 시간 반환
     public int getWalkGoalTime(int userIdx) {
-        System.out.println("WalkDao.getWalkGoalTime");
-        System.out.println("userIdx = " + userIdx);
+        log.debug("userIdx: {}", userIdx);
         String getTimeQuery = "select walkGoalTime from Goal where userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         int getTimeParam = userIdx;
         return this.jdbcTemplate.queryForObject(getTimeQuery, int.class, getTimeParam);
@@ -264,7 +258,6 @@ public class WalkDao {
     public GetBadgeIdx getAcquiredBadgeIdxList(int userIdx) {
         // 거리, 기록 관련 쿼리
 
-        System.out.println("WalkDao.getAcquiredBadgeIdxList");
         String getDisRecBadgeQuery = "SELECT \n" +
                 "       CASE\n" +
                 "            WHEN (sum(Walk.distance) between 10 and 30) then 2\n" +
@@ -275,24 +268,23 @@ public class WalkDao {
                 "        end as distanceBadgeIdx,\n" +
                 "       CASE\n" +
                 "            when (count(Walk.walkIdx) = 1) then 1" +
-                "            when (count(Walk.walkIdx) between 10 and 30) then 6\n" +
-                "            when (count(Walk.walkIdx) between 30 and 50) then 7\n" +
-                "            when (count(Walk.walkIdx) > 50) then 8\n" +
+                "            when (count(Walk.walkIdx) between 10 and 19) then 6\n" +
+                "            when (count(Walk.walkIdx) between 20 and 29) then 7\n" +
+                "            when (count(Walk.walkIdx) >= 30) then 8\n" +
                 "        else 0\n" +
                 "        end as recordBadgeIdx\n" +
                 "From Walk\n" +
                 "Where userIdx = ?\n" +
                 "group by Walk.userIdx";
 
-        System.out.println("before query");
         GetBadgeIdx getBadgeIdx = this.jdbcTemplate.queryForObject(getDisRecBadgeQuery,
                 (rs, rowNum) -> GetBadgeIdx.builder()
                         .distanceBadgeIdx(rs.getInt("distanceBadgeIdx"))
                         .recordBadgeIdx(rs.getInt("recordBadgeIdx"))
                         .build()
                 , userIdx);
-        System.out.println("getBadgeIdx.getRecordBadgeIdx() = " + getBadgeIdx.getRecordBadgeIdx());
-        System.out.println("getBadgeIdx.getDistanceBadgeIdx() = " + getBadgeIdx.getDistanceBadgeIdx());
+        log.debug("가지고 있던 기록 관련 뱃지중 가장 큰 인덱스: {}", getBadgeIdx.getRecordBadgeIdx());
+        log.debug("가지고 있던 거리 관련 뱃지중 가장 큰 인덱스: {}", getBadgeIdx.getDistanceBadgeIdx());
         return getBadgeIdx;
     }
 
@@ -319,9 +311,38 @@ public class WalkDao {
         return postWalkResList;
     }
 
+    // 유저의 산책 회수 반환
     public int checkFirstWalk(int userIdx) {
-        System.out.println("WalkDao.checkFirstWalk");
-        String checkFirstWalkQuery = "select exists (select userIdx from Walk where userIdx = ? group by userIdx having count(walkIdx) = 1)";
+        String checkFirstWalkQuery = "select count(walkIdx) from Walk where userIdx = ?";
         return this.jdbcTemplate.queryForObject(checkFirstWalkQuery, int.class, userIdx);
+    }
+
+    public int getWalkWholeIdx(int walkIdx, int userIdx) {
+        String getWalkWholeIdxQuery = "select walkIdx from Walk where userIdx = ? and status = 'ACTIVE' ORDER BY startAt ASC LIMIT ?,1";
+        return this.jdbcTemplate.queryForObject(getWalkWholeIdxQuery, int.class, userIdx, walkIdx-1);
+    }
+
+    public int checkWalkVal(int walkIdx) {
+        log.debug("WalkDao.checkWalkVal");
+        String checkWalkValQuery = "select EXISTS (select walkIdx from Walk where walkIdx=? and status='ACTIVE') as success;";
+        return this.jdbcTemplate.queryForObject(checkWalkValQuery, int.class, walkIdx);
+    }
+
+    public List<Integer> getFootprintIdxList(int walkIdx) {
+        String getFootprintQuery = "select footprintIdx from Footprint where walkIdx=?;";
+        List<Integer> footprintIdxList = jdbcTemplate.queryForList(getFootprintQuery, int.class, walkIdx);
+        return footprintIdxList;
+    }
+
+    // 해당 발자국의 사진 inactive
+    public void inactivePhoto(int footprintIdx) {
+        String inactivePhotoQuery = "update Photo set status='INACTIVE' where footprintIdx=? and status='ACTIVE';"; // 사진 INACTIVE
+        this.jdbcTemplate.update(inactivePhotoQuery, footprintIdx);
+    }
+
+    // 해당 발자국의 태그 inactive
+    public void inactiveTag(int footprintIdx) {
+        String inactiveTagQuery = "update Tag set status='INACTIVE' where footprintIdx=? and status='ACTIVE';"; // 태그 INACTIVE
+        this.jdbcTemplate.update(inactiveTagQuery, footprintIdx);
     }
 }

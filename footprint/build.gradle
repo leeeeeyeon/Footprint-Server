@@ -15,6 +15,9 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	all {
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+	}
 }
 
 repositories {
@@ -54,6 +57,9 @@ dependencies {
 
 	// AWS S3
 	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-aws', version: '2.2.6.RELEASE'
+
+	// log
+	implementation 'org.springframework.boot:spring-boot-starter-log4j2'
 }
 
 test {

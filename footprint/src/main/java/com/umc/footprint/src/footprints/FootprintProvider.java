@@ -2,6 +2,7 @@ package com.umc.footprint.src.footprints;
 
 import com.umc.footprint.config.BaseException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import static com.umc.footprint.config.BaseResponseStatus.*;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class FootprintProvider {
     private final FootprintDao footprintDao;
@@ -32,6 +34,19 @@ public class FootprintProvider {
                 throw new BaseException(NO_FOOTPRINT_IN_WALK); // 산책 기록에 발자국이 없을 때
            }
             return getFootprintRes;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    public int getFootprintWholeIdx(int walkIdx, int footprintIdx) throws BaseException {
+        try {
+            log.debug("walkIdx: {} ", walkIdx);
+            log.debug("footprintIdx: {} ", footprintIdx);
+            int wholeFootprintIdx = footprintDao.getFootprintWholeIdx(walkIdx, footprintIdx);
+            log.debug("wholeFootprintIdx: {}", wholeFootprintIdx);
+            return wholeFootprintIdx;
+
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }

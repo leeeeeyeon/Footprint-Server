@@ -3,6 +3,7 @@ package com.umc.footprint.src.walks;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.src.walks.model.*;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
+import static com.umc.footprint.config.BaseResponseStatus.INVALID_WALKIDX;
 
+@Slf4j
 @Service
 public class WalkProvider {
     private final WalkDao walkDao;
@@ -24,6 +27,10 @@ public class WalkProvider {
 
     public GetWalkInfo getWalkInfo(int walkIdx) throws BaseException {
         try {
+            int check = walkDao.checkWalkVal(walkIdx);
+            if(check!=1) { //산책 INACTIVE
+                throw new BaseException(INVALID_WALKIDX);
+            }
             GetWalkInfo getWalkInfo = walkDao.getWalkInfo(walkIdx);
             return getWalkInfo;
         } catch (Exception exception) {
@@ -34,17 +41,16 @@ public class WalkProvider {
     //
     public Float getGoalRate(SaveWalk walk) throws BaseException {
         try {
-            System.out.println("WalkProvider.getGoalRate");
             // 산책 시간
             Integer walkTime = Math.toIntExact(Duration.between(walk.getStartAt(), walk.getEndAt()).toMinutes());
             // 산책 목표 시간
             Integer walkGoalTime = walkDao.getWalkGoalTime(walk.getUserIdx());
             // (산책 끝 시간 - 산책 시작 시간) / 산책 목표 시간
-            float goalRate =walkTime.floatValue() / walkGoalTime.floatValue();
+            float goalRate =(walkTime.floatValue() / walkGoalTime.floatValue())*100;
 
             // 100퍼 넘을 시 100으로 고정
-            if (goalRate >= 1.0) {
-                goalRate = 1.0f;
+            if (goalRate >= 100.0) {
+                goalRate = 100.0f;
             }
 
             return goalRate;
@@ -58,16 +64,12 @@ public class WalkProvider {
         try {
             // 조건에 부합하는 뱃지 조회
             GetBadgeIdx getBadgeIdx = walkDao.getAcquiredBadgeIdxList(userIdx);
-            System.out.println("getBadgeIdx.getDistanceBadgeIdx() = " + getBadgeIdx.getDistanceBadgeIdx());
-            System.out.println("getBadgeIdx.getRecordBadgeIdx() = " + getBadgeIdx.getRecordBadgeIdx());
             // 원래 가지고 있던 뱃지 조회
             List<Integer> getOriginBadgeIdxList = walkDao.getOriginBadgeIdxList(userIdx);
-            System.out.println("getOriginBadgeIdxList = " + getOriginBadgeIdxList);
+            log.debug("원래 가지고 있던 뱃지들: {}", getOriginBadgeIdxList);
 
             // 얻은 뱃지
             List<Integer> acquiredBadgeIdxList = new ArrayList<>();
-
-
 
             // 원래 갖고 있던 뱃지(2~5)의 가장 큰 값
             int originMaxDistanceBadgeIdx = 1;
@@ -118,8 +120,17 @@ public class WalkProvider {
 
     public int checkFirstWalk(int userIdx) throws BaseException {
         try {
-            System.out.println("WalkProvider.checkFirstWalk entered");
             return walkDao.checkFirstWalk(userIdx);
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    public int getWalkWholeIdx(int walkIdx, int userIdx) throws BaseException {
+        try {
+            log.debug("walkIdx: {}", walkIdx);
+            log.debug("userIdx: {}", userIdx);
+            return walkDao.getWalkWholeIdx(walkIdx, userIdx);
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }

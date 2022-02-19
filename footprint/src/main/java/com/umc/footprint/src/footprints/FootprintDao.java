@@ -70,18 +70,11 @@ public class FootprintDao {
         return this.jdbcTemplate.update(updateAtQuery, updateAtParams); // 성공 - 1, 실패 - 0
     }
 
-    // 발자국 삭제
-    public int deleteFootprint(int footprintIdx){
+    // 발자국 삭제 (Footprint 테이블에서 INACTIVE 처리)
+    public void deleteFootprint(int footprintIdx){
         String deleteFootprintQuery = "update Footprint set status=? where footprintIdx=? and status=?";
         Object[] deleteFootprintParams = new Object[]{"INACTIVE", footprintIdx, "ACTIVE"};
-        int deleteFootprint = this.jdbcTemplate.update(deleteFootprintQuery, deleteFootprintParams);
-
-        String deletePhotoQuery = "update Photo set status=? where footprintIdx=? and status=?";
-        Object[] deletePhotoParams = new Object[]{"INACTIVE", footprintIdx, "ACTIVE"};
-        int deletePhoto = this.jdbcTemplate.update(deletePhotoQuery, deletePhotoParams);
-
-        return ( (deleteFootprint != 0 && deletePhoto != 0) ? 1 : 0 );
-        // 대응시켜 매핑시켜 쿼리 요청(성공했으면 1, 실패했으면 0)
+        this.jdbcTemplate.update(deleteFootprintQuery, deleteFootprintParams);
     }
 
     /**
@@ -136,7 +129,6 @@ public class FootprintDao {
             String addHashtagQuery = "insert into Hashtag (hashtag) values (?)";
             this.jdbcTemplate.update(addHashtagQuery, hashtag);
 
-            // TODO: last_insert_id()에 대해 좀 더 찾아보자
             String lastInsertQuery = "select last_insert_id()";
             int hashtagIdx = this.jdbcTemplate.queryForObject(lastInsertQuery, int.class);
 
@@ -158,5 +150,14 @@ public class FootprintDao {
         }
 
         return userIdx;
+    }
+
+    // 산책 내 n번째 발자국 -> 전체에서의 발자국 인덱스
+   public int getFootprintWholeIdx(int walkIdx, int footprintIdx) {
+        String getFootprintWholeIdxQuery = "select footprintIdx from Footprint\n" +
+                "join Walk W on Footprint.walkIdx = W.walkIdx\n" +
+                "where W.walkIdx = ? and Footprint.status = 'ACTIVE'\n" +
+                "order by W.startAt ASC LIMIT ?, 1";
+        return this.jdbcTemplate.queryForObject(getFootprintWholeIdxQuery, int.class, walkIdx, footprintIdx-1);
     }
 }
