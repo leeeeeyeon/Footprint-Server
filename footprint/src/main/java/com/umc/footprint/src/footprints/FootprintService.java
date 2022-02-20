@@ -3,8 +3,10 @@ package com.umc.footprint.src.footprints;
 import com.umc.footprint.config.BaseException;
 import static com.umc.footprint.config.BaseResponseStatus.*;
 
+import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.src.AwsS3Service;
 import com.umc.footprint.src.footprints.model.PatchFootprintReq;
+import com.umc.footprint.utils.AES128;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,12 +21,14 @@ public class FootprintService {
     private final FootprintDao footprintDao;
     private final FootprintProvider footprintProvider;
     private final AwsS3Service awsS3Service;
+    private final EncryptProperties encryptProperties;
 
     @Autowired
-    public FootprintService(FootprintDao footprintDao, FootprintProvider footprintProvider, AwsS3Service awsS3Service) {
+    public FootprintService(FootprintDao footprintDao, FootprintProvider footprintProvider, AwsS3Service awsS3Service, EncryptProperties encryptProperties) {
         this.footprintDao = footprintDao;
         this.footprintProvider = footprintProvider;
         this.awsS3Service = awsS3Service;
+        this.encryptProperties = encryptProperties;
     }
 
     // 발자국 수정 (Patch)
@@ -45,6 +49,10 @@ public class FootprintService {
             // 발자국 수정 과정
             // 1. 본문 수정
             if(patchFootprintReq.getWrite() != null) {
+
+                /* write 부호화 */
+                patchFootprintReq.setWrite(new AES128(encryptProperties.getKey()).encrypt(patchFootprintReq.getWrite()));
+
                 int modifyWrite = footprintDao.modifyWrite(patchFootprintReq, footprintIdx);
             }
 
@@ -75,7 +83,10 @@ public class FootprintService {
             // DB에 저장되어 있는 태그 리스트
             List<String> dbTagList = footprintDao.getTagList(footprintIdx);
             // 전달되어온 태그 리스트
-            List<String> tags = patchFootprintReq.getTagList();
+            List<String> tags = new ArrayList<>();
+            for(String tag : patchFootprintReq.getTagList()){
+                tags.add(new AES128(encryptProperties.getKey()).encrypt(tag));
+            }
 
             if(patchFootprintReq.getTagList() != null) {
                 if(dbTagList.isEmpty()) { // 발자국에 저장된 태그가 존재하지 않음
@@ -132,9 +143,13 @@ public class FootprintService {
         List<String> photoList = new ArrayList<>(); // URL 저장할 리스트
 
         // 이미지 URL 생성 및 S3 업로드
-        for(MultipartFile photo : photos) {
-            String imgUrl = awsS3Service.uploadFile(photo);
-            photoList.add(imgUrl);
+        try {
+            for (MultipartFile photo : photos) {
+                String imgUrl = awsS3Service.uploadFile(photo);
+                photoList.add(new AES128(encryptProperties.getKey()).encrypt(imgUrl));
+            }
+        } catch (Exception exception){
+            throw new BaseException(DATABASE_ERROR);
         }
 
         // Photo 테이블에 insert
