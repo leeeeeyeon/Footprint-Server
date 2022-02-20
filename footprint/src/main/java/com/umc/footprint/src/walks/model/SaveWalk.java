@@ -18,12 +18,12 @@ public class SaveWalk {
     private List<List<Double>> coordinates;
     private int userIdx;
     private String strCoordinates;
-    private Float goalRate;
+    private Double goalRate;
     private int calorie;
     private List<Integer> photoMatchNumList;
 
     @Builder
-    public SaveWalk(int walkIdx, LocalDateTime startAt, LocalDateTime endAt, double distance, List<List<Double>> coordinates, int userIdx, String strCoordinates, Float goalRate, int calorie, List<Integer> photoMatchNumList) {
+    public SaveWalk(int walkIdx, LocalDateTime startAt, LocalDateTime endAt, double distance, List<List<Double>> coordinates, int userIdx, String strCoordinates, Double goalRate, int calorie, List<Integer> photoMatchNumList) {
         this.walkIdx = walkIdx;
         this.startAt = startAt;
         this.endAt = endAt;

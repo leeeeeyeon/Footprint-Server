@@ -7,5 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 // 프로젝트에서 사용하는 상수
 @Getter
 @AllArgsConstructor
-public class Constant {
+public class Constants {
+    public static final Long MINUTES_TO_SECONDS = 60L;
 }
