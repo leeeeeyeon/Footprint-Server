@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -111,7 +112,7 @@ public class WalkDao {
                 preparedStatement.setString(4, walk.getStrCoordinates());
                 preparedStatement.setString(5, pathImgUrl);
                 preparedStatement.setInt(6, walk.getUserIdx());
-                preparedStatement.setFloat(7, walk.getGoalRate());
+                preparedStatement.setDouble(7, walk.getGoalRate());
                 preparedStatement.setInt(8, walk.getCalorie());
 
                 return preparedStatement;
@@ -248,11 +249,11 @@ public class WalkDao {
     }
 
     // 유저의 목표 시간 반환
-    public int getWalkGoalTime(int userIdx) {
+    public Long getWalkGoalTime(int userIdx) {
         log.debug("userIdx: {}", userIdx);
         String getTimeQuery = "select walkGoalTime from Goal where userIdx = ? and MONTH(createAt) = MONTH(NOW())";
         int getTimeParam = userIdx;
-        return this.jdbcTemplate.queryForObject(getTimeQuery, int.class, getTimeParam);
+        return this.jdbcTemplate.queryForObject(getTimeQuery, Long.class, getTimeParam);
     }
 
     public GetBadgeIdx getAcquiredBadgeIdxList(int userIdx) {

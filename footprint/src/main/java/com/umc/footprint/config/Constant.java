@@ -7,4 +7,5 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class Constant {
+    public static final Long MINUTES_TO_SECONDS = 60L;
 }

@@ -1,14 +1,8 @@
 package com.umc.footprint.src.walks;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
 import com.umc.footprint.config.BaseResponseStatus;
-import com.umc.footprint.config.Constant;
 import com.umc.footprint.src.users.UserProvider;
 import com.umc.footprint.src.walks.model.*;
 
@@ -19,9 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
-
-import static com.umc.footprint.config.BaseResponseStatus.EMPTY_WALK_PHOTO;
 
 @Slf4j
 @RestController
