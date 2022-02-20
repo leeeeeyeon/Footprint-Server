@@ -344,7 +344,7 @@ public class UserDao {
         }
     }
 
-    // 해당 userIdx를 갖는 date의 산책 관련 정보 조회
+// 해당 userIdx를 갖는 date의 산책 관련 정보 조회
     public List<GetUserDateRes> getUserDate(int userIdx, String date) throws BaseException{
 
         // 1. Walk 정보 가져오기
@@ -732,7 +732,6 @@ public class UserDao {
 
     // 태그 검색 결과 조회
     public List<GetTagRes> getWalks(int userIdx, String tag) {
-        tag = "#" + tag;
         // 산책 날짜
         String getWalkAtQuery = "select distinct cast(date_format(endAt, '%Y.%m.%d') as char(10)) from Hashtag\n" +
                 "inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +
