@@ -363,7 +363,8 @@ public class UserDao {
                 "                ON F.walkIdx = W.walkIdx) as SF " +
                 "        ON T.footprintIdx = SF.footprintIdx " +
                 "    INNER JOIN Hashtag H " +
-                "        ON T.hashtagIdx = H.hashtagIdx ";
+                "        ON T.hashtagIdx = H.hashtagIdx " +
+                "WHERE status = 'ACTIVE' ";
 
         List<Hashtag> entireHashtag = this.jdbcTemplate.query(getHashtagQuery, (rs, rowNum) -> new Hashtag(
                 rs.getInt("walkIdx"),
