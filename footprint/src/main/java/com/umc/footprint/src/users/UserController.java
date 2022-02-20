@@ -77,6 +77,10 @@ public class UserController {
         }
     }
 
+    /**
+     * 유저 자동 로그인 API
+     * [GET] /users/autologin
+     */
     @ResponseBody
     @GetMapping("/autologin")
     public BaseResponse<PostLoginRes> getCheckMonthChanged() {

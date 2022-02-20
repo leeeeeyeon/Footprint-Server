@@ -148,33 +148,34 @@ public class UserService {
     @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public PostLoginRes postUserLogin(PostLoginReq postLoginReq) throws BaseException {
         { // email 중복 확인 있으면 status에 Done 넣고 return
-            PostLoginRes result = userProvider.checkEmail(postLoginReq.getEmail());
-            log.debug("유저의 status: {}", result.getStatus());
-            // status: NONE -> 회원가입(유저 정보 db에 등록 필요)
-            // status: ACTIVE -> 로그인
-            // status: ACTIVE -> 정보 입력 필요
-            switch (result.getStatus()) {
-                case "NONE":
-                    try {
-                        // 암호화
-                        String jwt = jwtService.createJwt(postLoginReq.getUserId());
-                        // 유저 정보 db에 등록
-                        postLoginReq.setEncryptedInfos(new AES128(encryptProperties.getKey()).encrypt(postLoginReq.getUsername()), new AES128(encryptProperties.getKey()).encrypt(postLoginReq.getEmail()));
-                        userDao.postUserLogin(postLoginReq);
+            try {
+                String encryptEmail = new AES128(encryptProperties.getKey()).encrypt(postLoginReq.getEmail());
+                PostLoginRes result = userProvider.checkEmail(encryptEmail);
+                log.debug("유저의 status: {}", result.getStatus());
+                // status: NONE -> 회원가입(유저 정보 db에 등록 필요)
+                // status: ACTIVE -> 로그인
+                // status: ACTIVE -> 정보 입력 필요
+                switch (result.getStatus()) {
+                    case "NONE":
+                            // 암호화
+                            String jwt = jwtService.createJwt(postLoginReq.getUserId());
+                            // 유저 정보 db에 등록
+                            postLoginReq.setEncryptedInfos(new AES128(encryptProperties.getKey()).encrypt(postLoginReq.getUsername()), encryptEmail);
+                            userDao.postUserLogin(postLoginReq);
 
-                        return PostLoginRes.builder()
-                                .jwtId(jwt)
-                                .status("ONGOING")
-                                .checkMonthChanged(false)
-                                .build();
-                    } catch (Exception exception) {
-                        throw new BaseException(DATABASE_ERROR);
-                    }
-                case "ACTIVE":
-                case "ONGOING":
-                    return result;
+                            return PostLoginRes.builder()
+                                    .jwtId(jwt)
+                                    .status("ONGOING")
+                                    .checkMonthChanged(false)
+                                    .build();
+                    case "ACTIVE":
+                    case "ONGOING":
+                        return result;
+                }
+                return null;
+            } catch (Exception exception) {
+                throw new BaseException(DATABASE_ERROR);
             }
-            return null;
         }
     }
 
