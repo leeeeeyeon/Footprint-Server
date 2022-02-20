@@ -31,7 +31,7 @@ public class WeatherController {
 
     @ResponseBody
     @GetMapping("")
-    public BaseResponse<GetWeatherRes> GetWeather(@RequestBody GetWeatherReq getWeatherReq) throws IOException, JSONException {
+    public BaseResponse<GetWeatherRes> GetWeather(@RequestParam String nx, @RequestParam String ny) throws IOException, JSONException {
 
         try {
             // 현재 시간을 기준으로 발표 날짜와 발표 시간 도출
@@ -79,8 +79,8 @@ public class WeatherController {
             urlBuilder.append("&" + URLEncoder.encode("dataType", "UTF-8") + "=" + URLEncoder.encode(type, "UTF-8")); /*요청자료형식(XML/JSON) Default: XML*/
             urlBuilder.append("&" + URLEncoder.encode("base_date", "UTF-8") + "=" + URLEncoder.encode(dateNow, "UTF-8")); /*발표 날짜*/
             urlBuilder.append("&" + URLEncoder.encode("base_time", "UTF-8") + "=" + URLEncoder.encode("0500", "UTF-8")); /*발표 시각*/
-            urlBuilder.append("&" + URLEncoder.encode("nx", "UTF-8") + "=" + URLEncoder.encode(getWeatherReq.getNx(), "UTF-8")); /*예보지점의 X 좌표값*/
-            urlBuilder.append("&" + URLEncoder.encode("ny", "UTF-8") + "=" + URLEncoder.encode(getWeatherReq.getNy(), "UTF-8")); /*예보지점의 Y 좌표값*/
+            urlBuilder.append("&" + URLEncoder.encode("nx", "UTF-8") + "=" + URLEncoder.encode(nx, "UTF-8")); /*예보지점의 X 좌표값*/
+            urlBuilder.append("&" + URLEncoder.encode("ny", "UTF-8") + "=" + URLEncoder.encode(ny, "UTF-8")); /*예보지점의 Y 좌표값*/
 
             /*
              * GET방식으로 전송해서 파라미터 받아오기
