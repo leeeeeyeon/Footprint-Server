@@ -169,7 +169,8 @@ public class UserProvider {
             }
 
             GetUserRes getUserRes = userDao.getUser(userIdx);
-            getUserRes.setDecryptedUsernameAndEmail(new AES128(encryptProperties.getKey()).decrypt(getUserRes.getUsername()), new AES128(encryptProperties.getKey()).decrypt(getUserRes.getEmail()));
+            getUserRes.setUsername(new AES128(encryptProperties.getKey()).decrypt(getUserRes.getUsername()));
+            getUserRes.setEmail(new AES128(encryptProperties.getKey()).decrypt(getUserRes.getEmail()));
             return getUserRes;
         } catch (Exception exception) {
             exception.printStackTrace();
