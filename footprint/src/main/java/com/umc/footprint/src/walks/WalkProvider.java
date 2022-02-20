@@ -1,7 +1,6 @@
 package com.umc.footprint.src.walks;
 
 import com.umc.footprint.config.BaseException;
-import com.umc.footprint.config.Constants;
 import com.umc.footprint.src.walks.model.*;
 
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +13,7 @@ import java.util.List;
 
 import static com.umc.footprint.config.BaseResponseStatus.DATABASE_ERROR;
 import static com.umc.footprint.config.BaseResponseStatus.INVALID_WALKIDX;
-import static com.umc.footprint.config.Constants.MINUTES_TO_SECONDS;
+import static com.umc.footprint.config.Constant.MINUTES_TO_SECONDS;
 
 @Slf4j
 @Service
