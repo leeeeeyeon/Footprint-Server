@@ -29,9 +29,5 @@ public class GetUserRes {
     private int weight;
     private int walkNumber;
 
-    public void setDecryptedUsernameAndEmail(String decryptedUsername, String decryptedEmail) {
-        this.username = decryptedUsername;
-        this.email = decryptedEmail;
-    }
 }
 
