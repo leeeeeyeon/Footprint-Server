@@ -61,7 +61,7 @@ public class WeatherController {
                 timeNow = timeNow.replace(timeNow, "2000");
             } else if (timeNowInteger >= 2311 || timeNowInteger < 211) {
                 timeNow = timeNow.replace(timeNow, "2300");
-                if (timeNow.compareTo("0000") >= 0 && timeNow.compareTo("0211") == -1) { // 하루가 지나갈때 전날 날짜의 23시 발표로 가져옴
+                if (timeNowInteger >= 0 && timeNowInteger < 211) { // 하루가 지나갈때 전날 날짜의 23시 발표로 가져옴
                     LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
                     dateNow = yesterday.format(Dateformatter);
                 }
