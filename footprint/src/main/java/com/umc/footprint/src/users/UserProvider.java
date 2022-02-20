@@ -94,6 +94,7 @@ public class UserProvider {
 
             List<GetUserDateRes> userDateRes = userDao.getUserDate(userIdx, date);
 
+
             return userDateRes;
         } catch(Exception exception){
 
