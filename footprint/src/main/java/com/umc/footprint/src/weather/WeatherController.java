@@ -31,7 +31,7 @@ public class WeatherController {
 
     @ResponseBody
     @GetMapping("")
-    public BaseResponse<GetWeatherRes> GetWeather(@RequestParam String nx, @RequestParam String ny) throws IOException, JSONException {
+    public BaseResponse<GetWeatherRes> GetWeather(@RequestParam(value = "nx") String nx, @RequestParam(value = "ny") String ny) throws IOException, JSONException {
 
         try {
             // 현재 시간을 기준으로 발표 날짜와 발표 시간 도출
