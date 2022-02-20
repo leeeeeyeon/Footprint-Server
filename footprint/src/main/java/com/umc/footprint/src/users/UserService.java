@@ -169,6 +169,7 @@ public class UserService {
                                     .checkMonthChanged(false)
                                     .build();
                     case "ACTIVE":
+
                     case "ONGOING":
                         return result;
                 }
@@ -233,7 +234,8 @@ public class UserService {
             // Photo 테이블 -> s3에서 이미지 url 먼저 삭제 후 테이블 삭제 필요
             List<String> imageUrlList = userDao.getImageUrlList(userIdx); //S3에서 사진 삭제
             for(String imageUrl : imageUrlList) {
-                String fileName = imageUrl.substring(imageUrl.lastIndexOf("/")+1); // 파일 이름만 자르기
+                String decryptedImageUrl = new AES128(encryptProperties.getKey()).decrypt(imageUrl);
+                String fileName = decryptedImageUrl.substring(decryptedImageUrl.lastIndexOf("/")+1); // 파일 이름만 자르기
                 awsS3Service.deleteFile(fileName);
             }
             userDao.deletePhoto(userIdx); //Photo 테이블에서 삭제
@@ -244,7 +246,8 @@ public class UserService {
             // Walk 테이블 - 동선 이미지 S3 에서도 삭제
             List<String> pathImageUrlList = userDao.getPathImageUrlList(userIdx); //S3에서 사진 삭제
             for(String imageUrl : pathImageUrlList) {
-                String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1); // 파일 이름만 자르기
+                String decryptedImageUrl = new AES128(encryptProperties.getKey()).decrypt(imageUrl);
+                String fileName = decryptedImageUrl.substring(decryptedImageUrl.lastIndexOf("/") + 1); // 파일 이름만 자르기
                 awsS3Service.deleteFile(fileName);
             }
             userDao.deleteWalk(userIdx);
