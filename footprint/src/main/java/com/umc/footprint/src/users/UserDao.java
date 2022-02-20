@@ -1311,11 +1311,11 @@ public class UserDao {
     // Footprint 테이블에서 해당 사용자의 산책일기 삭제
     public void deleteFootprint(int userIdx) {
         //userIdx로 walkIdx 추출
-        String getWalkIdxQuery = "select walkIdx from Walk where userIdx=? and status = 'ACTIVE';";
+        String getWalkIdxQuery = "select walkIdx from Walk where userIdx=?;";
         List<Integer> walkIdxList = jdbcTemplate.queryForList(getWalkIdxQuery, int.class, userIdx);
 
         //해당 walkIdx에 해당하는 발자국 모두 삭제
-        String delFootprintQuery="delete from Footprint where walkIdx=? and status = 'ACTIVE';";
+        String delFootprintQuery="delete from Footprint where walkIdx=?;";
         for(int walkIdx : walkIdxList) {
             this.jdbcTemplate.update(delFootprintQuery,walkIdx);
         }
@@ -1323,7 +1323,7 @@ public class UserDao {
 
     // Walk 테이블에서 해당 사용자의 산책 기록 삭제
     public void deleteWalk(int userIdx) {
-        String delWalkQuery="delete from Walk where userIdx=? and status = 'ACTIVE';";
+        String delWalkQuery="delete from Walk where userIdx=?;";
         this.jdbcTemplate.update(delWalkQuery,userIdx);
     }
 
