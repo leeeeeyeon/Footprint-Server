@@ -19,6 +19,7 @@ import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
 
 @Slf4j
 @RestController
@@ -31,11 +32,16 @@ public class WeatherController {
 
     @ResponseBody
     @GetMapping("")
-    public BaseResponse<GetWeatherRes> GetWeather(@RequestParam String nx, @RequestParam String ny) throws IOException, JSONException {
+    public BaseResponse<GetWeatherRes> GetWeather(@RequestParam(value = "nx") String nx, @RequestParam(value = "ny") String ny) throws IOException, JSONException {
 
         try {
+
+            TimeZone default_time_zone = TimeZone.getTimeZone(ZoneId.of("Asia/Seoul"));
+            TimeZone.setDefault(default_time_zone);
+
             // 현재 시간을 기준으로 발표 날짜와 발표 시간 도출
             LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+            log.debug("now : {}",now);
 
             DateTimeFormatter Dateformatter = DateTimeFormatter.ofPattern("yyyyMMdd");
             DateTimeFormatter Timeformatter = DateTimeFormatter.ofPattern("HHmm");
@@ -63,6 +69,7 @@ public class WeatherController {
                 timeNow = timeNow.replace(timeNow, "2300");
                 if (timeNowInteger >= 0 && timeNowInteger < 211) { // 하루가 지나갈때 전날 날짜의 23시 발표로 가져옴
                     LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
+                    log.debug("yesterday : {}",yesterday);
                     dateNow = yesterday.format(Dateformatter);
                 }
             }
