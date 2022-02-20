@@ -1,8 +1,10 @@
 package com.umc.footprint.src.walks;
 
 import com.umc.footprint.config.BaseException;
+import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.src.walks.model.*;
 
+import com.umc.footprint.utils.AES128;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,10 +21,12 @@ import static com.umc.footprint.config.Constant.MINUTES_TO_SECONDS;
 @Service
 public class WalkProvider {
     private final WalkDao walkDao;
+    private final EncryptProperties encryptProperties;
 
     @Autowired
-    public WalkProvider(WalkDao walkDao) {
+    public WalkProvider(WalkDao walkDao, EncryptProperties encryptProperties) {
         this.walkDao = walkDao;
+        this.encryptProperties = encryptProperties;
     }
 
 
@@ -33,6 +37,7 @@ public class WalkProvider {
                 throw new BaseException(INVALID_WALKIDX);
             }
             GetWalkInfo getWalkInfo = walkDao.getWalkInfo(walkIdx);
+            getWalkInfo.setPathImageUrl(new AES128(encryptProperties.getKey()).decrypt(getWalkInfo.getPathImageUrl()));
             return getWalkInfo;
         } catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);

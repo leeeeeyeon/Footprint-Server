@@ -2,7 +2,7 @@ package com.umc.footprint.src.users;
 
 
 import com.umc.footprint.config.BaseException;
-import com.umc.footprint.src.AwsS3Service;
+import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.src.users.model.*;
 
 import lombok.extern.slf4j.Slf4j;
@@ -338,60 +338,63 @@ public class UserDao {
     }
 
     // 해당 userIdx를 갖는 date의 산책 관련 정보 조회
-    public List<GetUserDateRes> getUserDate(int userIdx, String date) {
+    public List<GetUserDateRes> getUserDate(int userIdx, String date) throws BaseException {
+        try {
+            // 1. Walk 정보 가져오기
+            String getUserDateWalkQuery = "SELECT walkIdx, DATE_FORMAT(startAt,'%H:%i') as startTime, DATE_FORMAT(endAt,'%H:%i') as endTime, pathImageUrl " +
+                    "FROM Walk " +
+                    "WHERE userIdx = ? and DATE(startAt) = DATE(?) and status = 'ACTIVE' " +
+                    "ORDER BY startAt ";
 
-        // 1. Walk 정보 가져오기
-        String getUserDateWalkQuery = "SELECT walkIdx, DATE_FORMAT(startAt,'%H:%i') as startTime, DATE_FORMAT(endAt,'%H:%i') as endTime, pathImageUrl " +
-                "FROM Walk " +
-                "WHERE userIdx = ? and DATE(startAt) = DATE(?) and status = 'ACTIVE' " +
-                "ORDER BY startAt ";
-
-        List<UserDateWalk> userDateWalkInfo = this.jdbcTemplate.query(getUserDateWalkQuery, (rs, rowNum) -> new UserDateWalk(
-                rs.getInt("walkIdx"),
-                rs.getString("startTime"),
-                rs.getString("endTime"),
-                rs.getString("pathImageUrl")
-        ),userIdx,date);
+            List<UserDateWalk> userDateWalkInfo = this.jdbcTemplate.query(getUserDateWalkQuery, (rs, rowNum) -> new UserDateWalk(
+                    rs.getInt("walkIdx"),
+                    rs.getString("startTime"),
+                    rs.getString("endTime"),
+                    rs.getString("pathImageUrl")
+            ), userIdx, date);
 
 
-        // 2-1. Hashtag 정보 가져오기
-        String getHashtagQuery = "SELECT SF.walkIdx, H.hashtag " +
-                "FROM Tag T " +
-                "    INNER JOIN (SELECT F.walkIdx, F.footprintIdx " +
-                "                FROM Footprint F " +
-                "                INNER JOIN (SELECT walkIdx FROM Walk W WHERE DATE (startAt) = DATE (?) and userIdx = ? and status = 'ACTIVE' ) as W " +
-                "                ON F.walkIdx = W.walkIdx) as SF " +
-                "        ON T.footprintIdx = SF.footprintIdx " +
-                "    INNER JOIN Hashtag H " +
-                "        ON T.hashtagIdx = H.hashtagIdx " +
-                "WHERE status = 'ACTIVE' ";
+            // 2-1. Hashtag 정보 가져오기
+            String getHashtagQuery = "SELECT SF.walkIdx, H.hashtag " +
+                    "FROM Tag T " +
+                    "    INNER JOIN (SELECT F.walkIdx, F.footprintIdx " +
+                    "                FROM Footprint F " +
+                    "                INNER JOIN (SELECT walkIdx FROM Walk W WHERE DATE (startAt) = DATE (?) and userIdx = ? and status = 'ACTIVE' ) as W " +
+                    "                ON F.walkIdx = W.walkIdx) as SF " +
+                    "        ON T.footprintIdx = SF.footprintIdx " +
+                    "    INNER JOIN Hashtag H " +
+                    "        ON T.hashtagIdx = H.hashtagIdx " +
+                    "WHERE status = 'ACTIVE' ";
 
-        List<Hashtag> entireHashtag = this.jdbcTemplate.query(getHashtagQuery, (rs, rowNum) -> new Hashtag(
-                rs.getInt("walkIdx"),
-                rs.getString("hashtag")
-        ),date,userIdx);
+            List<Hashtag> entireHashtag = this.jdbcTemplate.query(getHashtagQuery, (rs, rowNum) -> new Hashtag(
+                    rs.getInt("walkIdx"),
+                    rs.getString("hashtag")
+            ), date, userIdx);
 
-        List<GetUserDateRes> getUserDateRes = new ArrayList<>();
-        List<ArrayList<String>> hashtagList = new ArrayList<>();
+            List<GetUserDateRes> getUserDateRes = new ArrayList<>();
+            List<ArrayList<String>> hashtagList = new ArrayList<>();
 
-        for(UserDateWalk walk : userDateWalkInfo){
-            hashtagList.add(new ArrayList<>());
-            for(Hashtag tag : entireHashtag){
-                if(walk.getWalkIdx() == tag.getWalkIdx()) {
-                    hashtagList.get(hashtagList.size() - 1).add(tag.getHashtag());
+            for (UserDateWalk walk : userDateWalkInfo) {
+                hashtagList.add(new ArrayList<>());
+                for (Hashtag tag : entireHashtag) {
+                    if (walk.getWalkIdx() == tag.getWalkIdx()) {
+                        hashtagList.get(hashtagList.size() - 1).add(tag.getHashtag());
+                    }
                 }
+                getUserDateRes.add(new GetUserDateRes(walk, hashtagList.get(hashtagList.size() - 1)));
             }
-            getUserDateRes.add(new GetUserDateRes(walk,hashtagList.get(hashtagList.size()-1)));
+
+            for (GetUserDateRes userDateRes : getUserDateRes) {
+                String getWalkIdxQuery = "SELECT count(walkIdx)+1 as walkIdx FROM Walk WHERE userIdx = ? and status = 'ACTIVE' and startAt < (SELECT startAt FROM Walk WHERE walkIdx = ? and status = 'ACTIVE')";
+
+                int getWalkIdx = this.jdbcTemplate.queryForObject(getWalkIdxQuery, int.class, userIdx, userDateRes.getUserDateWalk().getWalkIdx());
+                userDateRes.getUserDateWalk().setWalkIdx(getWalkIdx);
+            }
+
+            return getUserDateRes;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
         }
-
-        for (GetUserDateRes userDateRes : getUserDateRes) {
-            String getWalkIdxQuery = "SELECT count(walkIdx)+1 as walkIdx FROM Walk WHERE userIdx = ? and status = 'ACTIVE' and startAt < (SELECT startAt FROM Walk WHERE walkIdx = ? and status = 'ACTIVE')";
-
-            int getWalkIdx = this.jdbcTemplate.queryForObject(getWalkIdxQuery, int.class, userIdx, userDateRes.getUserDateWalk().getWalkIdx());
-            userDateRes.getUserDateWalk().setWalkIdx(getWalkIdx);
-        }
-
-        return getUserDateRes;
     }
 
     // 해당 userIdx를 갖는 유저 정보 조회
@@ -718,7 +721,6 @@ public class UserDao {
 
     // 태그 검색 결과 조회
     public List<GetTagRes> getWalks(int userIdx, String tag) {
-        tag = "#" + tag;
         // 산책 날짜
         String getWalkAtQuery = "select distinct cast(date_format(endAt, '%Y.%m.%d') as char(10)) from Hashtag\n" +
                 "inner join Tag T on Hashtag.hashtagIdx = T.hashtagIdx\n" +

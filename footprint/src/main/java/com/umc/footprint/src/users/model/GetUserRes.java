@@ -28,5 +28,9 @@ public class GetUserRes {
     private int height;
     private int weight;
     private int walkNumber;
+
+    public void setDecryptedUsernameAndEmail(String decryptedUsername, String decryptedEmail) {
+
+    }
 }
 
