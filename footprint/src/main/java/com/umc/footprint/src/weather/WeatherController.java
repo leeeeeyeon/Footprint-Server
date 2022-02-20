@@ -35,7 +35,6 @@ public class WeatherController {
     public BaseResponse<GetWeatherRes> GetWeather(@RequestParam(value = "nx") String nx, @RequestParam(value = "ny") String ny) throws IOException, JSONException {
 
         try {
-
             TimeZone default_time_zone = TimeZone.getTimeZone(ZoneId.of("Asia/Seoul"));
             TimeZone.setDefault(default_time_zone);
 
@@ -185,7 +184,7 @@ public class WeatherController {
                 else if(weather == "1")
                     weather = "맑음";
                 else if(weather == "3")
-                    weather = "구름많음";
+                    weather = "구름 많음";
                 else if(weather == "4")
                     weather = "흐림";
             }
