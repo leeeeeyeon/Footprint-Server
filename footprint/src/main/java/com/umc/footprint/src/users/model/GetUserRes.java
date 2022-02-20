@@ -28,5 +28,6 @@ public class GetUserRes {
     private int height;
     private int weight;
     private int walkNumber;
+
 }
 

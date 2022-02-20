@@ -4,9 +4,11 @@ import static com.umc.footprint.config.BaseResponseStatus.*;
 
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponseStatus;
+import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.src.AwsS3Service;
 import com.umc.footprint.src.users.model.*;
 
+import com.umc.footprint.utils.AES128;
 import com.umc.footprint.utils.JwtService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,13 +31,15 @@ public class UserService {
     private final UserProvider userProvider;
     private final JwtService jwtService;
     private final AwsS3Service awsS3Service;
+    private final EncryptProperties encryptProperties;
 
     @Autowired
-    public UserService(UserDao userDao, UserProvider userProvider, JwtService jwtService, AwsS3Service awsS3Service) {
+    public UserService(UserDao userDao, UserProvider userProvider, JwtService jwtService, AwsS3Service awsS3Service, EncryptProperties encryptProperties) {
         this.userDao = userDao;
         this.userProvider = userProvider;
         this.jwtService = jwtService;
         this.awsS3Service = awsS3Service;
+        this.encryptProperties = encryptProperties;
     }
 
 
@@ -146,32 +148,35 @@ public class UserService {
     @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public PostLoginRes postUserLogin(PostLoginReq postLoginReq) throws BaseException {
         { // email 중복 확인 있으면 status에 Done 넣고 return
-            PostLoginRes result = userProvider.checkEmail(postLoginReq.getEmail());
-            log.debug("유저의 status: {}", result.getStatus());
-            // status: NONE -> 회원가입(유저 정보 db에 등록 필요)
-            // status: ACTIVE -> 로그인
-            // status: ACTIVE -> 정보 입력 필요
-            switch (result.getStatus()) {
-                case "NONE":
-                    try {
-                        // 암호화
-                        String jwt = jwtService.createJwt(postLoginReq.getUserId());
-                        // 유저 정보 db에 등록
-                        userDao.postUserLogin(postLoginReq);
+            try {
+                String encryptEmail = new AES128(encryptProperties.getKey()).encrypt(postLoginReq.getEmail());
+                PostLoginRes result = userProvider.checkEmail(encryptEmail);
+                log.debug("유저의 status: {}", result.getStatus());
+                // status: NONE -> 회원가입(유저 정보 db에 등록 필요)
+                // status: ACTIVE -> 로그인
+                // status: ACTIVE -> 정보 입력 필요
+                switch (result.getStatus()) {
+                    case "NONE":
+                            // 암호화
+                            String jwt = jwtService.createJwt(postLoginReq.getUserId());
+                            // 유저 정보 db에 등록
+                            postLoginReq.setEncryptedInfos(new AES128(encryptProperties.getKey()).encrypt(postLoginReq.getUsername()), encryptEmail);
+                            userDao.postUserLogin(postLoginReq);
 
-                        return PostLoginRes.builder()
-                                .jwtId(jwt)
-                                .status("ONGOING")
-                                .checkMonthChanged(false)
-                                .build();
-                    } catch (Exception exception) {
-                        throw new BaseException(DATABASE_ERROR);
-                    }
-                case "ACTIVE":
-                case "ONGOING":
-                    return result;
+                            return PostLoginRes.builder()
+                                    .jwtId(jwt)
+                                    .status("ONGOING")
+                                    .checkMonthChanged(false)
+                                    .build();
+                    case "ACTIVE":
+
+                    case "ONGOING":
+                        return result;
+                }
+                return null;
+            } catch (Exception exception) {
+                throw new BaseException(DATABASE_ERROR);
             }
-            return null;
         }
     }
 
@@ -229,7 +234,8 @@ public class UserService {
             // Photo 테이블 -> s3에서 이미지 url 먼저 삭제 후 테이블 삭제 필요
             List<String> imageUrlList = userDao.getImageUrlList(userIdx); //S3에서 사진 삭제
             for(String imageUrl : imageUrlList) {
-                String fileName = imageUrl.substring(imageUrl.lastIndexOf("/")+1); // 파일 이름만 자르기
+                String decryptedImageUrl = new AES128(encryptProperties.getKey()).decrypt(imageUrl);
+                String fileName = decryptedImageUrl.substring(decryptedImageUrl.lastIndexOf("/")+1); // 파일 이름만 자르기
                 awsS3Service.deleteFile(fileName);
             }
             userDao.deletePhoto(userIdx); //Photo 테이블에서 삭제
@@ -240,7 +246,8 @@ public class UserService {
             // Walk 테이블 - 동선 이미지 S3 에서도 삭제
             List<String> pathImageUrlList = userDao.getPathImageUrlList(userIdx); //S3에서 사진 삭제
             for(String imageUrl : pathImageUrlList) {
-                String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1); // 파일 이름만 자르기
+                String decryptedImageUrl = new AES128(encryptProperties.getKey()).decrypt(imageUrl);
+                String fileName = decryptedImageUrl.substring(decryptedImageUrl.lastIndexOf("/") + 1); // 파일 이름만 자르기
                 awsS3Service.deleteFile(fileName);
             }
             userDao.deleteWalk(userIdx);

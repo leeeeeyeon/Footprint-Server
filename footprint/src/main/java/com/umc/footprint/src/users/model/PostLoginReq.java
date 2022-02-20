@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostLoginReq {
@@ -14,4 +13,9 @@ public class PostLoginReq {
     private String username;
     private String email;
     private String providerType;
+
+    public void setEncryptedInfos(String encryptedUsername, String encryptedEmail) {
+        this.username = encryptedUsername;
+        this.email = encryptedEmail;
+    }
 }

@@ -1,9 +1,11 @@
 package com.umc.footprint.src.users;
 
 import com.umc.footprint.config.BaseException;
+import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.src.walks.WalkDao;
 
 import com.umc.footprint.src.users.model.GetUserTodayRes;
+import com.umc.footprint.utils.AES128;
 import com.umc.footprint.utils.JwtService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +26,14 @@ public class UserProvider {
 
     private final WalkDao walkDao;
     private final UserDao userDao;
+    private final EncryptProperties encryptProperties;
     private final JwtService jwtService;
 
     @Autowired
-    public UserProvider(WalkDao walkDao, UserDao userDao, JwtService jwtService) {
+    public UserProvider(WalkDao walkDao, UserDao userDao, EncryptProperties encryptProperties, JwtService jwtService) {
         this.walkDao = walkDao;
         this.userDao = userDao;
+        this.encryptProperties = encryptProperties;
         this.jwtService = jwtService;
     }
 
@@ -93,6 +97,7 @@ public class UserProvider {
             }
 
             List<GetUserDateRes> userDateRes = userDao.getUserDate(userIdx, date);
+
 
             return userDateRes;
         } catch(Exception exception){
@@ -164,6 +169,8 @@ public class UserProvider {
             }
 
             GetUserRes getUserRes = userDao.getUser(userIdx);
+            getUserRes.setUsername(new AES128(encryptProperties.getKey()).decrypt(getUserRes.getUsername()));
+            getUserRes.setEmail(new AES128(encryptProperties.getKey()).decrypt(getUserRes.getEmail()));
             return getUserRes;
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -332,11 +339,49 @@ public class UserProvider {
     // 해당 유저의 산책기록 중 태그를 포함하는 산책기록 조회
     public List<GetTagRes> getTagResult(int userIdx, String tag) throws BaseException {
         try {
-            List<GetTagRes> getTagResult = userDao.getWalks(userIdx, tag);
+            tag = "#" + tag;
+            String encryptedTag = new AES128(encryptProperties.getKey()).encrypt(tag);
+            List<GetTagRes> getTagResult = userDao.getWalks(userIdx, encryptedTag);
+
+            List<GetTagRes> decryptedTagResultList = new ArrayList<>();
+            for (GetTagRes getTagRes : getTagResult) {
+                GetTagRes decryptedGetTagRes = new GetTagRes();
+                decryptedGetTagRes.setWalkAt(getTagRes.getWalkAt());
+
+                List<SearchWalk> decryptedSearchWalkList = new ArrayList<>();
+
+                for (SearchWalk walk : getTagRes.getWalks()) {
+                    SearchWalk decryptedSearchWalk = new SearchWalk();
+
+                    // 복호화된 태그 리스트 설정
+                    List<String> decryptedHashtagList = new ArrayList<>();
+                    for (String hashtag : walk.getHashtag()) {
+                        String decryptedHashtag = new AES128(encryptProperties.getKey()).decrypt(hashtag);
+                        decryptedHashtagList.add(decryptedHashtag);
+                    }
+                    decryptedSearchWalk.setHashtag(decryptedHashtagList);
+
+                    // 복호화된 이미지 설정
+                    String decryptedImage = new AES128(encryptProperties.getKey()).decrypt(walk.getUserDateWalk().getPathImageUrl());
+                    decryptedSearchWalk.setUserDateWalk(new UserDateWalk(
+                            walk.getUserDateWalk().getWalkIdx(),
+                            walk.getUserDateWalk().getStartTime(),
+                            walk.getUserDateWalk().getEndTime(),
+                            decryptedImage
+                    ));
+
+                    decryptedSearchWalkList.add(decryptedSearchWalk);
+                }
+
+                decryptedGetTagRes.setWalks(decryptedSearchWalkList);
+
+                decryptedTagResultList.add(decryptedGetTagRes);
+            }
+
             if (getTagResult.isEmpty()) { // 검색결과가 없음
                 throw new BaseException(NO_EXIST_RESULT);
             }
-            return getTagResult;
+            return decryptedTagResultList;
         } catch (Exception exception) {
             exception.printStackTrace();
             throw new BaseException(DATABASE_ERROR);

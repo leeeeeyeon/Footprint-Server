@@ -1,22 +1,33 @@
 package com.umc.footprint.src.footprints;
 
+import com.umc.footprint.config.BaseException;
+import com.umc.footprint.config.BaseResponseStatus;
+import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.src.footprints.model.*;
 
+import com.umc.footprint.utils.AES128;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 public class FootprintDao {
     private JdbcTemplate jdbcTemplate;
+    private EncryptProperties encryptProperties;
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    @Autowired
+    public FootprintDao(EncryptProperties encryptProperties){
+        this.encryptProperties = encryptProperties;
     }
 
     // 해당 인덱스의 산책 기록이 존재하는지 조회 - validation에 사용
@@ -88,7 +99,6 @@ public class FootprintDao {
 
         return photoList;
     }
-
     // 발자국의 태그 리스트
     public List<String> getTagList(int footprintIdx) {
         String getTagQuery = "select hashtag from Tag T\n" +
