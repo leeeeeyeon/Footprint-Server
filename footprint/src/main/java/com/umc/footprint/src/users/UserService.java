@@ -4,9 +4,11 @@ import static com.umc.footprint.config.BaseResponseStatus.*;
 
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponseStatus;
+import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.src.AwsS3Service;
 import com.umc.footprint.src.users.model.*;
 
+import com.umc.footprint.utils.AES128;
 import com.umc.footprint.utils.JwtService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,13 +31,15 @@ public class UserService {
     private final UserProvider userProvider;
     private final JwtService jwtService;
     private final AwsS3Service awsS3Service;
+    private final EncryptProperties encryptProperties;
 
     @Autowired
-    public UserService(UserDao userDao, UserProvider userProvider, JwtService jwtService, AwsS3Service awsS3Service) {
+    public UserService(UserDao userDao, UserProvider userProvider, JwtService jwtService, AwsS3Service awsS3Service, EncryptProperties encryptProperties) {
         this.userDao = userDao;
         this.userProvider = userProvider;
         this.jwtService = jwtService;
         this.awsS3Service = awsS3Service;
+        this.encryptProperties = encryptProperties;
     }
 
 
@@ -157,6 +159,7 @@ public class UserService {
                         // 암호화
                         String jwt = jwtService.createJwt(postLoginReq.getUserId());
                         // 유저 정보 db에 등록
+                        postLoginReq.setEncryptedInfos(new AES128(encryptProperties.getKey()).encrypt(postLoginReq.getUsername()), new AES128(encryptProperties.getKey()).encrypt(postLoginReq.getEmail()));
                         userDao.postUserLogin(postLoginReq);
 
                         return PostLoginRes.builder()

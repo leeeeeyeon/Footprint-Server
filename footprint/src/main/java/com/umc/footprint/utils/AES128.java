@@ -1,5 +1,7 @@
 package com.umc.footprint.utils;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
