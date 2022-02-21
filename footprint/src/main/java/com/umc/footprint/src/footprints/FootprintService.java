@@ -84,11 +84,11 @@ public class FootprintService {
             List<String> dbTagList = footprintDao.getTagList(footprintIdx);
             // 전달되어온 태그 리스트
             List<String> tags = new ArrayList<>();
-            for(String tag : patchFootprintReq.getTagList()){
-                tags.add(new AES128(encryptProperties.getKey()).encrypt(tag));
-            }
 
             if(patchFootprintReq.getTagList() != null) {
+                for(String tag : patchFootprintReq.getTagList()){
+                    tags.add(new AES128(encryptProperties.getKey()).encrypt(tag));
+                }
                 if(dbTagList.isEmpty()) { // 발자국에 저장된 태그가 존재하지 않음
                     if(!tags.isEmpty()) { // 전달된 태그가 하나라도 존재
                         footprintDao.addTag(tags, userIdx, footprintIdx);
