@@ -328,7 +328,7 @@ public class UserDao {
         int getUserIdxParam = userIdx;
 
         try {
-            return this.jdbcTemplate.queryForObject(getUserTodayQuery,
+            GetUserTodayRes getUserTodayRes =  this.jdbcTemplate.queryForObject(getUserTodayQuery,
                     (rs, rowNum) -> new GetUserTodayRes(
                             rs.getFloat("goalRate"),
                             rs.getInt("walkGoalTime"),
@@ -336,6 +336,12 @@ public class UserDao {
                             rs.getDouble("distance"),
                             rs.getInt("calorie")
                     ), getUserIdxParam, getUserIdxParam);
+
+            getUserTodayRes.setGoalRate((float)Math.floor(getUserTodayRes.getGoalRate()));
+            getUserTodayRes.setDistance(Math.floor(getUserTodayRes.getDistance()*10)/10.0);
+
+            return getUserTodayRes;
+
         } catch(EmptyResultDataAccessException e){
             String getWalkGoalQuery = "SELECT walkGoalTime FROM Goal WHERE useridx = ? and MONTH(createAt) = MONTH(NOW())";
             int walkGoalTime = this.jdbcTemplate.queryForObject(getWalkGoalQuery,int.class,userIdx);
