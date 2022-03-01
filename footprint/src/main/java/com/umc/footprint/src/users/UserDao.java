@@ -66,12 +66,13 @@ public class UserDao {
         List<String> goalDayList = getUserGoalDays(userIdx);
 
         //이번달 일별 달성률 조회(List)
-        String getDayRateQuery = "select day(startAt) as day, sum(goalRate) as rate from Walk where userIdx=? and status = 'ACTIVE' group by day(startAt);";
+        String getDayRateQuery = "select day(startAt) as day, sum(goalRate) as rate from Walk where userIdx=? and status = 'ACTIVE' and year(startAt)=? and month(startAt)=? group by day(startAt);";
+        Object[] getDayRateParams = new Object[]{userIdx, year, month};
         List<GetDayRateRes> getDayRatesRes = this.jdbcTemplate.query(getDayRateQuery,
                 (rs, rowNum) -> new GetDayRateRes(
                         rs.getInt("day"),
                         rs.getFloat("rate")),
-                userIdx);
+                getDayRateParams);
 
         //사용자의 이번 달 누적 시간, 거리, 평균 칼로리
         String getMonthInfoQuery = "select sum((timestampdiff(second,startAt, endAt))) as monthTotalMin,\n" +
