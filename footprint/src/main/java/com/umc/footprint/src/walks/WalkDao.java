@@ -275,7 +275,7 @@ public class WalkDao {
                 "        else 0\n" +
                 "        end as recordBadgeIdx\n" +
                 "From Walk\n" +
-                "Where userIdx = ?\n" +
+                "Where userIdx = ?\n and status = 'ACTIVE'" +
                 "group by Walk.userIdx";
 
         GetBadgeIdx getBadgeIdx = this.jdbcTemplate.queryForObject(getDisRecBadgeQuery,
