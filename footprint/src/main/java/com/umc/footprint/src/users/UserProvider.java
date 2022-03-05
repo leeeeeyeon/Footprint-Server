@@ -132,7 +132,7 @@ public class UserProvider {
             }
 
             // Walk 테이블 validation
-            boolean userWalkExist = userDao.checkUser(userIdx, "Walk");
+            boolean userWalkExist = userDao.checkWalk(userIdx,year,month);
 
             GetMonthInfoRes getMonthInfoRes;
             if(userWalkExist == false) {

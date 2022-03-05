@@ -1007,6 +1007,17 @@ public class UserDao {
         return false;
     }
 
+    public boolean checkWalk(int userIdx, int year, int month){
+        log.debug("UserDao.checkWalk");
+        int walkCount = this.jdbcTemplate.queryForObject("SELECT count(*) " +
+                "FROM Walk " +
+                "WHERE userIdx = ? and status = 'ACTIVE' and year(startAt)=? and month(startAt)=?", int.class
+                ,userIdx,year,month);
+        if(walkCount != 0)
+            return true;
+        return false;
+    }
+
     // 해당 날짜에 해당 유저가 산책을 했는지 확인
     public int checkUserDateWalk(int userIdx, String date){
 
