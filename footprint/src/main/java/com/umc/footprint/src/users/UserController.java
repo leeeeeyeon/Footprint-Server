@@ -9,6 +9,9 @@ import java.util.Set;
 
 import com.umc.footprint.src.users.model.*;
 import com.umc.footprint.utils.JwtService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +49,8 @@ public class UserController {
      */
     @ResponseBody
     @PostMapping("/auth/login")
+    @ApiOperation(value = "로그인 및 회원가입", notes = "기존 회원은 로그인, 신규 회원은 회원 가입을 진행 (판별 기준은 이메일)")
+    @ApiImplicitParam(name = "postLoginReq", value = "로그인 정보", required = true)
     public BaseResponse<PostLoginRes> postUser(@RequestBody PostLoginReq postLoginReq) throws BaseException {
         // 유저 id를 입력하지 않은 경우
         if (postLoginReq.getUserId().isEmpty()) {
@@ -83,6 +88,7 @@ public class UserController {
      */
     @ResponseBody
     @GetMapping("/autologin")
+    @ApiOperation(value = "자동 로그인", notes = "JWT 토큰을 판별하여 자동 로그인 진행")
     public BaseResponse<PostLoginRes> getCheckMonthChanged() {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)

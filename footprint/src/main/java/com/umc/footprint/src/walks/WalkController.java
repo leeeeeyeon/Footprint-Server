@@ -7,6 +7,9 @@ import com.umc.footprint.src.users.UserProvider;
 import com.umc.footprint.src.walks.model.*;
 
 import com.umc.footprint.utils.JwtService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +41,12 @@ public class WalkController {
      */
     @ResponseBody
     @PostMapping("") // (POST) 127.0.0.1:3000/walks/
+    @ApiOperation(value = "산책 기록 저장")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "walk", value = "산책 정보", required = true),
+            @ApiImplicitParam(name = "footprintList", value = "발자국 정보", required = false),
+            @ApiImplicitParam(name = "photos", value = "동선 사진 및 발자국에서 남긴 사진들", required = true)
+    })
     public BaseResponse<List<PostWalkRes>> saveRecord(
             @RequestPart(value = "walk") SaveWalk walk,
             @RequestPart(value = "footprintList") List<SaveFootprint> footprintList,
