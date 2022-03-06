@@ -66,12 +66,13 @@ public class UserDao {
         List<String> goalDayList = getUserGoalDays(userIdx);
 
         //이번달 일별 달성률 조회(List)
-        String getDayRateQuery = "select day(startAt) as day, sum(goalRate) as rate from Walk where userIdx=? and status = 'ACTIVE' group by day(startAt);";
+        String getDayRateQuery = "select day(startAt) as day, sum(goalRate) as rate from Walk where userIdx=? and status = 'ACTIVE' and year(startAt)=? and month(startAt)=? group by day(startAt);";
+        Object[] getDayRateParams = new Object[]{userIdx, year, month};
         List<GetDayRateRes> getDayRatesRes = this.jdbcTemplate.query(getDayRateQuery,
                 (rs, rowNum) -> new GetDayRateRes(
                         rs.getInt("day"),
                         rs.getFloat("rate")),
-                userIdx);
+                getDayRateParams);
 
         //사용자의 이번 달 누적 시간, 거리, 평균 칼로리
         String getMonthInfoQuery = "select sum((timestampdiff(second,startAt, endAt))) as monthTotalMin,\n" +
@@ -1002,6 +1003,17 @@ public class UserDao {
             userCount = this.jdbcTemplate.queryForObject("SELECT count(*) FROM " + tableName + " WHERE userIdx = ? ", int.class, userIdx);
 
         if (userCount != 0)
+            return true;
+        return false;
+    }
+
+    public boolean checkWalk(int userIdx, int year, int month){
+        log.debug("UserDao.checkWalk");
+        int walkCount = this.jdbcTemplate.queryForObject("SELECT count(*) " +
+                "FROM Walk " +
+                "WHERE userIdx = ? and status = 'ACTIVE' and year(startAt)=? and month(startAt)=?", int.class
+                ,userIdx,year,month);
+        if(walkCount != 0)
             return true;
         return false;
     }
