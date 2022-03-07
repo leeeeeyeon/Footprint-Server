@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.umc.footprint.src.users.model.*;
 import com.umc.footprint.utils.JwtService;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -159,7 +160,19 @@ public class UserController {
      * 유저 정보 조회 API
      * [GET] /users
      */
-    // Path-variable
+    @ApiResponses({
+            @ApiResponse(code = 1000, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 2001, message = "JWT를 입력해주세요."),
+            @ApiResponse(code = 2002, message = "유효하지 않은 JWT입니다."),
+            @ApiResponse(code = 2100, message = "잘못된 유저 인덱스입니다."),
+            @ApiResponse(code = 2122, message = "비활성화된 유저입니다."),
+            @ApiResponse(code = 2123, message = "블랙 유저입니다."),
+    })
+    @ApiOperation(value = "유저 정보 조회 API", notes = "메인 화면, 마이페이지 화면")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-ACCESS-TOKEN", value = "JWT Token", required = true, dataType = "string"
+                    , paramType = "header")
+    })
     @ResponseBody
     @GetMapping("") // (GET) 127.0.0.1:3000
     public BaseResponse<GetUserRes> getUser() {
@@ -183,6 +196,18 @@ public class UserController {
      * 유저 정보 변경 API
      * [PATCH] /users/infos/after
      */
+    @ApiResponses({
+            @ApiResponse(code = 1000, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 2001, message = "JWT를 입력해주세요."),
+            @ApiResponse(code = 2002, message = "유효하지 않은 JWT입니다."),
+            @ApiResponse(code = 2160, message = "닉네임은 8자를 초과할 수 없습니다."),
+            @ApiResponse(code = 2161, message = "생년월일 값은 0000-00-00이 될 수 없습니다.")
+    })
+    @ApiOperation(value = "유저 정보 변경 API", notes = "정보 수정 화면, 생년월일 0000-00-00 입력 금지!")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-ACCESS-TOKEN", value = "JWT Token", required = true, dataType = "string"
+                    , paramType = "header")
+    })
     @ResponseBody
     @PatchMapping("/infos/after")
     public BaseResponse<String> modifyUserInfo(@RequestBody PatchUserInfoReq patchUserInfoReq) {
@@ -525,6 +550,18 @@ public class UserController {
      * [GET] /users/tags?tag=""
      */
     // Query String
+    @ApiResponses({
+            @ApiResponse(code = 1000, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 2001, message = "JWT를 입력해주세요."),
+            @ApiResponse(code = 2002, message = "유효하지 않은 JWT입니다."),
+            @ApiResponse(code = 2124, message = "검색하고자 하는 태그를 입력해주세요."),
+            @ApiResponse(code = 2125, message = "검색 결과가 존재하지 않습니다.")
+    })
+    @ApiOperation(value = "태그 검색 API", notes = "태그 검색 화면")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-ACCESS-TOKEN", value = "JWT Token", required = true, dataType = "string"
+                    , paramType = "header")
+    })
     @ResponseBody
     @GetMapping("/tags")
     public BaseResponse<List<GetTagRes>> getTags(@RequestParam(required = false) String tag) {
