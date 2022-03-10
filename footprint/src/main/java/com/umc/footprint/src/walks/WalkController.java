@@ -1,17 +1,23 @@
 package com.umc.footprint.src.walks;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
 import com.umc.footprint.config.BaseResponseStatus;
 import com.umc.footprint.src.users.UserProvider;
+import com.umc.footprint.src.users.model.GetMonthInfoRes;
+import com.umc.footprint.src.users.model.PostLoginReq;
 import com.umc.footprint.src.walks.model.*;
 
+import com.umc.footprint.utils.AES128;
 import com.umc.footprint.utils.JwtService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -127,4 +133,30 @@ public class WalkController {
             return new BaseResponse<>((exception.getStatus()));
         }
     }
+
+
+    @ResponseBody
+    @PostMapping("/check/encrypt") // (POST) 127.0.0.1:3000/walks/check/encrypt
+    public BaseResponse<String> checkEncryptWalk(@RequestBody String encryptString){
+        try {
+
+            String encryptedString = walkService.checkEncryptWalk(encryptString);
+
+            return new BaseResponse<>(encryptedString);
+
+        } catch (BaseException exception) {
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
+
+
+    @ResponseBody
+    @PostMapping("/check/decrypt") // (POST) 127.0.0.1:3000/walks/check/decrypt
+    public BaseResponse<String> checkDecryptWalk(@RequestBody String decryptString) throws BaseException {
+        
+        String decryptedString = walkService.checkDecryptWalk(decryptString);
+
+        return new BaseResponse<>(decryptedString);
+    }
+
 }

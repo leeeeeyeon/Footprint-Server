@@ -266,4 +266,30 @@ public class WalkService {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    public String checkEncryptWalk(String encryptString) throws BaseException{
+        try{
+            String encryptResult = new AES128(encryptProperties.getKey()).encrypt(encryptString);
+
+            log.info("encryptResult = {}",encryptResult );
+
+            return encryptResult;
+        } catch(Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    public String checkDecryptWalk(String decryptString) throws BaseException{
+        try{
+            System.out.println("decryptString = " + decryptString);
+            String decryptResult = new AES128(encryptProperties.getKey()).decrypt(decryptString);
+
+            System.out.println("decryptResult = " + decryptResult);
+            
+            return decryptResult;
+        } catch(Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
 }

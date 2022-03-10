@@ -64,6 +64,9 @@ dependencies {
 	// configuration
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
+	// Jackson
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
+
 	// Swagger
 	implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 	implementation 'io.springfox:springfox-swagger2:2.9.2'

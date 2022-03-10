@@ -1,5 +1,9 @@
 package com.umc.footprint.src.users;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.footprint.src.users.model.GetUserTodayRes;
 
 import java.time.LocalDate;
@@ -46,7 +50,10 @@ public class UserController {
      */
     @ResponseBody
     @PostMapping("/auth/login")
-    public BaseResponse<PostLoginRes> postUser(@RequestBody PostLoginReq postLoginReq) throws BaseException {
+    public BaseResponse<PostLoginRes> postUser(@RequestBody String request) throws JsonProcessingException {
+
+        PostLoginReq postLoginReq = new ObjectMapper().readValue(request, PostLoginReq.class);
+
         // 유저 id를 입력하지 않은 경우
         if (postLoginReq.getUserId().isEmpty()) {
             return new BaseResponse<>(POST_USERS_EMPTY_USERID);
@@ -185,7 +192,10 @@ public class UserController {
      */
     @ResponseBody
     @PatchMapping("/infos/after")
-    public BaseResponse<String> modifyUserInfo(@RequestBody PatchUserInfoReq patchUserInfoReq) {
+    public BaseResponse<String> modifyUserInfo(@RequestBody String request) throws JsonProcessingException {
+
+        PatchUserInfoReq patchUserInfoReq = new ObjectMapper().readValue(request, PatchUserInfoReq.class);
+
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
@@ -291,7 +301,9 @@ public class UserController {
     // Path-variable
     @ResponseBody
     @PatchMapping("/goals") // [PATCH] /users/goals
-    public BaseResponse<String> modifyGoal(@RequestBody PatchUserGoalReq patchUserGoalReq){
+    public BaseResponse<String> modifyGoal(@RequestBody String request) throws JsonProcessingException {
+
+        PatchUserGoalReq patchUserGoalReq = new ObjectMapper().readValue(request, PatchUserGoalReq.class);
 
         // Validaion 1. dayIdx 길이 확인
         if(patchUserGoalReq.getDayIdx().size() == 0) // 요일 0개 선택
@@ -326,6 +338,7 @@ public class UserController {
             log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
+            System.out.println("userIdx = " + userIdx);
 
             userService.modifyGoal(userIdx, patchUserGoalReq);
 
@@ -460,7 +473,9 @@ public class UserController {
     // Path-variable
     @ResponseBody
     @PostMapping("/infos") // [POST] /users/infos
-    public BaseResponse<String> postUserInfo(@RequestBody PatchUserInfoReq patchUserInfoReq){
+    public BaseResponse<String> postUserInfo(@RequestBody String request) throws JsonProcessingException {
+
+        PatchUserInfoReq patchUserInfoReq = new ObjectMapper().readValue(request, PatchUserInfoReq.class);
 
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
