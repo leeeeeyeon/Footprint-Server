@@ -13,6 +13,7 @@ public class FilterServletOutputStream extends ServletOutputStream{
         this.outputStream = new DataOutputStream(output);
     }
 
+    // FilterServletOutputStream이 호출되면 write를 통해 outputStream에 Response Body의 데이터를 쌓을 수 있다.
     @Override
     public void write(int b) throws IOException{
         outputStream.write(b);

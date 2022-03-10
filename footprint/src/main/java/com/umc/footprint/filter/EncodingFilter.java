@@ -23,7 +23,6 @@ public class EncodingFilter implements Filter{
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         Filter.super.init(filterConfig);
-        System.out.println("Start Decoding");
     }
 
     @Override
@@ -31,9 +30,6 @@ public class EncodingFilter implements Filter{
         HttpServletResponse res = (HttpServletResponse) response;
 
         try{
-            System.out.println("Do Filter");
-
-            System.out.println("res = " + res);
             ResponseBodyEncryptWrapper responseWrapper = new ResponseBodyEncryptWrapper(res);
 
             chain.doFilter(request, responseWrapper);

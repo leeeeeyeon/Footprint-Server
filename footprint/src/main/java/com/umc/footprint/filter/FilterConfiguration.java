@@ -18,7 +18,13 @@ public class FilterConfiguration implements WebMvcConfigurer {
     public FilterRegistrationBean<DecodingFilter> decodingFilterRegistrationBean(){
         FilterRegistrationBean<DecodingFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new DecodingFilter(encryptProperties));
-        registrationBean.addUrlPatterns("/walks/decrypt");
+        registrationBean.addUrlPatterns("/users/infos");
+        registrationBean.addUrlPatterns("/users/infos/after");
+        registrationBean.addUrlPatterns("/users/auth/login");
+        registrationBean.addUrlPatterns("/users/goals");
+
+        System.out.println("URL =" + registrationBean.getUrlPatterns());
+
 
         return registrationBean;
     }
@@ -27,7 +33,9 @@ public class FilterConfiguration implements WebMvcConfigurer {
     public FilterRegistrationBean<EncodingFilter> encodingFilterRegistrationBean(){
         FilterRegistrationBean<EncodingFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new EncodingFilter(encryptProperties));
-        registrationBean.addUrlPatterns("/walks/check/encrypt");
+        registrationBean.addUrlPatterns("/*");
+
+        System.out.println("URL =" + registrationBean.getUrlPatterns());
 
         return registrationBean;
     }
