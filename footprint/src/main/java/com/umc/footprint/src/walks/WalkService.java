@@ -269,9 +269,11 @@ public class WalkService {
 
     public String checkEncryptWalk(String encryptString) throws BaseException{
         try{
-            String encryptedWalk = new AES128(encryptProperties.getKey()).encrypt(encryptString);
+            String encryptResult = new AES128(encryptProperties.getKey()).encrypt(encryptString);
 
-            return encryptedWalk;
+            log.info("encryptResult = {}",encryptResult );
+
+            return encryptResult;
         } catch(Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }

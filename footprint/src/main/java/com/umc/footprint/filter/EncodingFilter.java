@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,16 +29,22 @@ public class EncodingFilter implements Filter{
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse res = (HttpServletResponse) response;
+        HttpServletRequest req = (HttpServletRequest) request;
 
         try{
             ResponseBodyEncryptWrapper responseWrapper = new ResponseBodyEncryptWrapper(res);
 
             chain.doFilter(request, responseWrapper);
 
-            String responseMessage = new String(responseWrapper.getDataStream(), StandardCharsets.UTF_8);
-            String encodedResponse = new AES128(encryptProperties.getKey()).encrypt(responseMessage);
-
-            response.getOutputStream().write(encodedResponse.getBytes());
+            // encode response body
+            String url = req.getServletPath();
+            if(!(url.equals("/walks/check/encrypt")) && !(url.equals("/walks/check/decrypt"))){
+                String responseMessage = new String(responseWrapper.getDataStream(), StandardCharsets.UTF_8);
+                String encodedResponse = new AES128(encryptProperties.getKey()).encrypt(responseMessage);
+                response.getOutputStream().write(encodedResponse.getBytes());
+            }else{
+                response.getOutputStream().write(responseWrapper.getDataStream());
+            }
 
         } catch (Exception exception){
             logger.error("디코딩이 불가합니다.");

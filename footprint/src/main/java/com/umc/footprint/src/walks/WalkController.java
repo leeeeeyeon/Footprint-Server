@@ -136,7 +136,7 @@ public class WalkController {
 
 
     @ResponseBody
-    @GetMapping("/check/encrypt") // (POST) 127.0.0.1:3000/walks/check/encrypt
+    @PostMapping("/check/encrypt") // (POST) 127.0.0.1:3000/walks/check/encrypt
     public BaseResponse<String> checkEncryptWalk(@RequestBody String encryptString){
         try {
 
