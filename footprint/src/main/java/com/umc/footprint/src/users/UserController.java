@@ -2,34 +2,20 @@ package com.umc.footprint.src.users;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.umc.footprint.config.BaseException;
+import com.umc.footprint.config.BaseResponse;
+import com.umc.footprint.config.BaseResponseStatus;
 import com.umc.footprint.config.EncryptProperties;
-import com.umc.footprint.src.users.model.GetUserTodayRes;
+import com.umc.footprint.src.users.model.*;
+import com.umc.footprint.utils.JwtService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import com.umc.footprint.src.users.model.*;
-import com.umc.footprint.utils.AES128;
-import com.umc.footprint.utils.JwtService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.umc.footprint.config.BaseException;
-import com.umc.footprint.config.BaseResponse;
-
-import com.umc.footprint.config.BaseResponseStatus;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
 import static com.umc.footprint.utils.ValidationRegax.isRegexEmail;
