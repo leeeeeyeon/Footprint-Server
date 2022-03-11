@@ -25,7 +25,6 @@ repositories {
 }
 
 dependencies {
-	implementation 'junit:junit:4.13.2'
 
 	// Spring Boot Starter
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -41,7 +40,6 @@ dependencies {
 
 	// Web
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'commons-io:commons-io:2.11.0'
 
 	// Security
 //	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -74,8 +72,6 @@ dependencies {
 	implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 	implementation 'io.springfox:springfox-swagger2:2.9.2'
 
-	// Test
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 test {

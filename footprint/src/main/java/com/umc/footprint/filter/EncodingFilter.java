@@ -38,8 +38,6 @@ public class EncodingFilter implements Filter{
 
             chain.doFilter(request, responseWrapper);
 
-            log.debug("반환 값: {}", new String(responseWrapper.getDataStream(), StandardCharsets.UTF_8));
-
             // encode response body
             String url = req.getServletPath();
             if(!(url.equals("/walks/check/encrypt")) && !(url.equals("/walks/check/decrypt"))){
@@ -48,10 +46,14 @@ public class EncodingFilter implements Filter{
                 int startIndex = responseMessage.indexOf("result") + 8;
                 int endIndex = responseMessage.lastIndexOf("}");
 
+                // 최종 메시지
                 StringBuffer finalResponseMessage = new StringBuffer(responseMessage);
 
+                // 오류 안났을 때만
                 if (responseMessage.indexOf("result") != -1){
+                    // result 부분 암호화 쌍따음표 붙여서
                     String encodedResultPart = '\u0022' + (new AES128(encryptProperties.getKey()).encrypt(responseMessage.substring(startIndex, endIndex))) + '\u0022';
+                    // result 부분 암호화한걸로 치환
                     finalResponseMessage.replace(startIndex, endIndex, encodedResultPart);
                 }
 
