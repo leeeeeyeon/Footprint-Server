@@ -1,7 +1,5 @@
 package com.umc.footprint.utils;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -40,6 +38,7 @@ public class AES128 {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, keySpec, new IvParameterSpec(ips.getBytes(UTF_8)));
         byte[] decrypted = Base64.getDecoder().decode(value.getBytes());
+
         return new String(cipher.doFinal(decrypted), UTF_8);
     }
 }

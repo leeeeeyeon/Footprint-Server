@@ -1,28 +1,21 @@
 package com.umc.footprint.src.users;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.umc.footprint.src.users.model.GetUserTodayRes;
+import com.umc.footprint.config.BaseException;
+import com.umc.footprint.config.BaseResponse;
+import com.umc.footprint.config.BaseResponseStatus;
+import com.umc.footprint.config.EncryptProperties;
+import com.umc.footprint.src.users.model.*;
+import com.umc.footprint.utils.JwtService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import com.umc.footprint.src.users.model.*;
-import com.umc.footprint.utils.JwtService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.umc.footprint.config.BaseException;
-import com.umc.footprint.config.BaseResponse;
-
-import com.umc.footprint.config.BaseResponseStatus;
 
 import static com.umc.footprint.config.BaseResponseStatus.*;
 import static com.umc.footprint.utils.ValidationRegax.isRegexEmail;
@@ -36,12 +29,14 @@ public class UserController {
     private final UserProvider userProvider;
     private final UserService userService;
     private final JwtService jwtService;
+    private final EncryptProperties encryptProperties;
 
     @Autowired
-    public UserController(UserProvider userProvider, UserService userService, JwtService jwtService) {
+    public UserController(UserProvider userProvider, UserService userService, JwtService jwtService, EncryptProperties encryptProperties) {
         this.userProvider = userProvider;
         this.userService = userService;
         this.jwtService = jwtService;
+        this.encryptProperties = encryptProperties;
     }
 
     /**
