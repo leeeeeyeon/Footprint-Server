@@ -10,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 public class PatchUserGoalReq {
+
     private int walkGoalTime;
     private int walkTimeSlot;
     private List<Integer> dayIdx;
