@@ -544,7 +544,6 @@ public class UserController {
             log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
-
             if (tag == null) { // Query String(검색어)를 입력하지 않았을 경우
                 return new BaseResponse<>(new BaseException(BaseResponseStatus.NEED_TAG_INFO).getStatus());
             }
