@@ -1,14 +1,22 @@
 package com.umc.footprint.src.users.model;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 @Getter
 @NoArgsConstructor
-@ToString
 public class PostLoginReq {
+
+    @ApiModelProperty(example = "사용자 ID")
     private String userId;
+
+    @ApiModelProperty(example = "사용자 이름")
     private String username;
+
+    @ApiModelProperty(example = "사용자 Email")
     private String email;
+
+    @ApiModelProperty(example = "구글 Or 카카오")
     private String providerType;
 
     @Builder

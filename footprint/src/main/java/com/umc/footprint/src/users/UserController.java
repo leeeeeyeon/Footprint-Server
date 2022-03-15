@@ -5,9 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
 import com.umc.footprint.config.BaseResponseStatus;
-import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.src.users.model.*;
 import com.umc.footprint.utils.JwtService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,14 +30,12 @@ public class UserController {
     private final UserProvider userProvider;
     private final UserService userService;
     private final JwtService jwtService;
-    private final EncryptProperties encryptProperties;
 
     @Autowired
-    public UserController(UserProvider userProvider, UserService userService, JwtService jwtService, EncryptProperties encryptProperties) {
+    public UserController(UserProvider userProvider, UserService userService, JwtService jwtService) {
         this.userProvider = userProvider;
         this.userService = userService;
         this.jwtService = jwtService;
-        this.encryptProperties = encryptProperties;
     }
 
     /**
@@ -45,6 +44,8 @@ public class UserController {
      */
     @ResponseBody
     @PostMapping("/auth/login")
+    @ApiOperation(value = "로그인 및 회원가입", notes = "기존 회원은 로그인, 신규 회원은 회원 가입을 진행 (판별 기준은 이메일)")
+    @ApiImplicitParam(name = "postLoginReq", value = "로그인 정보", required = true)
     public BaseResponse<PostLoginRes> postUser(@RequestBody String request) throws JsonProcessingException {
 
         PostLoginReq postLoginReq = new ObjectMapper().readValue(request, PostLoginReq.class);
@@ -69,7 +70,6 @@ public class UserController {
 
             // 유저 id로 인덱스 값 추출
             int userIdx = userProvider.getUserIdx(postLoginReq.getUserId());
-            log.debug("userIdx: {}", userIdx);
 
             // 사용자의 로그인한 날짜 이전 기록과 비교 후 달 바뀌면 true return
             postLoginRes.setCheckMonthChanged(userService.modifyUserLogAt(userIdx).isCheckMonthChanged());
@@ -86,6 +86,7 @@ public class UserController {
      */
     @ResponseBody
     @GetMapping("/autologin")
+    @ApiOperation(value = "자동 로그인", notes = "JWT 토큰을 판별하여 자동 로그인 진행")
     public BaseResponse<PostLoginRes> getCheckMonthChanged() {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
@@ -334,7 +335,6 @@ public class UserController {
             log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
-            System.out.println("userIdx = " + userIdx);
 
             userService.modifyGoal(userIdx, patchUserGoalReq);
 
@@ -545,6 +545,7 @@ public class UserController {
             log.debug("유저 id: {}", userId);
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
+
             if (tag == null) { // Query String(검색어)를 입력하지 않았을 경우
                 return new BaseResponse<>(new BaseException(BaseResponseStatus.NEED_TAG_INFO).getStatus());
             }

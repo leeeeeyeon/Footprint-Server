@@ -1,5 +1,6 @@
 package com.umc.footprint.src.users.model;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -7,8 +8,14 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 public class PostLoginRes {
+
+    @ApiModelProperty(example = "JWT 토큰")
     private String jwtId;
+
+    @ApiModelProperty(example = "사용자의 상태")
     private String status;
+
+    @ApiModelProperty(example = "달이 변화되었는 지 체크하는 Flag")
     private boolean checkMonthChanged;
 
     @Builder
