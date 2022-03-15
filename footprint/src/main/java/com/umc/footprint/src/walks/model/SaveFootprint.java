@@ -1,6 +1,7 @@
 package com.umc.footprint.src.walks.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -9,14 +10,27 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class SaveFootprint {
+
+    @ApiModelProperty(example = "발자국 인덱스")
     private int footprintIdx;
-    // coordinate 형식에 따라 string으로 받을 지 point로 받을 지 정함
+
+    @ApiModelProperty(example = "발자국 좌표")
     private List<Double> coordinates;
+
+    @ApiModelProperty(example = "발자국 string 좌표", hidden = true)
     private String strCoordinate;
+
+    @ApiModelProperty(example = "글")
     private String write;
+
+    @ApiModelProperty(example = "발자국 작성 시간")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime recordAt;
+
+    @ApiModelProperty(example = "산책 인덱스", hidden = true)
     private int walkIdx;
+
+    @ApiModelProperty(example = "산책 활성 여부")
     private int onWalk;
 
     private List<String> hashtagList;

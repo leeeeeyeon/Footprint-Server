@@ -169,7 +169,6 @@ public class UserService {
                                     .checkMonthChanged(false)
                                     .build();
                     case "ACTIVE":
-
                     case "ONGOING":
                         return result;
                 }
@@ -186,6 +185,9 @@ public class UserService {
 
             // 이전에 로그인 했던 시간
             AutoLoginUser autoLoginUser = userDao.getUserLogAt(userIdx);
+
+            log.debug("AutoLoginUser: {}", autoLoginUser.toString());
+
             PostLoginRes postLoginRes = PostLoginRes.builder()
                     .status(autoLoginUser.getStatus())
                     .build();

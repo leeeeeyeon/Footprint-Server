@@ -302,11 +302,12 @@ public class WalkDao {
         List<PostWalkRes> postWalkResList = new ArrayList<PostWalkRes>();
         for (Integer badgeIdx : badgeIdxList) {
             postWalkResList.add(this.jdbcTemplate.queryForObject(getBadgeInfoQuery,
-                    (rs, rowNum) -> new PostWalkRes(
-                            rs.getInt("badgeIdx"),
-                            rs.getString("badgeName"),
-                            rs.getString("badgeUrl")
-                    ), badgeIdx));
+                            (rs, rowNum) -> PostWalkRes.builder()
+                                    .badgeIdx(rs.getInt("badgeIdx"))
+                                    .badgeName(rs.getString("badgeName"))
+                                    .badgeUrl(rs.getString("badgeUrl"))
+                                    .build()
+                    , badgeIdx));
         }
 
         return postWalkResList;

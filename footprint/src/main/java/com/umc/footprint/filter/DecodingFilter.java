@@ -1,16 +1,20 @@
 package com.umc.footprint.filter;
 
 
+import com.amazonaws.util.IOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.src.users.model.PatchUserGoalReq;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
+@Slf4j
 public class DecodingFilter implements Filter {
     private static final Logger logger = LoggerFactory.getLogger(DecodingFilter.class);
     private final EncryptProperties encryptProperties;

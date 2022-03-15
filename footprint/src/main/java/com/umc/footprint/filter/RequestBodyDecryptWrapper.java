@@ -5,7 +5,8 @@ import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.utils.AES128;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
@@ -20,7 +21,7 @@ public class RequestBodyDecryptWrapper extends HttpServletRequestWrapper {
     private final String requestDecryptBody;
     private final EncryptProperties encryptProperties;
 
-    public RequestBodyDecryptWrapper(HttpServletRequest request, EncryptProperties encryptProperties) throws IOException, DecoderException {
+    public RequestBodyDecryptWrapper(HttpServletRequest request, EncryptProperties encryptProperties) throws IOException, DecoderException, JSONException {
         super(request);
         this.encryptProperties = encryptProperties;
 
@@ -64,13 +65,14 @@ public class RequestBodyDecryptWrapper extends HttpServletRequestWrapper {
     }
 
     // -- request Body 가져오기 --
-    private String requestDataByte(HttpServletRequest request) throws IOException {
-        byte[] rawData;
+    private String requestDataByte(HttpServletRequest request) throws IOException, JSONException {
+        String rawData;
         InputStream inputStream = request.getInputStream();
 
-        rawData = IOUtils.toByteArray(inputStream);
+        rawData = new String(IOUtils.toByteArray(inputStream), StandardCharsets.UTF_8);
+        log.debug("rawData: {}", rawData);
 
-        return new String(rawData);
+        return rawData;
     }
 
     // -- request Body AES128 디코딩 --
