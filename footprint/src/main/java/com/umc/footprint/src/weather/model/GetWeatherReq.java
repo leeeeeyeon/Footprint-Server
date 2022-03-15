@@ -8,6 +8,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class GetWeatherReq {
+
+    public GetWeatherReq(){}
+
     private String nx;
     private String ny;
 }
