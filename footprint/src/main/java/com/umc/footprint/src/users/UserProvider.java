@@ -377,10 +377,7 @@ public class UserProvider {
 
                 decryptedTagResultList.add(decryptedGetTagRes);
             }
-
-            if (getTagResult.isEmpty()) { // 검색결과가 없음
-                throw new BaseException(NO_EXIST_RESULT);
-            }
+            
             return decryptedTagResultList;
         } catch (Exception exception) {
             exception.printStackTrace();

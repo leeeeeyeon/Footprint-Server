@@ -1,5 +1,6 @@
 package com.umc.footprint.src.weather;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.footprint.config.BaseResponse;
 import com.umc.footprint.src.weather.model.GetWeatherReq;
 import com.umc.footprint.src.weather.model.GetWeatherRes;
@@ -31,10 +32,13 @@ public class WeatherController {
     private String serviceKey;
 
     @ResponseBody
-    @GetMapping("")
-    public BaseResponse<GetWeatherRes> GetWeather(@RequestParam(value = "nx") String nx, @RequestParam(value = "ny") String ny) throws IOException, JSONException {
+    @PostMapping("")
+    public BaseResponse<GetWeatherRes> GetWeather(@RequestBody String request) throws IOException, JSONException {
 
         try {
+
+            GetWeatherReq getWeatherReq = new ObjectMapper().readValue(request, GetWeatherReq.class);
+
             TimeZone default_time_zone = TimeZone.getTimeZone(ZoneId.of("Asia/Seoul"));
             TimeZone.setDefault(default_time_zone);
 
@@ -85,8 +89,8 @@ public class WeatherController {
             urlBuilder.append("&" + URLEncoder.encode("dataType", "UTF-8") + "=" + URLEncoder.encode(type, "UTF-8")); /*요청자료형식(XML/JSON) Default: XML*/
             urlBuilder.append("&" + URLEncoder.encode("base_date", "UTF-8") + "=" + URLEncoder.encode(dateNow, "UTF-8")); /*발표 날짜*/
             urlBuilder.append("&" + URLEncoder.encode("base_time", "UTF-8") + "=" + URLEncoder.encode("0500", "UTF-8")); /*발표 시각*/
-            urlBuilder.append("&" + URLEncoder.encode("nx", "UTF-8") + "=" + URLEncoder.encode(nx, "UTF-8")); /*예보지점의 X 좌표값*/
-            urlBuilder.append("&" + URLEncoder.encode("ny", "UTF-8") + "=" + URLEncoder.encode(ny, "UTF-8")); /*예보지점의 Y 좌표값*/
+            urlBuilder.append("&" + URLEncoder.encode("nx", "UTF-8") + "=" + URLEncoder.encode(getWeatherReq.getNx(), "UTF-8")); /*예보지점의 X 좌표값*/
+            urlBuilder.append("&" + URLEncoder.encode("ny", "UTF-8") + "=" + URLEncoder.encode(getWeatherReq.getNy(), "UTF-8")); /*예보지점의 Y 좌표값*/
 
             /*
              * GET방식으로 전송해서 파라미터 받아오기
