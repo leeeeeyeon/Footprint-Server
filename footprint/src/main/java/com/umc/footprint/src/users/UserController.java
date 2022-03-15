@@ -69,6 +69,7 @@ public class UserController {
 
             // 유저 id로 인덱스 값 추출
             int userIdx = userProvider.getUserIdx(postLoginReq.getUserId());
+            log.debug("userIdx: {}", userIdx);
 
             // 사용자의 로그인한 날짜 이전 기록과 비교 후 달 바뀌면 true return
             postLoginRes.setCheckMonthChanged(userService.modifyUserLogAt(userIdx).isCheckMonthChanged());

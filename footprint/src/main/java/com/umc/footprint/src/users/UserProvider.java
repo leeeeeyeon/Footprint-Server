@@ -410,9 +410,11 @@ public class UserProvider {
     // email을 통해 유저 중복 검사
     public PostLoginRes checkEmail(String email) throws BaseException {
         try {
+            log.debug("email: {}", email);
             // flag == 1 -> 유저 이미 존재
             // flag == 0 -> 유저 정보 등록 필요
             int flag = userDao.checkEmail(email);
+            log.debug("flag: {}", flag);
 
             if (flag == 1) {
                 // email로 userId랑 상태 추출
