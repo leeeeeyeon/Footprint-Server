@@ -46,6 +46,8 @@ public class EncodingFilter implements Filter{
                 int startIndex = responseMessage.indexOf("result") + 8;
                 int endIndex = responseMessage.lastIndexOf("}");
 
+                System.out.println("responseMessage = " + responseMessage);
+
                 // 최종 메시지
                 StringBuffer finalResponseMessage = new StringBuffer(responseMessage);
 
