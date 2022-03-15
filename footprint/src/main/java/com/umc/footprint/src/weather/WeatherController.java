@@ -95,8 +95,8 @@ public class WeatherController {
             urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지번호*/
             urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("10", "UTF-8")); /*한 페이지 결과 수*/
             urlBuilder.append("&" + URLEncoder.encode("dataType", "UTF-8") + "=" + URLEncoder.encode(type, "UTF-8")); /*요청자료형식(XML/JSON) Default: XML*/
-            urlBuilder.append("&" + URLEncoder.encode("base_date", "UTF-8") + "=" + URLEncoder.encode("20220315", "UTF-8")); /*발표 날짜*/
-            urlBuilder.append("&" + URLEncoder.encode("base_time", "UTF-8") + "=" + URLEncoder.encode("0200", "UTF-8")); /*발표 시각*/
+            urlBuilder.append("&" + URLEncoder.encode("base_date", "UTF-8") + "=" + URLEncoder.encode(dateNow, "UTF-8")); /*발표 날짜*/
+            urlBuilder.append("&" + URLEncoder.encode("base_time", "UTF-8") + "=" + URLEncoder.encode(timeNow, "UTF-8")); /*발표 시각*/
             urlBuilder.append("&" + URLEncoder.encode("nx", "UTF-8") + "=" + URLEncoder.encode(getWeatherReq.getNx(), "UTF-8")); /*예보지점의 X 좌표값*/
             urlBuilder.append("&" + URLEncoder.encode("ny", "UTF-8") + "=" + URLEncoder.encode(getWeatherReq.getNy(), "UTF-8")); /*예보지점의 Y 좌표값*/
 
@@ -107,7 +107,7 @@ public class WeatherController {
 
             URL url = new URL(urlBuilder.toString());
 
-            for(int i=0; i < 3; i++){
+            for(int i=0; i < 5; i++){
                 try {
                     System.out.println("url = " + url);
 

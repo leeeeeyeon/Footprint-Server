@@ -38,6 +38,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
+	// JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
 	// Web
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
@@ -48,7 +51,6 @@ dependencies {
 
 	// JSON
 	implementation group: 'org.json', name: 'json', version: '20090211'
-
 
 	// 이메일 인증
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
