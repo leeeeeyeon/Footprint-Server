@@ -4,13 +4,15 @@ import com.umc.footprint.config.BaseException;
 
 import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.src.AwsS3Service;
+import com.umc.footprint.src.model.GoalNext;
+import com.umc.footprint.src.repository.GoalNextRepository;
 import com.umc.footprint.src.users.UserService;
 import com.umc.footprint.src.walks.model.*;
 
 import com.umc.footprint.utils.AES128;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
@@ -33,14 +35,16 @@ public class WalkService {
     private final UserService userService;
     private final AwsS3Service awsS3Service;
     private final EncryptProperties encryptProperties;
+    private final GoalNextRepository goalNextRepository;
 
     @Autowired
-    public WalkService(WalkDao walkDao, WalkProvider walkProvider, UserService userService, AwsS3Service awsS3Service, EncryptProperties encryptProperties) {
+    public WalkService(WalkDao walkDao, WalkProvider walkProvider, UserService userService, AwsS3Service awsS3Service, EncryptProperties encryptProperties, GoalNextRepository goalNextRepository) {
         this.walkDao = walkDao;
         this.walkProvider = walkProvider;
         this.userService = userService;
         this.awsS3Service = awsS3Service;
         this.encryptProperties = encryptProperties;
+        this.goalNextRepository = goalNextRepository;
     }
 
     @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
@@ -292,4 +296,9 @@ public class WalkService {
         }
     }
 
+    public void testJpa() {
+        Optional<GoalNext> example = goalNextRepository.findById(3);
+        log.debug("example: {}" ,example.get().toString());
+
+    }
 }
