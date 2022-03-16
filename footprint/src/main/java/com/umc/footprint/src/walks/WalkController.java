@@ -15,6 +15,7 @@ import com.umc.footprint.utils.JwtService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/walks")
 public class WalkController {
@@ -42,8 +44,8 @@ public class WalkController {
     }
 
     /**
-     *  실시간 처리 API
-     *  [Post] /walks
+     * 실시간 처리 API
+     * [Post] /walks
      */
     @ResponseBody
     @PostMapping("") // (POST) 127.0.0.1:3000/walks/
@@ -57,7 +59,7 @@ public class WalkController {
             @RequestPart(value = "walk") SaveWalk walk,
             @RequestPart(value = "footprintList") List<SaveFootprint> footprintList,
             @RequestPart(value = "photos") List<MultipartFile> photos
-            ) throws BaseException {
+    ) throws BaseException {
         // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
         String userId = jwtService.getUserId();
         log.debug("userId = " + userId);
@@ -73,7 +75,6 @@ public class WalkController {
         log.debug("walk coordinate: {}", walk.getCoordinates());
         log.debug("walk calorie: {}", walk.getCalorie());
         log.debug("walk photoMatchNumList: {}", walk.getPhotoMatchNumList());
-
 
 
         try {
@@ -146,7 +147,7 @@ public class WalkController {
 
     @ResponseBody
     @PostMapping("/check/encrypt") // (POST) 127.0.0.1:3000/walks/check/encrypt
-    public BaseResponse<String> checkEncryptWalk(@RequestBody String encryptString){
+    public BaseResponse<String> checkEncryptWalk(@RequestBody String encryptString) {
         try {
 
             String encryptedString = walkService.checkEncryptWalk(encryptString);
@@ -162,10 +163,18 @@ public class WalkController {
     @ResponseBody
     @PostMapping("/check/decrypt") // (POST) 127.0.0.1:3000/walks/check/decrypt
     public BaseResponse<String> checkDecryptWalk(@RequestBody String decryptString) throws BaseException {
-        
+
         String decryptedString = walkService.checkDecryptWalk(decryptString);
 
         return new BaseResponse<>(decryptedString);
     }
 
+
+    @GetMapping("/test/jpa")
+    public String testJpa() {
+
+        walkService.testJpa();
+
+        return "test";
+    }
 }
