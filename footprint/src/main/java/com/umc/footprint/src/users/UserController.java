@@ -579,4 +579,15 @@ public class UserController {
         }
     }
 
+    @ResponseBody
+    @GetMapping("/test-jpa")
+    public BaseResponse<String> testJpa() {
+
+        int planIdx = 3;
+
+        userService.testJpa(planIdx);
+
+        return null;
+    }
+
 }

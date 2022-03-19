@@ -51,7 +51,7 @@ public class WeatherController {
 
             // 현재 시간을 기준으로 발표 날짜와 발표 시간 도출
             LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-        System.out.println("now = " + now);
+            System.out.println("now = " + now);
             log.debug("now : {}",now);
 
             DateTimeFormatter Dateformatter = DateTimeFormatter.ofPattern("yyyyMMdd");
