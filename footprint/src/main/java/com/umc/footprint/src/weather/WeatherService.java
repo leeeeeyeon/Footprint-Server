@@ -1,28 +1,23 @@
 package com.umc.footprint.src.weather;
 
-import com.umc.footprint.config.BaseResponse;
-import com.umc.footprint.src.weather.model.GetWeatherReq;
-import com.umc.footprint.src.weather.model.GetWeatherRes;
+import com.umc.footprint.src.weather.model.PostWeatherRes;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 
 @Slf4j
 @Service
 public class WeatherService {
-    
-    public GetWeatherRes getWeather(BufferedReader rd){
 
-        try{
+    public PostWeatherRes postWeather(BufferedReader rd) {
 
+        String result = "";
+
+        try {
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = rd.readLine()) != null) {
@@ -30,107 +25,135 @@ public class WeatherService {
             }
 
             rd.close();
-            String result = sb.toString();
+            result = sb.toString();
+        } catch (IOException io) {
+            System.out.println("io = " + io);
+        }
 
-            //======= 이 밑에 부터는 json에서 데이터 파싱해 오는 부분 =====//
-            // response 키를 가지고 데이터를 파싱
-            JSONObject jsonObj_1 = new JSONObject(result);
-            String response = jsonObj_1.getString("response");
-            log.debug("response : {}",response);
+        String temp = getTemp(result);
+        String weather = "-";
 
-            // response 로 부터 body 찾기
-            JSONObject jsonObj_2 = new JSONObject(response);
-            String body = jsonObj_2.getString("body");
+        String isRain = checkRain(result);
+        String isSnow = checkSnow(result);
 
-            // body 로 부터 items 찾기
-            JSONObject jsonObj_3 = new JSONObject(body);
-            String items = jsonObj_3.getString("items");
-            log.debug("items : {}",items);
+        if(!isRain.equals("none")){
+            return PostWeatherRes.builder()
+                    .temperature(temp)
+                    .weather("비")
+                    .build();
+        } else if (!isSnow.equals("none")){
+            return PostWeatherRes.builder()
+                    .temperature(temp)
+                    .weather("눈")
+                    .build();
+        } else {
+            weather = getMain(result);
 
-            System.out.println("items = " + items);
-
-            // items로 부터 itemlist 를 받기
-            JSONObject jsonObj_4 = new JSONObject(items);
-            JSONArray jsonArray = jsonObj_4.getJSONArray("item");
-
-            String weather = "";
-            String rain = "";
-            float wind = 0;
-            String temperature = "";
-
-            for (int i = 0; i < jsonArray.length(); i++) {
-                jsonObj_4 = jsonArray.getJSONObject(i);
-                String fcstValue = jsonObj_4.getString("fcstValue");
-                String category = jsonObj_4.getString("category");
-
-                if (category.equals("SKY")) {
-                    if (fcstValue.equals("1")) { // 맑음
-                        weather = "1";
-                    } else if (fcstValue.equals("3")) {   // 구름 많음
-                        weather = "3";
-                    } else if (fcstValue.equals("4")) {   // 흐림
-                        weather = "4";
-                    }
-                }
-
-                if (category.equals("PTY")) {
-                    if (fcstValue.equals("0")) {    // 없음
-                        rain = "0";
-                    } else if (fcstValue.equals("1")) {  // 비
-                        rain = "1";
-                    } else if (fcstValue.equals("2")) {  // 비/눈
-                        rain = "2";
-                    } else if (fcstValue.equals("3")) {  // 눈
-                        rain = "3";
-                    } else if (fcstValue.equals("4")) {  // 소나기
-                        rain = "4";
-                    }
-                }
-
-                if (category.equals("WSD")) {
-                    wind = Float.parseFloat(fcstValue);
-                }
-
-                if (category.equals("TMP")) {
-                    temperature = fcstValue;
-                }
-
-            }
-
-            if(rain == "0"){
-                if(wind > 13)
-                    weather = "바람";
-                else if(weather == "1")
-                    weather = "맑음";
-                else if(weather == "3")
-                    weather = "구름 많음";
-                else if(weather == "4")
-                    weather = "흐림";
-            }
-            else if(rain == "1")
-                weather = "비";
-            else if(rain == "2")
-                weather = "비/눈";
-            else if(rain == "3")
-                weather = "눈";
-            else if(rain == "4")
-                weather = "소나기";
-
-            log.debug("temperature : {} || weather : {}",temperature,weather);
-
-            GetWeatherRes getWeatherRes = new GetWeatherRes(temperature,weather);
-
-            System.out.println("getWeatherRes.getWeather() = " + getWeatherRes.getWeather());
-            System.out.println("getWeatherRes.getTemperature() = " + getWeatherRes.getTemperature());
-
-            return getWeatherRes;
-        } catch(JSONException json){
-            return new GetWeatherRes("-","-");
-        } catch (IOException io){
-            return new GetWeatherRes("-","-");
+            return PostWeatherRes.builder()
+                    .temperature(temp)
+                    .weather(weather)
+                    .build();
         }
 
     }
 
+    public String checkRain(String result){
+
+        String isRain = "";
+
+        try {
+            JSONObject resultJson = new JSONObject(result);
+
+            String rain = resultJson.getString("rain");
+            JSONObject rainJson = new JSONObject(rain);
+            String oneHourRain = rainJson.getString("1h");
+
+            return oneHourRain;
+        } catch (JSONException json){
+            isRain = "none";
+
+            return isRain;
+        }
+    }
+
+    public String checkSnow(String result){
+
+        String isSnow = "";
+
+        try {
+            JSONObject resultJson = new JSONObject(result);
+
+            String snow = resultJson.getString("snow");
+            JSONObject snowJson = new JSONObject(snow);
+            String oneHourSnow = snowJson.getString("1h");
+
+            return oneHourSnow;
+        } catch (JSONException json){
+            isSnow = "none";
+
+            return isSnow;
+        }
+    }
+
+    public String getTemp(String result){
+
+        String temp = "-";
+        try {
+            JSONObject resultJson = new JSONObject(result);
+
+            // main 중 temp 부분 가져오기
+            String main = resultJson.getString("main");
+            JSONObject mainJson = new JSONObject(main);
+            temp = mainJson.getString("temp");
+
+            // temp float to int
+            float tempFloat = Float.parseFloat(temp);
+            int tempInt = Math.round(tempFloat);
+            temp = Integer.toString(tempInt);
+
+            return temp;
+        } catch(JSONException json){
+            log.debug("getTemp JSON ERROR");
+            return temp;
+        }
+
+    }
+
+    public String getMain(String result){
+
+        //======= 이 밑에 부터는 json에서 데이터 파싱해 오는 부분 =====//
+        // response 키를 가지고 데이터를 파싱
+        String weather = "-";
+
+        try {
+            JSONObject resultJson = new JSONObject(result);
+
+            // wind 중 speed 부분 가져오기
+            String wind = resultJson.getString("wind");
+            JSONObject windJson = new JSONObject(wind);
+            String speed = windJson.getString("speed");
+
+            // cloud 중 all 부분 가져오기
+            String clouds = resultJson.getString("clouds");
+            JSONObject cloudsJson = new JSONObject(clouds);
+            String all = cloudsJson.getString("all");
+
+            if(Float.parseFloat(speed) > 13)
+                weather = "바람";
+            else if(Float.parseFloat(all) > 80)
+                weather = "흐림";
+            else if(Float.parseFloat(all) > 60)
+                weather = "구름 많음";
+            else
+                weather = "맑음";
+
+            return weather;
+
+        } catch (JSONException json){
+            log.debug("getMain JSON ERROR");
+            return weather;
+        }
+
+    }
 
 }
