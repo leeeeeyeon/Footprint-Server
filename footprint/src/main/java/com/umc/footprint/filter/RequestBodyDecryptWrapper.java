@@ -18,25 +18,38 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class RequestBodyDecryptWrapper extends HttpServletRequestWrapper {
     // 가로챈 데이터를 가공하여 담을 final 변수
-    private final String requestDecryptBody;
+    private final String requestBody;
     private final EncryptProperties encryptProperties;
+    private static Boolean isEncrypted;
 
     public RequestBodyDecryptWrapper(HttpServletRequest request, EncryptProperties encryptProperties) throws IOException, DecoderException, JSONException {
         super(request);
         this.encryptProperties = encryptProperties;
 
         String requestHashData = requestDataByte(request); // Request Data 가로채기
-        String decodeTemp = requestBodyDecode(requestHashData); // Request Data AES128 디코드
 
-        log.info("인코딩 데이터: " + requestHashData);
-        log.info("디코딩 데이터: " + decodeTemp);
+        String decodeTemp = "";
 
-        requestDecryptBody = decodeTemp;
+        if(requestHashData.charAt(0) != '{'){   // 암호화된 Request Body가 들어올 경우 -> 복호화해서 전달
+            isEncrypted = true;
+
+            decodeTemp = requestBodyDecode(requestHashData); // Request Data AES128 디코드
+
+            log.info("인코딩 데이터: " + requestHashData);
+            log.info("디코딩 데이터: " + decodeTemp);
+
+            requestBody = decodeTemp;
+        } else {                                // 비암호화된 Request Body가 들어올 경우 -> 그냥 전달
+            isEncrypted = false;
+
+            requestBody = requestHashData;
+        }
+
     }
 
     @Override
     public ServletInputStream getInputStream() {
-        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(requestDecryptBody.getBytes(StandardCharsets.UTF_8));
+        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(requestBody.getBytes(StandardCharsets.UTF_8));
         return new ServletInputStream() {
             @Override
             public boolean isFinished() {
@@ -86,6 +99,10 @@ public class RequestBodyDecryptWrapper extends HttpServletRequestWrapper {
         } catch (Exception exception){
             throw new DecoderException();
         }
+    }
+
+    public Boolean getIsEncrypted(){
+        return isEncrypted;
     }
 
 }

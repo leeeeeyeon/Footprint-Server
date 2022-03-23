@@ -1,15 +1,18 @@
 package com.umc.footprint.filter;
 
+import com.amazonaws.util.IOUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.umc.footprint.config.EncryptProperties;
 import com.umc.footprint.utils.AES128;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.methods.HttpRequestWrapper;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -37,11 +40,16 @@ public class EncodingFilter implements Filter{
         try{
             ResponseBodyEncryptWrapper responseWrapper = new ResponseBodyEncryptWrapper(res);
 
-            chain.doFilter(request, responseWrapper);
+            // 암호화 되지 않고 들어온 Request인지 확인
+            // 파라미터로 들어온 request로 부터 isEncrypted 정보 얻어옴
+            RequestBodyDecryptWrapper requestBody = (RequestBodyDecryptWrapper) req;
+            Boolean isEncrypted = requestBody.getIsEncrypted();
+
+            chain.doFilter(request, responseWrapper);   // ** doFilter **
 
             // encode response body
             String url = req.getServletPath();
-            if(!(url.equals("/walks/check/encrypt")) && !(url.equals("/walks/check/decrypt"))){
+            if(isEncrypted == true && !(url.equals("/walks/check/encrypt")) && !(url.equals("/walks/check/decrypt"))){
                 String responseMessage = new String(responseWrapper.getDataStream(), StandardCharsets.UTF_8);
 
                 JSONObject jsonObject = new JSONObject(responseMessage);
@@ -69,7 +77,7 @@ public class EncodingFilter implements Filter{
             }
 
         } catch (Exception exception){
-            logger.error("디코딩이 불가합니다.");
+            logger.error("인코딩이 불가합니다.");
         }
 
     }
