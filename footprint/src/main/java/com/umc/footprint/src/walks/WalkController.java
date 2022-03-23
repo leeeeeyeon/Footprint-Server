@@ -143,29 +143,4 @@ public class WalkController {
         }
     }
 
-
-    @ResponseBody
-    @PostMapping("/check/encrypt") // (POST) 127.0.0.1:3000/walks/check/encrypt
-    public BaseResponse<String> checkEncryptWalk(@RequestBody String encryptString){
-        try {
-
-            String encryptedString = walkService.checkEncryptWalk(encryptString);
-
-            return new BaseResponse<>(encryptedString);
-
-        } catch (BaseException exception) {
-            return new BaseResponse<>((exception.getStatus()));
-        }
-    }
-
-
-    @ResponseBody
-    @PostMapping("/check/decrypt") // (POST) 127.0.0.1:3000/walks/check/decrypt
-    public BaseResponse<String> checkDecryptWalk(@RequestBody String decryptString) throws BaseException {
-        
-        String decryptedString = walkService.checkDecryptWalk(decryptString);
-
-        return new BaseResponse<>(decryptedString);
-    }
-
 }

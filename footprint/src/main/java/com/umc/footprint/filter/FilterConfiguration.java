@@ -26,7 +26,6 @@ public class FilterConfiguration implements WebMvcConfigurer {
 
         System.out.println("URL =" + registrationBean.getUrlPatterns());
 
-
         return registrationBean;
     }
 
@@ -34,11 +33,18 @@ public class FilterConfiguration implements WebMvcConfigurer {
     public FilterRegistrationBean<EncodingFilter> encodingFilterRegistrationBean(){
         FilterRegistrationBean<EncodingFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new EncodingFilter(encryptProperties));
-        registrationBean.addUrlPatterns("/*");
+        registrationBean.addUrlPatterns("/users/*");
+        registrationBean.addUrlPatterns("/footprints/*");
+        registrationBean.addUrlPatterns("/walks/*");
+        registrationBean.addUrlPatterns("/weather");
+
 
         System.out.println("URL =" + registrationBean.getUrlPatterns());
 
         return registrationBean;
     }
+
+
+
 
 }

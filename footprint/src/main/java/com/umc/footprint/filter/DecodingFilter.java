@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 public class DecodingFilter implements Filter {
     private static final Logger logger = LoggerFactory.getLogger(DecodingFilter.class);
     private final EncryptProperties encryptProperties;
+    private static Boolean isEncrypted;
 
     public DecodingFilter(EncryptProperties encryptProperties){
         this.encryptProperties = encryptProperties;
@@ -38,7 +39,7 @@ public class DecodingFilter implements Filter {
 
             RequestBodyDecryptWrapper requestWrapper = new RequestBodyDecryptWrapper(req, encryptProperties);
 
-            chain.doFilter(requestWrapper, response);
+            chain.doFilter(requestWrapper, response);   // ** doFilter **
 
             logger.info("Return URI: {}", req.getRequestURL());
         } catch (Exception exception){
