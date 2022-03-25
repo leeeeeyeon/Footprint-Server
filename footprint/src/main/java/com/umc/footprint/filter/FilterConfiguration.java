@@ -33,8 +33,10 @@ public class FilterConfiguration implements WebMvcConfigurer {
     public FilterRegistrationBean<EncodingFilter> encodingFilterRegistrationBean(){
         FilterRegistrationBean<EncodingFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new EncodingFilter(encryptProperties));
+        registrationBean.addUrlPatterns("/users");
         registrationBean.addUrlPatterns("/users/*");
         registrationBean.addUrlPatterns("/footprints/*");
+        registrationBean.addUrlPatterns("/walks");
         registrationBean.addUrlPatterns("/walks/*");
         registrationBean.addUrlPatterns("/weather");
 
