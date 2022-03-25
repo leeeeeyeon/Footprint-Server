@@ -37,9 +37,13 @@ public class DecodingFilter implements Filter {
         try{
             logger.info("Request URI: {}", req.getRequestURL());
 
-            RequestBodyDecryptWrapper requestWrapper = new RequestBodyDecryptWrapper(req, encryptProperties);
+            if(req.getMethod().equals("POST") || req.getMethod().equals("PATCH")){
+                RequestBodyDecryptWrapper requestWrapper = new RequestBodyDecryptWrapper(req, encryptProperties);
 
-            chain.doFilter(requestWrapper, response);   // ** doFilter **
+                chain.doFilter(requestWrapper, response);   // ** doFilter **
+            } else {
+                chain.doFilter(request, response);   // ** doFilter **
+            }
 
             logger.info("Return URI: {}", req.getRequestURL());
         } catch (Exception exception){
