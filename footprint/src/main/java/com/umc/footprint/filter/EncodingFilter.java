@@ -44,8 +44,6 @@ public class EncodingFilter implements Filter{
 
             // 암호화 되지 않고 들어온 Request인지 확인
             // 파라미터로 들어온 request로 부터 isEncrypted 정보 얻어옴
-            String requestInputStream = new String(IOUtils.toByteArray(request.getInputStream()), StandardCharsets.UTF_8);
-
             String isEncrypted = req.getHeader("isEncrypted");
 
             chain.doFilter(request, responseWrapper);   // ** doFilter **
