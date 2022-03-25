@@ -15,7 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
 
 @Slf4j
 public class EncodingFilter implements Filter{
@@ -42,14 +44,16 @@ public class EncodingFilter implements Filter{
 
             // 암호화 되지 않고 들어온 Request인지 확인
             // 파라미터로 들어온 request로 부터 isEncrypted 정보 얻어옴
-            RequestBodyDecryptWrapper requestBody = (RequestBodyDecryptWrapper) req;
-            Boolean isEncrypted = requestBody.getIsEncrypted();
+            String requestInputStream = new String(IOUtils.toByteArray(request.getInputStream()), StandardCharsets.UTF_8);
+
+            String isEncrypted = req.getHeader("isEncrypted");
 
             chain.doFilter(request, responseWrapper);   // ** doFilter **
 
             // encode response body
             String url = req.getServletPath();
-            if(isEncrypted == true && !(url.equals("/walks/check/encrypt")) && !(url.equals("/walks/check/decrypt"))){
+
+            if(!(isEncrypted == null) && !(url.equals("/walks/check/encrypt")) && !(url.equals("/walks/check/decrypt"))){
                 String responseMessage = new String(responseWrapper.getDataStream(), StandardCharsets.UTF_8);
 
                 JSONObject jsonObject = new JSONObject(responseMessage);
