@@ -20,7 +20,6 @@ public class FilterConfiguration implements WebMvcConfigurer {
         registrationBean.setFilter(new DecodingFilter(encryptProperties));
         registrationBean.addUrlPatterns("/users/infos");
         registrationBean.addUrlPatterns("/users/infos/after");
-        registrationBean.addUrlPatterns("/users/badges/title/*");
         registrationBean.addUrlPatterns("/users/auth/login");
         registrationBean.addUrlPatterns("/users/goals");
         registrationBean.addUrlPatterns("/weather");
