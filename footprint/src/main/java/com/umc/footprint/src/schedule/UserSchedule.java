@@ -47,8 +47,8 @@ public class UserSchedule {
     public void changeMonthGoalTest(){
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
-        log.info("now_back : {}",now);
-        log.debug("now_back : {}",now);
+        log.info("now : {}",now);
+        log.debug("now : {}",now);
     }
 
     @Transactional
@@ -56,8 +56,8 @@ public class UserSchedule {
     public void changeMonthGoalTesFore(){
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
-        log.info("now_back : {}",now);
-        log.debug("now_back : {}",now);
+        log.info("now_fore : {}",now);
+        log.debug("now_fore : {}",now);
     }
 
 }
