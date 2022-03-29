@@ -34,30 +34,18 @@ public class UserSchedule {
     }
 
     @Transactional
-    @Scheduled(cron = "0 25 9 29 * ?")
-    public void changeMonthGoalTestBack(){
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-
-        log.info("now_back : {}",now);
-        log.debug("now_back : {}",now);
-    }
-
-    @Transactional
-    @Scheduled(cron = "0 25 18 29 * ?")
+    @Scheduled(cron = "0 45 20 29 * ?")
     public void changeMonthGoalTest(){
+
+        userDao.updateGoal();
+        userDao.updateGoalDay();
+
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
-        log.info("now : {}",now);
-        log.debug("now : {}",now);
+        log.info("=== Schedule now : {} ===",now);
+        log.debug("=== Schedule now : {} ===",now);
+        
     }
 
-    @Transactional
-    @Scheduled(cron = "0 25 3 30 * ?")
-    public void changeMonthGoalTesFore(){
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-
-        log.info("now_fore : {}",now);
-        log.debug("now_fore : {}",now);
-    }
 
 }
