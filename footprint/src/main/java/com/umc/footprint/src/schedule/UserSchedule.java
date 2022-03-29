@@ -34,7 +34,8 @@ public class UserSchedule {
     }
 
     @Transactional
-    @Scheduled(cron = "0 30 2 30 * ?")
+//    @Scheduled(cron = "0 30 2 30 * ?")
+    @Scheduled(cron = "0 0/1 * * * *")
     public void changeMonthGoalTest(){
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
