@@ -1,5 +1,6 @@
 package com.umc.footprint.src.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,6 +33,7 @@ public class User {
     private String username;
 
     @Column(name = "birth")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDateTime birth;
 
     @Column(name = "sex", length = 6)
@@ -53,6 +55,7 @@ public class User {
     private String status;
 
     @Column(name = "logAt", nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime logAt;
 
     @Builder

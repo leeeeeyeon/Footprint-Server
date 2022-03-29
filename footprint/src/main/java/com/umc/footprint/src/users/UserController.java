@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.footprint.config.BaseException;
 import com.umc.footprint.config.BaseResponse;
 import com.umc.footprint.config.BaseResponseStatus;
+import com.umc.footprint.src.model.User;
+import com.umc.footprint.src.repository.UserRepository;
 import com.umc.footprint.src.users.model.*;
 import com.umc.footprint.utils.JwtService;
 import io.swagger.annotations.ApiImplicitParam;
@@ -14,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,11 +36,14 @@ public class UserController {
     private final UserService userService;
     private final JwtService jwtService;
 
+    private final UserRepository userRepository;
+
     @Autowired
-    public UserController(UserProvider userProvider, UserService userService, JwtService jwtService) {
+    public UserController(UserProvider userProvider, UserService userService, JwtService jwtService, UserRepository userRepository) {
         this.userProvider = userProvider;
         this.userService = userService;
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -160,7 +168,7 @@ public class UserController {
     // Path-variable
     @ResponseBody
     @GetMapping("") // (GET) 127.0.0.1:3000
-    public BaseResponse<GetUserRes> getUser() {
+    public Object getUser() {
         try {
             // userId(구글이나 카카오에서 보낸 ID) 추출 (복호화)
             String userId = jwtService.getUserId();
@@ -168,8 +176,13 @@ public class UserController {
             // userId로 userIdx 추출
             int userIdx = userProvider.getUserIdx(userId);
 
-            GetUserRes getUserRes = userProvider.getUser(userIdx);
-            return new BaseResponse<>(getUserRes);
+            // GetUserRes getUserRes = userProvider.getUser(userIdx);
+            System.out.println(userRepository.findById(userIdx));
+
+            // return new BaseResponse<>(getUserRes);
+            return userRepository.findById(userIdx);
+            // TODO: 암호화가 안됨
+
         } catch (BaseException exception) {
             exception.printStackTrace();
             return new BaseResponse<>((exception.getStatus()));
@@ -201,8 +214,22 @@ public class UserController {
                 throw new BaseException(BaseResponseStatus.INVALID_BIRTH);
             }
 
-            userService.modifyUserInfo(userIdx, patchUserInfoReq);
+            /*
+            String str = patchUserInfoReq.getBirth();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
 
+            // 인코딩 해야 함 !!!
+            User user = User.builder()
+                    .nickname(patchUserInfoReq.getNickname())
+                    .sex(patchUserInfoReq.getSex())
+                    .birth(dateTime)
+                    .height(patchUserInfoReq.getHeight())
+                    .weight(patchUserInfoReq.getWeight())
+                    .build();
+
+             */
+            userService.modifyUserInfo(userIdx, patchUserInfoReq);
             String result = "유저 정보가 수정되었습니다.";
             
             return new BaseResponse<>(result);
