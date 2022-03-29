@@ -3,6 +3,9 @@ package com.umc.footprint;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
+import javax.annotation.PostConstruct;
+import java.util.TimeZone;
+
 @SpringBootApplication
 public class FootprintApplication {
 
@@ -15,6 +18,11 @@ public class FootprintApplication {
 		new SpringApplicationBuilder(FootprintApplication.class)
 				.properties(APPLICATION_LOCATIONS)
 				.run(args);
+	}
+
+	@PostConstruct
+	public void started(){
+		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
 	}
 
 }
