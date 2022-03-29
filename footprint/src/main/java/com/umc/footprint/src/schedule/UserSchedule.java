@@ -34,7 +34,7 @@ public class UserSchedule {
     }
 
     @Transactional
-    @Scheduled(cron = "0 10 9 29 * ?")
+    @Scheduled(cron = "0 25 9 29 * ?")
     public void changeMonthGoalTestBack(){
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
@@ -43,7 +43,7 @@ public class UserSchedule {
     }
 
     @Transactional
-    @Scheduled(cron = "0 10 18 29 * ?")
+    @Scheduled(cron = "0 25 18 29 * ?")
     public void changeMonthGoalTest(){
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
@@ -52,7 +52,7 @@ public class UserSchedule {
     }
 
     @Transactional
-    @Scheduled(cron = "0 10 3 30 * ?")
+    @Scheduled(cron = "0 25 3 30 * ?")
     public void changeMonthGoalTesFore(){
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
